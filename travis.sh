@@ -40,18 +40,26 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
         -Dsonar.analysis.sha1=$GIT_COMMIT \
         -Dsonar.projectVersion=$INITIAL_VERSION
 
-elif [ "$TRAVIS_PULL_REQUEST" != "false" ] && [ -n "${GITHUB_TOKEN:-}" ]; then
-    echo 'Build and analyze pull request'
-    ${gradle_cmd} build sonarqube \
-        ${sonar_analysis} \
-        -Dsonar.analysis.prNumber=$TRAVIS_PULL_REQUEST \
-        -Dsonar.analysis.sha1=$TRAVIS_PULL_REQUEST_SHA \
-        -Dsonar.pullrequest.key=$TRAVIS_PULL_REQUEST \
-        -Dsonar.pullrequest.branch=$TRAVIS_PULL_REQUEST_BRANCH \
-        -Dsonar.pullrequest.base=$TRAVIS_BRANCH \
-        -Dsonar.pullrequest.provider=github \
-        -Dsonar.pullrequest.github.repository=$TRAVIS_REPO_SLUG
+elif [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then
+    if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+        echo 'Build and analyze pull request'
+        ${gradle_cmd} build sonarqube \
+            ${sonar_analysis} \
+            -Dsonar.analysis.prNumber=$TRAVIS_PULL_REQUEST \
+            -Dsonar.analysis.sha1=$TRAVIS_PULL_REQUEST_SHA \
+            -Dsonar.pullrequest.key=$TRAVIS_PULL_REQUEST \
+            -Dsonar.pullrequest.branch=$TRAVIS_PULL_REQUEST_BRANCH \
+            -Dsonar.pullrequest.base=$TRAVIS_BRANCH \
+            -Dsonar.pullrequest.provider=github \
+            -Dsonar.pullrequest.github.repository=$TRAVIS_REPO_SLUG
+    else
+        echo 'Build and analyze pull request'
+        ${gradle_cmd} build sonarqube \
+            ${sonar_analysis} \
+            -Dsonar.analysis.sha1=$TRAVIS_PULL_REQUEST_SHA \
+            -Dsonar.branch.name=$TRAVIS_BRANCH
+    fi
 else
-    echo 'Build feature branch or external pull request'
+    echo 'Build external pull request'
     ${gradle_cmd} -DbuildNumber=$BUILD_NUMBER build
 fi
