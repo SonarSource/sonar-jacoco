@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN" "report.dtd">
+<report name="kache">
+  <sessioninfo id="meneses-a4de3bef" start="1532611010509" dump="1532611011039"/>
+  <package name="com/yundom/kache">
+    <class name="com/yundom/kache/Builder$Companion">
+      <method name="build" desc="(Lkotlin/jvm/functions/Function1;)Lcom/yundom/kache/Kache;" line="18">
+        <counter type="INSTRUCTION" missed="0" covered="25"/>
+        <counter type="BRANCH" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="4"/>
+        <counter type="COMPLEXITY" missed="0" covered="2"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="()V" line="16">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="28"/>
+      <counter type="BRANCH" missed="0" covered="2"/>
+      <counter type="LINE" missed="0" covered="5"/>
+      <counter type="COMPLEXITY" missed="0" covered="3"/>
+      <counter type="METHOD" missed="0" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/Builder">
+      <method name="getPolicy" desc="()Lcom/yundom/kache/config/Policy;" line="13">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="setPolicy" desc="(Lcom/yundom/kache/config/Policy;)V" line="13">
+        <counter type="INSTRUCTION" missed="0" covered="7"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getCapacity" desc="()I" line="14">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setCapacity" desc="(I)V" line="14">
+        <counter type="INSTRUCTION" missed="0" covered="4"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="build" desc="()Lcom/yundom/kache/Kache;" line="27">
+        <counter type="INSTRUCTION" missed="0" covered="12"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="()V" line="12">
+        <counter type="INSTRUCTION" missed="0" covered="10"/>
+        <counter type="LINE" missed="0" covered="3"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;clinit&gt;" desc="()V">
+        <counter type="INSTRUCTION" missed="0" covered="6"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="3" covered="42"/>
+      <counter type="LINE" missed="0" covered="4"/>
+      <counter type="COMPLEXITY" missed="1" covered="6"/>
+      <counter type="METHOD" missed="1" covered="6"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/Builder$build$1">
+      <method name="invoke" desc="(I)Ljava/util/Map;" line="28">
+        <counter type="INSTRUCTION" missed="4" covered="25"/>
+        <counter type="BRANCH" missed="1" covered="3"/>
+        <counter type="LINE" missed="0" covered="4"/>
+        <counter type="COMPLEXITY" missed="1" covered="2"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(Lcom/yundom/kache/Builder;)V">
+        <counter type="INSTRUCTION" missed="0" covered="7"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="4" covered="32"/>
+      <counter type="BRANCH" missed="1" covered="3"/>
+      <counter type="LINE" missed="0" covered="4"/>
+      <counter type="COMPLEXITY" missed="1" covered="3"/>
+      <counter type="METHOD" missed="0" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <sourcefile name="Builder.kt">
+      <line nr="12" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="13" mi="0" ci="11" mb="0" cb="0"/>
+      <line nr="14" mi="3" ci="8" mb="0" cb="0"/>
+      <line nr="16" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="18" mi="0" ci="7" mb="0" cb="0"/>
+      <line nr="19" mi="0" ci="8" mb="0" cb="2"/>
+      <line nr="20" mi="0" ci="7" mb="0" cb="0"/>
+      <line nr="22" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="27" mi="0" ci="12" mb="0" cb="0"/>
+      <line nr="28" mi="0" ci="4" mb="0" cb="0"/>
+      <line nr="29" mi="0" ci="10" mb="0" cb="2"/>
+      <line nr="30" mi="4" ci="10" mb="1" cb="1"/>
+      <line nr="31" mi="0" ci="1" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="7" covered="102"/>
+      <counter type="BRANCH" missed="1" covered="5"/>
+      <counter type="LINE" missed="0" covered="13"/>
+      <counter type="COMPLEXITY" missed="2" covered="12"/>
+      <counter type="METHOD" missed="1" covered="10"/>
+      <counter type="CLASS" missed="0" covered="3"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="7" covered="102"/>
+    <counter type="BRANCH" missed="1" covered="5"/>
+    <counter type="LINE" missed="0" covered="13"/>
+    <counter type="COMPLEXITY" missed="2" covered="12"/>
+    <counter type="METHOD" missed="1" covered="10"/>
+    <counter type="CLASS" missed="0" covered="3"/>
+  </package>
+  <package name="com/yundom/kache/map">
+    <class name="com/yundom/kache/map/LruMap$putAll$1">
+      <method name="accept" desc="(Ljava/lang/Object;Ljava/lang/Object;)V" line="54">
+        <counter type="INSTRUCTION" missed="7" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(Lcom/yundom/kache/map/LruMap;)V">
+        <counter type="INSTRUCTION" missed="6" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="13" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="com/yundom/kache/map/FifoMap$map$1">
+      <method name="removeEldestEntry" desc="(Ljava/util/Map$Entry;)Z" line="6">
+        <counter type="INSTRUCTION" missed="0" covered="10"/>
+        <counter type="BRANCH" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="2"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(Lcom/yundom/kache/map/FifoMap;I)V" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="7"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getKeys" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="keySet" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getValues" desc="()Ljava/util/Collection;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="values" desc="()Ljava/util/Collection;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getEntries" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="entrySet" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getSize" desc="()I" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="size" desc="()I" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="18" covered="23"/>
+      <counter type="BRANCH" missed="0" covered="2"/>
+      <counter type="LINE" missed="0" covered="2"/>
+      <counter type="COMPLEXITY" missed="6" covered="5"/>
+      <counter type="METHOD" missed="6" covered="4"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/map/LruMap">
+      <method name="getSize" desc="()I" line="11">
+        <counter type="INSTRUCTION" missed="0" covered="4"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="size" desc="()I" line="3">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="containsKey" desc="(Ljava/lang/Object;)Z" line="14">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="containsValue" desc="(Ljava/lang/Object;)Z" line="18">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="get" desc="(Ljava/lang/Object;)Ljava/lang/Object;" line="22">
+        <counter type="INSTRUCTION" missed="0" covered="26"/>
+        <counter type="BRANCH" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="5"/>
+        <counter type="COMPLEXITY" missed="0" covered="2"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="isEmpty" desc="()Z" line="31">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getEntries" desc="()Ljava/util/Set;" line="35">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="entrySet" desc="()Ljava/util/Set;" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getKeys" desc="()Ljava/util/Set;" line="37">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="keySet" desc="()Ljava/util/Set;" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getValues" desc="()Ljava/util/Collection;" line="39">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="values" desc="()Ljava/util/Collection;" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="clear" desc="()V" line="42">
+        <counter type="INSTRUCTION" missed="0" covered="4"/>
+        <counter type="LINE" missed="0" covered="2"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="put" desc="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;" line="46">
+        <counter type="INSTRUCTION" missed="0" covered="18"/>
+        <counter type="LINE" missed="0" covered="4"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="putAll" desc="(Ljava/util/Map;)V" line="53">
+        <counter type="INSTRUCTION" missed="15" covered="0"/>
+        <counter type="LINE" missed="3" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="remove" desc="(Ljava/lang/Object;)Ljava/lang/Object;" line="60">
+        <counter type="INSTRUCTION" missed="0" covered="5"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(I)V" line="3">
+        <counter type="INSTRUCTION" missed="0" covered="15"/>
+        <counter type="LINE" missed="0" covered="2"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="50" covered="75"/>
+      <counter type="BRANCH" missed="0" covered="2"/>
+      <counter type="LINE" missed="9" covered="15"/>
+      <counter type="COMPLEXITY" missed="10" covered="8"/>
+      <counter type="METHOD" missed="10" covered="7"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/map/FifoMap">
+      <method name="getSize" desc="()I" line="11">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="size" desc="()I" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="containsKey" desc="(Ljava/lang/Object;)Z" line="14">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="containsValue" desc="(Ljava/lang/Object;)Z" line="18">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="get" desc="(Ljava/lang/Object;)Ljava/lang/Object;" line="22">
+        <counter type="INSTRUCTION" missed="0" covered="5"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="isEmpty" desc="()Z" line="26">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getEntries" desc="()Ljava/util/Set;" line="30">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="entrySet" desc="()Ljava/util/Set;" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getKeys" desc="()Ljava/util/Set;" line="32">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="keySet" desc="()Ljava/util/Set;" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getValues" desc="()Ljava/util/Collection;" line="34">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="values" desc="()Ljava/util/Collection;" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="clear" desc="()V" line="37">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="put" desc="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;" line="41">
+        <counter type="INSTRUCTION" missed="0" covered="6"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="putAll" desc="(Ljava/util/Map;)V" line="45">
+        <counter type="INSTRUCTION" missed="8" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="remove" desc="(Ljava/lang/Object;)Ljava/lang/Object;" line="49">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(I)V" line="3">
+        <counter type="INSTRUCTION" missed="0" covered="15"/>
+        <counter type="LINE" missed="0" covered="2"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="59" covered="26"/>
+      <counter type="LINE" missed="12" covered="4"/>
+      <counter type="COMPLEXITY" missed="14" covered="3"/>
+      <counter type="METHOD" missed="14" covered="3"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/map/LruMap$map$1">
+      <method name="removeEldestEntry" desc="(Ljava/util/Map$Entry;)Z" line="6">
+        <counter type="INSTRUCTION" missed="0" covered="10"/>
+        <counter type="BRANCH" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="2"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(Lcom/yundom/kache/map/LruMap;I)V" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="7"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getSize" desc="()I" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="size" desc="()I" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getKeys" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="keySet" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getEntries" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="entrySet" desc="()Ljava/util/Set;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getValues" desc="()Ljava/util/Collection;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="values" desc="()Ljava/util/Collection;" line="4">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="18" covered="23"/>
+      <counter type="BRANCH" missed="0" covered="2"/>
+      <counter type="LINE" missed="0" covered="2"/>
+      <counter type="COMPLEXITY" missed="6" covered="5"/>
+      <counter type="METHOD" missed="6" covered="4"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <sourcefile name="FifoMap.kt">
+      <line nr="3" mi="12" ci="5" mb="0" cb="0"/>
+      <line nr="4" mi="18" ci="23" mb="0" cb="0"/>
+      <line nr="6" mi="0" ci="10" mb="0" cb="2"/>
+      <line nr="11" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="14" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="18" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="22" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="26" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="30" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="32" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="34" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="37" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="38" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="41" mi="0" ci="6" mb="0" cb="0"/>
+      <line nr="45" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="46" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="49" mi="5" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="77" covered="49"/>
+      <counter type="BRANCH" missed="0" covered="2"/>
+      <counter type="LINE" missed="12" covered="5"/>
+      <counter type="COMPLEXITY" missed="20" covered="8"/>
+      <counter type="METHOD" missed="20" covered="7"/>
+      <counter type="CLASS" missed="0" covered="2"/>
+    </sourcefile>
+    <sourcefile name="LruMap.kt">
+      <line nr="3" mi="9" ci="8" mb="0" cb="0"/>
+      <line nr="4" mi="18" ci="23" mb="0" cb="0"/>
+      <line nr="6" mi="0" ci="10" mb="0" cb="2"/>
+      <line nr="11" mi="0" ci="4" mb="0" cb="0"/>
+      <line nr="14" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="18" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="22" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="23" mi="0" ci="8" mb="0" cb="2"/>
+      <line nr="24" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="25" mi="0" ci="6" mb="0" cb="0"/>
+      <line nr="27" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="31" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="35" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="37" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="39" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="42" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="43" mi="0" ci="1" mb="0" cb="0"/>
+      <line nr="46" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="47" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="48" mi="0" ci="6" mb="0" cb="0"/>
+      <line nr="49" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="53" mi="7" ci="0" mb="0" cb="0"/>
+      <line nr="54" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="55" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="56" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="57" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="60" mi="0" ci="5" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="81" covered="98"/>
+      <counter type="BRANCH" missed="0" covered="4"/>
+      <counter type="LINE" missed="11" covered="16"/>
+      <counter type="COMPLEXITY" missed="18" covered="13"/>
+      <counter type="METHOD" missed="18" covered="11"/>
+      <counter type="CLASS" missed="1" covered="2"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="158" covered="147"/>
+    <counter type="BRANCH" missed="0" covered="6"/>
+    <counter type="LINE" missed="23" covered="21"/>
+    <counter type="COMPLEXITY" missed="38" covered="21"/>
+    <counter type="METHOD" missed="38" covered="18"/>
+    <counter type="CLASS" missed="1" covered="4"/>
+  </package>
+  <package name="com/yundom/kache/config">
+    <class name="com/yundom/kache/config/Policy">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/config/LRU">
+      <method name="&lt;init&gt;" desc="()V" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="4"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;clinit&gt;" desc="()V" line="4">
+        <counter type="INSTRUCTION" missed="0" covered="7"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="11"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="2"/>
+      <counter type="METHOD" missed="0" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/config/FIFO">
+      <method name="&lt;init&gt;" desc="()V" line="5">
+        <counter type="INSTRUCTION" missed="0" covered="4"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;clinit&gt;" desc="()V" line="5">
+        <counter type="INSTRUCTION" missed="0" covered="7"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="11"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="2"/>
+      <counter type="METHOD" missed="0" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <sourcefile name="Policy.kt">
+      <line nr="3" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="4" mi="0" ci="11" mb="0" cb="0"/>
+      <line nr="5" mi="0" ci="11" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="0" covered="25"/>
+      <counter type="LINE" missed="0" covered="3"/>
+      <counter type="COMPLEXITY" missed="0" covered="5"/>
+      <counter type="METHOD" missed="0" covered="5"/>
+      <counter type="CLASS" missed="0" covered="3"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="0" covered="25"/>
+    <counter type="LINE" missed="0" covered="3"/>
+    <counter type="COMPLEXITY" missed="0" covered="5"/>
+    <counter type="METHOD" missed="0" covered="5"/>
+    <counter type="CLASS" missed="0" covered="3"/>
+  </package>
+  <package name="com/yundom/kache/store">
+    <class name="com/yundom/kache/store/ObjectCache$Companion">
+      <method name="getDEFAULT_CAPACITY" desc="()I" line="8">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="()V" line="7">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="2" covered="3"/>
+      <counter type="LINE" missed="1" covered="1"/>
+      <counter type="COMPLEXITY" missed="1" covered="1"/>
+      <counter type="METHOD" missed="1" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="com/yundom/kache/store/ObjectCache">
+      <method name="get" desc="(Ljava/lang/Object;)Ljava/lang/Object;" line="31">
+        <counter type="INSTRUCTION" missed="0" covered="5"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="put" desc="(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;" line="35">
+        <counter type="INSTRUCTION" missed="0" covered="6"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="remove" desc="(Ljava/lang/Object;)Ljava/lang/Object;" line="39">
+        <counter type="INSTRUCTION" missed="0" covered="5"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="clear" desc="()V" line="43">
+        <counter type="INSTRUCTION" missed="0" covered="4"/>
+        <counter type="LINE" missed="0" covered="2"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getMaxSize" desc="()I" line="47">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getSize" desc="()I" line="51">
+        <counter type="INSTRUCTION" missed="0" covered="4"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(I)V" line="6">
+        <counter type="INSTRUCTION" missed="0" covered="27"/>
+        <counter type="BRANCH" missed="0" covered="2"/>
+        <counter type="LINE" missed="0" covered="5"/>
+        <counter type="COMPLEXITY" missed="0" covered="2"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;init&gt;" desc="()V" line="21">
+        <counter type="INSTRUCTION" missed="5" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="&lt;init&gt;" desc="(ILkotlin/jvm/functions/Function1;)V" line="23">
+        <counter type="INSTRUCTION" missed="6" covered="17"/>
+        <counter type="BRANCH" missed="1" covered="1"/>
+        <counter type="LINE" missed="1" covered="3"/>
+        <counter type="COMPLEXITY" missed="1" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="&lt;clinit&gt;" desc="()V" line="8">
+        <counter type="INSTRUCTION" missed="0" covered="8"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="11" covered="79"/>
+      <counter type="BRANCH" missed="1" covered="3"/>
+      <counter type="LINE" missed="2" covered="16"/>
+      <counter type="COMPLEXITY" missed="2" covered="10"/>
+      <counter type="METHOD" missed="1" covered="9"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <sourcefile name="ObjectCache.kt">
+      <line nr="6" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="7" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="8" mi="2" ci="3" mb="0" cb="0"/>
+      <line nr="11" mi="0" ci="4" mb="0" cb="0"/>
+      <line nr="15" mi="0" ci="3" mb="0" cb="2"/>
+      <line nr="16" mi="0" ci="6" mb="0" cb="0"/>
+      <line nr="18" mi="0" ci="9" mb="0" cb="0"/>
+      <line nr="21" mi="5" ci="0" mb="0" cb="0"/>
+      <line nr="23" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="24" mi="0" ci="3" mb="1" cb="1"/>
+      <line nr="25" mi="6" ci="0" mb="0" cb="0"/>
+      <line nr="27" mi="0" ci="8" mb="0" cb="0"/>
+      <line nr="31" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="35" mi="0" ci="6" mb="0" cb="0"/>
+      <line nr="39" mi="0" ci="5" mb="0" cb="0"/>
+      <line nr="43" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="44" mi="0" ci="1" mb="0" cb="0"/>
+      <line nr="47" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="51" mi="0" ci="4" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="13" covered="82"/>
+      <counter type="BRANCH" missed="1" covered="3"/>
+      <counter type="LINE" missed="2" covered="17"/>
+      <counter type="COMPLEXITY" missed="3" covered="11"/>
+      <counter type="METHOD" missed="2" covered="10"/>
+      <counter type="CLASS" missed="0" covered="2"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="13" covered="82"/>
+    <counter type="BRANCH" missed="1" covered="3"/>
+    <counter type="LINE" missed="2" covered="17"/>
+    <counter type="COMPLEXITY" missed="3" covered="11"/>
+    <counter type="METHOD" missed="2" covered="10"/>
+    <counter type="CLASS" missed="0" covered="2"/>
+  </package>
+  <counter type="INSTRUCTION" missed="178" covered="356"/>
+  <counter type="BRANCH" missed="2" covered="14"/>
+  <counter type="LINE" missed="25" covered="54"/>
+  <counter type="COMPLEXITY" missed="43" covered="49"/>
+  <counter type="METHOD" missed="41" covered="43"/>
+  <counter type="CLASS" missed="1" covered="12"/>
+</report>

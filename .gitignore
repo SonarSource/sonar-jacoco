@@ -1,0 +1,31 @@
+# ---- gradle
+build
+.gradle
+
+# ---- IntelliJ IDEA
+*.iws
+*.iml
+*.ipr
+.idea/
+out
+
+# ---- Eclipse
+.classpath
+.project
+.settings
+.externalToolBuilders
+
+# ---- Mac OS X
+.DS_Store
+Icon?
+# Thumbnails
+._*
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# ---- Windows
+# Windows image file caches
+Thumbs.db 
+# Folder config file
+Desktop.ini

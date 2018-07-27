@@ -1,0 +1,78 @@
+buildscript {
+  repositories {
+    maven {
+      url 'https://repox.sonarsource.com/plugins.gradle.org/'
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
+  }
+}
+plugins {
+    id 'java'
+}
+
+apply plugin: "com.github.hierynomus.license"
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://repox.sonarsource.com/sonarsource"
+    }
+}
+
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    testCompile 'org.assertj:assertj-core:3.10.0'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    compileOnly 'org.sonarsource.sonarqube:sonar-plugin-api:7.2-RC1'
+    testCompile 'org.sonarsource.sonarqube:sonar-plugin-api:7.2-RC1'
+
+} 
+
+license {
+    //header = rootProject.file('HEADER')
+    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+    strictCheck true
+    mapping {
+      java = 'SLASHSTAR_STYLE'
+      js = 'SLASHSTAR_STYLE'
+      ts = 'SLASHSTAR_STYLE'
+      tsx = 'SLASHSTAR_STYLE'
+      css = 'SLASHSTAR_STYLE'
+      less = 'SLASHSTAR_STYLE'
+    }
+    excludes(['**/*.txt', '**/*.properties', '**/*.xml', '**/*.xsd', '**/*.html', '**/*.json', '**/*.sql', '**/*.rb', '**/*.vm', '**/*.snap', '**/*.svg', '**/*.jar', '**/*.zip', '**/*.log', '**/*.cnf', '**/*.jks', '**/README', '**/*.pdf'])
+}
+
+jar {
+    manifest {
+        def displayVersion = project.hasProperty('buildNumber') ? version.substring(0, version.lastIndexOf('.')) + " (build ${project.buildNumber})" : version
+        def buildDate = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        attributes(
+                'Build-Time': buildDate,
+                'Implementation-Build': 'git rev-parse HEAD'.execute().text.trim(),
+                'Plugin-BuildDate': buildDate,
+                'Plugin-ChildFirstClassLoader': 'false',
+                'Plugin-Class': 'org.sonar.plugins.jacoco.JacocoPlugin',
+                'Plugin-Description': 'JaCoCo XML report importer',
+                'Plugin-Display-Version': displayVersion,
+                'Plugin-IssueTrackerUrl': 'https://github.com/SonarSource/sonar-jacoco/issues',
+                'Plugin-Key': 'jacoco',
+                'Plugin-License': 'GNU LGPL 3',
+                'Plugin-Name': 'SonarJacoco',
+                'Plugin-Organization': 'SonarSource',
+                'Plugin-OrganizationUrl': 'http://www.sonarsource.com',
+                'Plugin-SourcesUrl': 'https://github.com/SonarSource/sonar-jacoco',
+                'Plugin-Version': version,
+                'Sonar-Version': '6.7',
+                'SonarLint-Supported': 'false',
+                'Version': "${version}",
+        )
+    }
+}
