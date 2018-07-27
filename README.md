@@ -1,4 +1,4 @@
-# Sonar JaCoCO Plugin
+# SonarQube JaCoCO Plugin
 
 ### License
 
