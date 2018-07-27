@@ -19,32 +19,42 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-import javax.annotation.CheckForNull;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.sonar.api.batch.fs.InputFile;
 
-public class FileLocator {
-  private final List<InputFile> inputFiles;
-  private final ReversePathTree tree = new ReversePathTree();
+public class ReversePathTree {
+  private Node root = new Node();
 
-  public FileLocator(Iterable<InputFile> inputFiles) {
-    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()));
-  }
-
-  public FileLocator(List<InputFile> inputFiles) {
-    this.inputFiles = inputFiles;
-    for (InputFile inputFile : inputFiles) {
-      String[] path = inputFile.relativePath().split("/");
-      tree.index(inputFile, path);
+  public void index(InputFile inputFile, String[] path) {
+    Node currentNode = root;
+    for (int i = path.length - 1; i >= 0; i--) {
+      currentNode = currentNode.children.computeIfAbsent(path[i], e -> new Node());
     }
+    currentNode.file = inputFile;
   }
 
-  @CheckForNull
-  public InputFile getInputFile(String packagePath, String fileName) {
-    String filePath = packagePath + "/" + fileName;
-    String[] path = filePath.split("/");
-    return tree.getFileWithSuffix(path);
+  public InputFile getFileWithSuffix(String[] path) {
+    Node currentNode = root;
+
+    for (int i = path.length - 1; i >= 0; i--) {
+      currentNode = currentNode.children.get(path[i]);
+      if (currentNode == null) {
+        return null;
+      }
+    }
+    return getFirstLeaf(currentNode);
+  }
+
+  private static InputFile getFirstLeaf(Node node) {
+    while (!node.children.isEmpty()) {
+      node = node.children.values().iterator().next();
+    }
+    return node.file;
+  }
+
+  static class Node {
+    Map<String, Node> children = new LinkedHashMap<>();
+    InputFile file = null;
   }
 }
