@@ -9,6 +9,8 @@ buildscript {
   }
 }
 plugins {
+    id 'org.sonarqube' version '2.6.2'
+    id 'com.jfrog.artifactory' version '4.7.0'
     id 'java'
 }
 
@@ -21,6 +23,12 @@ repositories {
     mavenCentral()
     maven {
         url "https://repox.sonarsource.com/sonarsource"
+    }
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', projectTitle
     }
 }
 
