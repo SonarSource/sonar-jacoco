@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Test;
 import org.sonar.api.batch.fs.InputFile;
@@ -40,5 +41,14 @@ public class FileLocatorTest {
     FileLocator locator = new FileLocator(Collections.singleton(inputFile));
     assertThat(locator.getInputFile("org/sonar/test", "File2.java")).isNull();
     assertThat(locator.getInputFile("org/sonar/test2", "File.java")).isNull();
+  }
+
+  @Test
+  public void should_match_first_with_many_options() {
+    InputFile inputFile1 = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
+    InputFile inputFile2 = new TestInputFileBuilder("module1", "src/test/java/org/sonar/test/File.java").build();
+
+    FileLocator locator = new FileLocator(Arrays.asList(inputFile1, inputFile2));
+    assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile1);
   }
 }
