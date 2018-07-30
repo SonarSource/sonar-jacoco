@@ -35,10 +35,13 @@ public class ReportImporter {
       .onFile(inputFile);
 
     for (XmlReportParser.Line line : sourceFile.lines()) {
+      boolean conditions = false;
       if (line.coveredBranches() > 0 || line.missedBranches() > 0) {
         int branches = line.coveredBranches() + line.missedBranches();
         newCoverage.conditions(line.number(), branches, line.coveredBranches());
-      } else {
+        conditions = true;
+      }
+      if (conditions || line.coveredInstrs() > 0 || line.missedInstrs() > 0) {
         newCoverage.lineHits(line.number(), line.coveredInstrs() > 0 ? 1 : 0);
       }
     }
