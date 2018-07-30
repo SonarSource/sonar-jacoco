@@ -1,0 +1,25 @@
+plugins {
+  id "java"
+}
+
+description = 'SonarQube JaCoCo :: Integration Tests'
+
+dependencies {
+  // please keep the list ordered
+
+  testCompile 'junit:junit'
+  testCompile 'org.assertj:assertj-core'
+  testCompile 'org.sonarsource.orchestrator:sonar-orchestrator'
+  testCompile 'org.sonarsource.sonarqube:sonar-ws:6.7'
+  testCompile 'com.google.code.findbugs:jsr305:2.0.2'
+}
+
+sonarqube.skipProject = true
+
+task integrationTest(type: Test) {
+  systemProperty 'java.awt.headless', 'true'
+
+  def orchestratorProps = System.getProperties().findAll { it.key.startsWith("orchestrator") || it.key.startsWith("sonar") }.collect { it.key }
+  systemProperties System.getProperties().subMap(orchestratorProps)
+}
+
