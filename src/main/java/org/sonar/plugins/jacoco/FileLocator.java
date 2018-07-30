@@ -26,7 +26,6 @@ import javax.annotation.CheckForNull;
 import org.sonar.api.batch.fs.InputFile;
 
 public class FileLocator {
-  private final List<InputFile> inputFiles;
   private final ReversePathTree tree = new ReversePathTree();
 
   public FileLocator(Iterable<InputFile> inputFiles) {
@@ -34,7 +33,6 @@ public class FileLocator {
   }
 
   public FileLocator(List<InputFile> inputFiles) {
-    this.inputFiles = inputFiles;
     for (InputFile inputFile : inputFiles) {
       String[] path = inputFile.relativePath().split("/");
       tree.index(inputFile, path);

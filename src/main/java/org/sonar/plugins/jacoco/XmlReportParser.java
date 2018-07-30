@@ -71,7 +71,7 @@ public class XmlReportParser {
             sourceFiles.add(new SourceFile(packageName, sourceFileName));
           } else if (element.equals("line")) {
             SourceFile file = sourceFiles.get(sourceFiles.size() - 1);
-            Supplier<String> errorCtx = () -> "for the sourcefile '" + file.name + "' in line " + parser.getLocation().getLineNumber();
+            Supplier<String> errorCtx = () -> "for the sourcefile '" + file.name() + "' in line " + parser.getLocation().getLineNumber();
 
             Line line = new Line(
               getIntAttr(parser, "nr", errorCtx),
@@ -79,7 +79,7 @@ public class XmlReportParser {
               getIntAttr(parser, "ci", errorCtx),
               getIntAttr(parser, "mb", errorCtx),
               getIntAttr(parser, "cb", errorCtx));
-            file.lines.add(line);
+            file.lines().add(line);
           }
         }
       }
@@ -90,7 +90,7 @@ public class XmlReportParser {
     }
   }
 
-  private String getStringAttr(XMLStreamReader parser, String name, Supplier<String> errorContext) {
+  private static String getStringAttr(XMLStreamReader parser, String name, Supplier<String> errorContext) {
     String value = parser.getAttributeValue(null, name);
     if (value == null) {
       throw new IllegalStateException("Invalid report: couldn't find the attribute '" + name + "' " + errorContext.get());
@@ -98,7 +98,7 @@ public class XmlReportParser {
     return value;
   }
 
-  private int getIntAttr(XMLStreamReader parser, String name, Supplier<String> errorContext) {
+  private static int getIntAttr(XMLStreamReader parser, String name, Supplier<String> errorContext) {
     String value = getStringAttr(parser, name, errorContext);
     try {
       return Integer.parseInt(value);
@@ -131,7 +131,7 @@ public class XmlReportParser {
   }
 
   static class Line {
-   private  int number;
+    private int number;
     private int missedInstrs;
     private int coveredInstrs;
     private int missedBranches;
