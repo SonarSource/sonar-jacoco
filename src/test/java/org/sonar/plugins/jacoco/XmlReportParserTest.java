@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,12 +28,16 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class XmlReportParserTest {
   @Rule
   public ExpectedException exception = ExpectedException.none();
+
+  @Rule
+  public TemporaryFolder temp = new TemporaryFolder();
 
   private Path load(String name) throws URISyntaxException {
     return Paths.get(this.getClass().getClassLoader().getResource(name).toURI());
@@ -64,12 +70,42 @@ public class XmlReportParserTest {
   }
 
   @Test
+  public void should_fail_if_report_is_not_xml() throws IOException {
+    Path filePath = temp.newFile("report.xml").toPath();
+    XmlReportParser report = new XmlReportParser(filePath);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Failed to parse JaCoCo XML report: " + filePath.toAbsolutePath());
+    report.parse();
+  }
+
+  @Test
   public void should_fail_if_name_missing_in_sourcefile() throws URISyntaxException {
     Path sample = load("name_missing_in_sourcefile.xml");
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Invalid report: couldn't find the attribute 'name' for a sourcefile in line 5");
+    report.parse();
+  }
+
+  @Test
+  public void should_fail_if_line_not_within_sourcefile() throws URISyntaxException {
+    Path sample = load("line_not_within_sourcefile.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage( "Invalid report: expected to find 'line' within a 'sourcefile' in line 5");
+    report.parse();
+  }
+
+  @Test
+  public void should_fail_if_sourcefile_not_within_package() throws URISyntaxException {
+    Path sample = load("sourcefile_not_within_package.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage( "Invalid report: expected to find 'sourcefile' within a 'package' in line 4");
     report.parse();
   }
 
@@ -102,4 +138,5 @@ public class XmlReportParserTest {
     assertThat(sourceFiles).hasSize(5);
     assertThat(sourceFiles.stream().mapToInt(sf -> sf.lines().size()).sum()).isEqualTo(79);
   }
+
 }

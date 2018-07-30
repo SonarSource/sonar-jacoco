@@ -40,13 +40,14 @@ public class XmlReportParser {
 
   public List<SourceFile> parse() {
     XMLInputFactory factory = XMLInputFactory.newInstance();
-
+    factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false);
+    factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
     try {
       XMLStreamReader parser = factory.createXMLStreamReader(Files.newBufferedReader(xmlReportPath, StandardCharsets.UTF_8));
       List<SourceFile> sourceFiles = new ArrayList<>();
 
       String packageName = null;
-      String sourceFileName;
+      String sourceFileName = null;
 
       while (true) {
         int event = parser.next();
@@ -67,9 +68,15 @@ public class XmlReportParser {
           if (element.equals("package")) {
             packageName = getStringAttr(parser, "name", () -> "for a sourcefile in line " + parser.getLocation().getLineNumber());
           } else if (element.equals("sourcefile")) {
+            if (packageName == null) {
+              throw new IllegalStateException("Invalid report: expected to find 'sourcefile' within a 'package' in line " + parser.getLocation().getLineNumber());
+            }
             sourceFileName = getStringAttr(parser, "name", () -> "for a sourcefile in line " + parser.getLocation().getLineNumber());
             sourceFiles.add(new SourceFile(packageName, sourceFileName));
           } else if (element.equals("line")) {
+            if (sourceFileName == null) {
+              throw new IllegalStateException("Invalid report: expected to find 'line' within a 'sourcefile' in line " + parser.getLocation().getLineNumber());
+            }
             SourceFile file = sourceFiles.get(sourceFiles.size() - 1);
             Supplier<String> errorCtx = () -> "for the sourcefile '" + file.name() + "' in line " + parser.getLocation().getLineNumber();
 
@@ -86,7 +93,7 @@ public class XmlReportParser {
 
       return sourceFiles;
     } catch (XMLStreamException | IOException e) {
-      throw new IllegalStateException("Failed to parse JaCoCo XML report", e);
+      throw new IllegalStateException("Failed to parse JaCoCo XML report: " + xmlReportPath.toAbsolutePath(), e);
     }
   }
 

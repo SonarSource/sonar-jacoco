@@ -64,7 +64,7 @@ public class ReportImporterTest {
     Assertions.assertThat(ctx.conditions(inputFile.key(), 2)).isNull();
     Assertions.assertThat(ctx.conditions(inputFile.key(), 3)).isNull();
 
-    Assertions.assertThat(ctx.lineHits(inputFile.key(), 1)).isNull();
+    Assertions.assertThat(ctx.lineHits(inputFile.key(), 1)).isEqualTo(0);
     Assertions.assertThat(ctx.lineHits(inputFile.key(), 2)).isEqualTo(1);
     Assertions.assertThat(ctx.lineHits(inputFile.key(), 3)).isEqualTo(0);
   }
