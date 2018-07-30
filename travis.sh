@@ -35,7 +35,7 @@ export INITIAL_VERSION=$(cat gradle.properties | grep version | awk -F= '{print 
 
 if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
     echo 'Build and analyze master'
-    ${gradle_cmd} build sonarqube  -Prelease=true \
+    ${gradle_cmd} build sonarqube artifactoryPublish -Prelease=true \
         ${sonar_analysis} \
         -Dsonar.analysis.sha1=$GIT_COMMIT \
         -Dsonar.projectVersion=$INITIAL_VERSION
@@ -43,7 +43,7 @@ if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ]; th
 elif [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then
     if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
         echo 'Build and analyze pull request'
-        ${gradle_cmd} build sonarqube \
+        ${gradle_cmd} build sonarqube artifactoryPublish \
             ${sonar_analysis} \
             -Dsonar.analysis.prNumber=$TRAVIS_PULL_REQUEST \
             -Dsonar.analysis.sha1=$TRAVIS_PULL_REQUEST_SHA \
@@ -54,7 +54,7 @@ elif [ "$TRAVIS_SECURE_ENV_VARS" != "false" ]; then
             -Dsonar.pullrequest.github.repository=$TRAVIS_REPO_SLUG
     else
         echo 'Build and analyze pull request'
-        ${gradle_cmd} build sonarqube \
+        ${gradle_cmd} build sonarqube artifactoryPublish \
             ${sonar_analysis} \
             -Dsonar.analysis.sha1=$TRAVIS_PULL_REQUEST_SHA \
             -Dsonar.branch.name=$TRAVIS_BRANCH
