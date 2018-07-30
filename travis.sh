@@ -22,13 +22,13 @@ else
   export PULL_REQUEST_NUMBER=$TRAVIS_PULL_REQUEST
 fi
 
-gradle_cmd="./gradlew --no-daemon --console plain"
+gradle_cmd="./gradlew --no-daemon -i --console plain"
 sonar_analysis="-DbuildNumber=$BUILD_NUMBER \
         -Dsonar.host.url=$SONAR_HOST_URL \
         -Dsonar.login=$SONAR_TOKEN \
         -Dsonar.analysis.buildNumber=$BUILD_NUMBER \
         -Dsonar.analysis.pipeline=$BUILD_NUMBER \
-        -Dsonar.analysis.repository=$TRAVIS_REPO_SLUG "
+        -Dsonar.analysis.repository=$TRAVIS_REPO_SLUG"
 
 # Used by Next
 export INITIAL_VERSION=$(cat gradle.properties | grep version | awk -F= '{print $2}')

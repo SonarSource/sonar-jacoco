@@ -1,10 +1,8 @@
 language: java
 install: true
 jdk: oraclejdk8
-
 git:
-  depth: false  # get full git history for SQ blame info
-
+  depth: false
 script: "./travis.sh"
 cache:
   directories:
@@ -13,4 +11,6 @@ cache:
   - "$HOME/.gradle/wrapper/"
 notifications:
   email: false
+  webhooks:
+   - secure: fwkd7vUkGNDyOsCkQfUFdPyDiHB7128qEuMIkJ/SV8VKwdViSsuMmtMruQmU0tuUpprv+eqgh8U6eyP7mugI0tQfE/T6YvE+EZh6xL+l6g6DkD7x7XsZPqSZx6DGXKFenXn72Nit80g0BEJ6OQ0rNmmnOosgqASQyojRxeobF0dq1FX0h7tQ38tiXYWpLDp4B0a3Qxgjj6PRr8eKIX2sY0V3g8v7tmB/3H0mDJMTT3iKdMJwBbjLvsubVKvoKS9Jf+VA3j97nygh9vrrg1PKq9MCpCWrmBYRVAFhL07upGSYBT6Qlfj35FEJVxgsfnqBuQToYDNSrVKex+lNwDhEHwzZ/wvHDZz54rd6GV/btRKSD+VyyiRSatYv1AOWqJt2A+0OFzsRvrAHOjj761+PFsPZqdKA+eoQ/BCt9LZ7EpmF7ErQnejciBXau4aRn0fWHapIHR4TLdZQJQeh9vIx4lB/Ilh/VvAyJUaev1WgMJmnTvB2VSINdKqW1J4F8wx8iZCQurpuzWz2ratVRzvTQlEUPu7ppl4SYaigqxApUoaOOSJm7gbPhf10wegqOFt6SehcF8e92gre5hCA7P/Rz5mMTkfJD6D4RnMFDg3HqKN39kgoFuYuSzk/WVIpuHpMWJwy+M05h8Gb0F0zrYnwpQpDsPQhFANdcpQwZEMzH8Q=
   on_start: always
