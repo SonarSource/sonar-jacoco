@@ -5,11 +5,10 @@ plugins {
 description = 'SonarQube JaCoCo :: Integration Tests'
 
 dependencies {
-  // please keep the list ordered
-
-  testCompile 'junit:junit'
-  testCompile 'org.assertj:assertj-core'
-  testCompile 'org.sonarsource.orchestrator:sonar-orchestrator'
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.mockito:mockito-core:1.10.19'
+  testCompile 'org.assertj:assertj-core:3.10.0'
+  testCompile 'org.sonarsource.orchestrator:sonar-orchestrator:3.19.0.1641'
   testCompile 'org.sonarsource.sonarqube:sonar-ws:6.7'
   testCompile 'com.google.code.findbugs:jsr305:2.0.2'
 }
@@ -22,4 +21,7 @@ task integrationTest(type: Test) {
   def orchestratorProps = System.getProperties().findAll { it.key.startsWith("orchestrator") || it.key.startsWith("sonar") }.collect { it.key }
   systemProperties System.getProperties().subMap(orchestratorProps)
 }
+
+test.onlyIf { project.hasProperty('integrationTests') && project.getProperty('integrationTests') }
+
 
