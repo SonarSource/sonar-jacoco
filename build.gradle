@@ -4,9 +4,6 @@ buildscript {
       url 'https://repox.sonarsource.com/plugins.gradle.org/'
     }
   }
-  dependencies {
-    classpath "gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.14.0"
-  }
 }
 plugins {
     id 'org.sonarqube' version '2.6.2'
@@ -30,10 +27,12 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-repositories {
-    mavenCentral()
-    maven {
-        url "https://repox.sonarsource.com/sonarsource"
+allprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://repox.sonarsource.com/sonarsource"
+        }
     }
 }
 
