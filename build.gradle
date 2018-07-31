@@ -14,6 +14,9 @@ plugins {
     id 'com.github.hierynomus.license' version '0.14.0'
 }
 
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
+
 ext {
     release = project.hasProperty('release') && project.getProperty('release')
     buildNumber = System.getProperty("buildNumber")
@@ -67,6 +70,7 @@ license {
     excludes(['**/*.txt', '**/*.properties', '**/*.xml', '**/*.xsd', '**/*.html', '**/*.json', '**/*.sql', '**/*.rb', '**/*.vm', '**/*.snap', '**/*.svg', '**/*.jar', '**/*.zip', '**/*.log', '**/*.cnf', '**/*.jks', '**/README', '**/*.pdf'])
 }
 
+
 jar {
     manifest {
         def displayVersion = project.hasProperty('buildNumber') ? version.substring(0, version.lastIndexOf('.')) + " (build ${project.buildNumber})" : version
@@ -91,6 +95,14 @@ jar {
                 'SonarLint-Supported': 'false',
                 'Version': "${version}",
         )
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
     }
 }
 
