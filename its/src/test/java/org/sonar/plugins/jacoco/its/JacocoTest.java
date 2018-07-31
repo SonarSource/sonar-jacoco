@@ -81,6 +81,23 @@ public class JacocoTest {
   }
 
   @Test
+  public void should_import_coverage_even_when_java_also_imports() throws IOException {
+    SonarScanner build = SonarScanner.create()
+      .setProjectKey(PROJECT_KEY)
+      .setDebugLogs(true)
+      .setSourceDirs("src/main")
+      .setTestDirs("src/test")
+      .setProperty("sonar.coverage.jacoco.xmlReportPaths", "jacoco.xml")
+      .setProperty("sonar.jacoco.reportPath", "jacoco.exec")
+      .setProperty("sonar.java.binaries", ".")
+      .setProjectDir(prepareProject("simple-project-jacoco"));
+    orchestrator.executeBuild(build);
+
+    checkCoveredFile();
+    checkUncoveredFile();
+  }
+
+  @Test
   public void should_not_import_coverage_if_no_property_given() throws IOException {
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
@@ -88,6 +105,20 @@ public class JacocoTest {
       .setSourceDirs("src/main")
       .setTestDirs("src/test")
       .setProperty("sonar.java.binaries", ".")
+      .setProjectDir(prepareProject("simple-project-jacoco"));
+    orchestrator.executeBuild(build);
+    checkNoJacocoCoverage();
+  }
+
+  @Test
+  public void should_not_import_coverage_if_report_contains_files_that_cant_be_found() throws IOException {
+    SonarScanner build = SonarScanner.create()
+      .setProjectKey(PROJECT_KEY)
+      .setDebugLogs(true)
+      .setSourceDirs("src/main")
+      .setTestDirs("src/test")
+      .setProperty("sonar.java.binaries", ".")
+      .setProperty("sonar.coverage.jacoco.xmlReportPaths", "jacoco-with-invalid-sources.xml")
       .setProjectDir(prepareProject("simple-project-jacoco"));
     orchestrator.executeBuild(build);
     checkNoJacocoCoverage();
