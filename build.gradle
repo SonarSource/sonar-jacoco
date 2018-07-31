@@ -14,6 +14,7 @@ plugins {
     id 'com.github.hierynomus.license' version '0.14.0'
 }
 
+apply plugin: 'com.jfrog.artifactory'
 apply plugin: 'maven-publish'
 
 ext {
@@ -94,6 +95,14 @@ jar {
                 'SonarLint-Supported': 'false',
                 'Version': "${version}",
         )
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
     }
 }
 
