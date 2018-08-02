@@ -27,6 +27,14 @@ pipeline {
                         runTests "DEV"
                     }
                 }
+                stage('plugin-lts') {
+                    agent {
+                        label 'linux'
+                    }
+                    steps {
+                        runTests "LATEST_RELEASE[6.7]"
+                    }
+                }
             }
             post {
                 always {
@@ -50,7 +58,7 @@ pipeline {
 def runTests(String sqRuntimeVersion) {
     withQAEnv {
         sh "./gradlew -DbuildNumber=${params.CI_BUILD_NUMBER} -Dsonar.runtimeVersion=${sqRuntimeVersion} " +
-                "-Dorchestrator.artifactory.apiKey=${env.ARTIFACTORY_PRIVATE_API_KEY}  --console plain --no-daemon --info -PintegrationTests=true test"
+                "-Dorchestrator.artifactory.apiKey=${env.ARTIFACTORY_PRIVATE_API_KEY}  --console plain --no-daemon --info -PintegrationTests=true build test"
     }
 }
 

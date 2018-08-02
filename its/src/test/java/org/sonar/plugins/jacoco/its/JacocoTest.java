@@ -51,7 +51,7 @@ public class JacocoTest {
     String pluginVersion = System.getProperty("jacocoVersion");
     Location pluginLocation;
     if (StringUtils.isEmpty(pluginVersion) || pluginVersion.endsWith("-SNAPSHOT")) {
-      pluginLocation = FileLocation.byWildcardMavenFilename(new File("../build/libs"), "sonar-jacoco-plugin-*.jar");
+      pluginLocation = FileLocation.byWildcardMavenFilename(new File("../build/libs"), "sonar-jacoco-*.jar");
     } else {
       pluginLocation = MavenLocation.of("org.sonarsource.jacoco", "sonar-jacoco-plugin", pluginVersion);
     }
