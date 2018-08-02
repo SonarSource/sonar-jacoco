@@ -86,7 +86,7 @@ jar {
                 'Plugin-IssueTrackerUrl': 'https://github.com/SonarSource/sonar-jacoco/issues',
                 'Plugin-Key': 'jacoco',
                 'Plugin-License': 'GNU LGPL 3',
-                'Plugin-Name': 'SonarJacoco',
+                'Plugin-Name': 'JaCoCO',
                 'Plugin-Organization': 'SonarSource',
                 'Plugin-OrganizationUrl': 'http://www.sonarsource.com',
                 'Plugin-SourcesUrl': 'https://github.com/SonarSource/sonar-jacoco',
