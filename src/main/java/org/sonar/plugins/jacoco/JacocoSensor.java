@@ -38,25 +38,28 @@ public class JacocoSensor implements Sensor {
 
   @Override public void execute(SensorContext context) {
     ReportPathsProvider reportPathsProvider = new ReportPathsProvider(context);
+    Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
+    FileLocator locator = new FileLocator(inputFiles);
+    ReportImporter importer = new ReportImporter(context);
+    
+    importReports(reportPathsProvider, locator, importer);
+  }
+
+  void importReports(ReportPathsProvider reportPathsProvider, FileLocator locator, ReportImporter importer) {
     Collection<Path> reportPaths = reportPathsProvider.getPaths();
     if (reportPaths.isEmpty()) {
       LOG.debug("No reports found");
       return;
     }
 
-    Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
-    FileLocator locator = new FileLocator(inputFiles);
-    ReportImporter importer = new ReportImporter(context);
-
     for (Path reportPath : reportPaths) {
       LOG.debug("Reading report '{}'", reportPath);
-      importReport(reportPath, locator, importer);
+      importReport(new XmlReportParser(reportPath), locator, importer);
     }
   }
 
-  void importReport(Path reportPath, FileLocator locator, ReportImporter importer) {
-    XmlReportParser parser = new XmlReportParser(reportPath);
-    List<XmlReportParser.SourceFile> sourceFiles = parser.parse();
+  void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer) {
+    List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
 
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
       InputFile inputFile = locator.getInputFile(sourceFile.packageName(), sourceFile.name());
