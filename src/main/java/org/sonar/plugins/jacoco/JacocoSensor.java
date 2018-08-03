@@ -20,28 +20,37 @@
 package org.sonar.plugins.jacoco;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class JacocoSensor implements Sensor {
-  private static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
+  private static final Logger LOG = Loggers.get(JacocoSensor.class);
 
   @Override public void describe(SensorDescriptor descriptor) {
-    descriptor.name("JaCoCo XML report importer").onlyWhenConfiguration(c -> c.hasKey(REPORT_PATHS_PROPERTY_KEY));
+    descriptor.name("JaCoCo XML Report Importer");
   }
 
   @Override public void execute(SensorContext context) {
-    String[] reportPaths = context.config().getStringArray(REPORT_PATHS_PROPERTY_KEY);
+    ReportPathsProvider reportPathsProvider = new ReportPathsProvider(context);
+    Collection<Path> reportPaths = reportPathsProvider.getPaths();
+    if (reportPaths.isEmpty()) {
+      LOG.debug("No reports found");
+      return;
+    }
+
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
     FileLocator locator = new FileLocator(inputFiles);
     ReportImporter importer = new ReportImporter(context);
 
-    for (String reportPath : reportPaths) {
-      Path path = context.fileSystem().baseDir().toPath().resolve(reportPath);
-      importReport(path, locator, importer);
+    for (Path reportPath : reportPaths) {
+      LOG.debug("Reading report '{}'", reportPath);
+      importReport(reportPath, locator, importer);
     }
   }
 
