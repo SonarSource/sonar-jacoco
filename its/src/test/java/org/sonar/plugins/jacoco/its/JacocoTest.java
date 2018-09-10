@@ -2,6 +2,7 @@ package org.sonar.plugins.jacoco.its;
 
 import com.sonar.orchestrator.Orchestrator;
 import com.sonar.orchestrator.OrchestratorBuilder;
+import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.SonarScanner;
 import com.sonar.orchestrator.locator.FileLocation;
 import com.sonar.orchestrator.locator.Location;
@@ -95,6 +96,20 @@ public class JacocoTest {
 
     checkCoveredFile();
     checkUncoveredFile();
+  }
+
+  @Test
+  public void should_give_warning_if_report_doesnt_exist() throws IOException {
+    SonarScanner build = SonarScanner.create()
+      .setProjectKey(PROJECT_KEY)
+      .setDebugLogs(true)
+      .setSourceDirs("src/main")
+      .setTestDirs("src/test")
+      .setProperty("sonar.coverage.jacoco.xmlReportPaths", "invalid_file.xml")
+      .setProperty("sonar.java.binaries", ".")
+      .setProjectDir(prepareProject("simple-project-jacoco"));
+    BuildResult result = orchestrator.executeBuild(build);
+    result.getLogs().contains("Report doesn't exist: ");
   }
 
   @Test

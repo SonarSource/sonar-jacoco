@@ -33,6 +33,7 @@ import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.utils.log.LogTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -43,6 +44,10 @@ import static org.mockito.Mockito.when;
 public class JacocoSensorTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
+
+  @Rule
+  public LogTester logTester = new LogTester();
+
   private JacocoSensor sensor = new JacocoSensor();
 
   @Test
@@ -80,6 +85,20 @@ public class JacocoSensorTest {
     sensor.importReports(reportPathsProvider, locator, importer);
 
     verify(reportPathsProvider).getPaths();
+    verifyZeroInteractions(locator, importer);
+  }
+
+  @Test
+  public void do_nothing_if_report_doesnt_exist() {
+    ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
+    FileLocator locator = mock(FileLocator.class);
+    ReportImporter importer = mock(ReportImporter.class);
+
+    when(reportPathsProvider.getPaths()).thenReturn(Collections.singletonList(Paths.get("invalid.xml")));
+    sensor.importReports(reportPathsProvider, locator, importer);
+
+    verify(reportPathsProvider).getPaths();
+    assertThat(logTester.logs()).contains("Report doesn't exist: 'invalid.xml'");
     verifyZeroInteractions(locator, importer);
   }
 

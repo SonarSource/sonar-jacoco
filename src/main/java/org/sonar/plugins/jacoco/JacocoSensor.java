@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +42,7 @@ public class JacocoSensor implements Sensor {
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
     FileLocator locator = new FileLocator(inputFiles);
     ReportImporter importer = new ReportImporter(context);
-    
+
     importReports(reportPathsProvider, locator, importer);
   }
 
@@ -53,8 +54,12 @@ public class JacocoSensor implements Sensor {
     }
 
     for (Path reportPath : reportPaths) {
-      LOG.debug("Reading report '{}'", reportPath);
-      importReport(new XmlReportParser(reportPath), locator, importer);
+      if (!Files.isRegularFile(reportPath)) {
+        LOG.warn("Report doesn't exist: '{}'", reportPath);
+      } else {
+        LOG.debug("Reading report '{}'", reportPath);
+        importReport(new XmlReportParser(reportPath), locator, importer);
+      }
     }
   }
 
