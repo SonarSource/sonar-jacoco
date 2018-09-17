@@ -153,9 +153,9 @@ artifactory {
     }
     clientConfig.info.setBuildNumber(System.getenv('BUILD_NUMBER'))
     // Define the artifacts to be deployed to https://sonarsource.bintray.com on releases
-    clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_PUBLISH', "${project.group}:sonar-jacoco:jar")
+    clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_PUBLISH', "${project.group}:sonar-jacoco-plugin:jar")
     // The name of this variable is important because it's used by the delivery process when extracting version from Artifactory build info.
     clientConfig.info.addEnvironmentProperty('PROJECT_VERSION', "${version}")
-    clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_DOWNLOAD', "${project.group}:sonar-jacoco:jar")
+    clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_DOWNLOAD', "${project.group}:sonar-jacoco-plugin:jar")
 
 }
