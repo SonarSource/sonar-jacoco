@@ -90,7 +90,7 @@ jar {
                 'Plugin-Class': 'org.sonar.plugins.jacoco.JacocoPlugin',
                 'Plugin-Description': 'JaCoCo XML report importer',
                 'Plugin-Display-Version': displayVersion,
-                'Plugin-IssueTrackerUrl': 'https://github.com/SonarSource/sonar-jacoco/issues',
+                'Plugin-IssueTrackerUrl': 'https://jira.sonarsource.com/browse/JACOCO',
                 'Plugin-Key': 'jacoco',
                 'Plugin-License': 'GNU LGPL 3',
                 'Plugin-Name': 'JaCoCo',
