@@ -139,7 +139,7 @@ artifactory {
         }
         defaults {
             properties = [
-                'build.name': 'sonar-jacoco',
+                'build.name': 'sonar-jacoco-plugin',
                 'build.number': (System.getenv('BUILD_ID') ?: System.getenv('BUILD_NUMBER')),
                 'pr.branch.target': System.getenv('PULL_REQUEST_BRANCH_TARGET'),
                 'pr.number': System.getenv('PULL_REQUEST_NUMBER'),
@@ -157,6 +157,5 @@ artifactory {
     clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_PUBLISH', "${project.group}:sonar-jacoco-plugin:jar")
     // The name of this variable is important because it's used by the delivery process when extracting version from Artifactory build info.
     clientConfig.info.addEnvironmentProperty('PROJECT_VERSION', "${version}")
-    clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_DOWNLOAD', "${project.group}:sonar-jacoco-plugin:jar")
 
 }
