@@ -42,6 +42,7 @@ allprojects {
 sonarqube {
     properties {
         property 'sonar.projectName', projectTitle
+        property 'sonar.projectKey', project.group + ':sonar-jacoco'
     }
 }
 
