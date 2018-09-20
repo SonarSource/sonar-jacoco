@@ -79,7 +79,6 @@ license {
 
 
 jar {
-    baseName('sonar-jacoco-plugin')
     manifest {
         def displayVersion = project.hasProperty('buildNumber') ? version.substring(0, version.lastIndexOf('.')) + " (build ${project.buildNumber})" : version
         def buildDate = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
