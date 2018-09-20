@@ -139,7 +139,7 @@ artifactory {
         }
         defaults {
             properties = [
-                'build.name': 'sonar-jacoco-plugin',
+                'build.name': 'sonar-jacoco',
                 'build.number': (System.getenv('BUILD_ID') ?: System.getenv('BUILD_NUMBER')),
                 'pr.branch.target': System.getenv('PULL_REQUEST_BRANCH_TARGET'),
                 'pr.number': System.getenv('PULL_REQUEST_NUMBER'),
@@ -152,6 +152,8 @@ artifactory {
             publishIvy = false
         }
     }
+
+    clientConfig.info.setBuildName('sonar-jacoco')
     clientConfig.info.setBuildNumber(System.getenv('BUILD_NUMBER'))
     // Define the artifacts to be deployed to https://sonarsource.bintray.com on releases
     clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_PUBLISH', "${project.group}:sonar-jacoco-plugin:jar")
