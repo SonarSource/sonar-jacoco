@@ -58,7 +58,7 @@ public class JacocoTest {
     }
     builder.addPlugin(pluginLocation);
     try {
-      builder.addPlugin(URLLocation.create(new URL("https://sonarsource.bintray.com/Distribution/sonar-java-plugin/sonar-java-plugin-5.6.0.15032.jar")));
+      builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-5.6.0.15032.jar")));
     } catch (MalformedURLException e) {
       throw new IllegalStateException("Failed to download plugin", e);
     }
