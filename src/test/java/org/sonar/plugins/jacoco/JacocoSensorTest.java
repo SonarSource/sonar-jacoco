@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,7 +37,10 @@ import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.utils.log.LogTester;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -103,6 +107,29 @@ public class JacocoSensorTest {
   }
 
   @Test
+  public void parse_failure_do_not_fail_analysis() {
+    ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
+    FileLocator locator = mock(FileLocator.class);
+    ReportImporter importer = mock(ReportImporter.class);
+    InputFile inputFile = mock(InputFile.class);
+    Path baseDir = Paths.get("src", "test", "resources");
+    Path invalidFile = baseDir.resolve("invalid_ci_in_line.xml");
+    Path validFile = baseDir.resolve("jacoco.xml");
+
+    when(locator.getInputFile("org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
+    when(reportPathsProvider.getPaths()).thenReturn(Arrays.asList(invalidFile, validFile));
+
+    sensor.importReports(reportPathsProvider, locator, importer);
+
+    verify(reportPathsProvider).getPaths();
+    String expectedErrorMessage = String.format(
+      "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' in line 6",
+      invalidFile.toString());
+    assertThat(logTester.logs()).contains(expectedErrorMessage);
+    verify(importer, times(1)).importCoverage(any(), eq(inputFile));
+  }
+
+  @Test
   public void do_nothing_if_file_not_found() {
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
@@ -133,7 +160,29 @@ public class JacocoSensorTest {
     assertThat(tester.lineHits(inputFile.key(), 110)).isEqualTo(1);
     assertThat(tester.conditions(inputFile.key(), 110)).isEqualTo(2);
     assertThat(tester.coveredConditions(inputFile.key(), 110)).isEqualTo(1);
+  }
 
+  @Test
+  public void import_failure_do_not_fail_analysis() throws URISyntaxException, IOException {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "invalid_line_number.xml");
+    SensorContextTester tester = SensorContextTester.create(temp.getRoot());
+    tester.setSettings(settings);
+    InputFile inputFile = TestInputFileBuilder
+      .create("module", "org/sonarlint/cli/File.java")
+      .setLines(1000)
+      .build();
+    tester.fileSystem().add(inputFile);
+    Path sample = load("invalid_line_number.xml");
+    Files.copy(sample, temp.getRoot().toPath().resolve("invalid_line_number.xml"));
+
+    sensor.execute(tester);
+
+    String expectedLogError = String.format(
+      "Cannot import coverage information for file '%s', coverage data is invalid. Error: java.lang.IllegalStateException: Line 1001 is out of range in the file %s (lines: 1000)",
+      inputFile,
+      inputFile);
+    assertThat(logTester.logs()).contains(expectedLogError);
   }
 
   private Path load(String name) throws URISyntaxException {

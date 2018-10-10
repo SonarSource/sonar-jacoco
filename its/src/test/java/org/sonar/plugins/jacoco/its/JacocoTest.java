@@ -139,6 +139,30 @@ public class JacocoTest {
     checkNoJacocoCoverage();
   }
 
+  @Test
+  public void no_failure_with_invalid_reports() throws IOException {
+    SonarScanner build = SonarScanner.create()
+      .setProjectKey(PROJECT_KEY)
+      .setDebugLogs(true)
+      .setSourceDirs("src/main")
+      .setTestDirs("src/test")
+      .setProperty("sonar.java.binaries", ".")
+      .setProperty("sonar.coverage.jacoco.xmlReportPaths", "jacoco-with-invalid-lines.xml,jacoco-with-invalid-format.xml")
+      .setProjectDir(prepareProject("simple-project-jacoco"));
+    orchestrator.executeBuild(build);
+    checkCoveredFile();
+
+    // No coverage info from JaCoCo for second file
+    Map<String, Double> measures = getCoverageMeasures(FILE_WITHOUT_COVERAGE_KEY);
+    assertThat(measures.get("line_coverage")).isEqualTo(0.0);
+    assertThat(measures.get("lines_to_cover")).isEqualTo(6);
+    assertThat(measures.get("uncovered_lines")).isEqualTo(6.0);
+    assertThat(measures.get("branch_coverage")).isNull();
+    assertThat(measures.get("conditions_to_cover")).isNull();
+    assertThat(measures.get("uncovered_conditions")).isNull();
+    assertThat(measures.get("coverage")).isEqualTo(0.0);
+  }
+
   private void checkNoJacocoCoverage() {
     Map<String, Double> measures = getCoverageMeasures(FILE_KEY);
     assertThat(measures.get("line_coverage")).isEqualTo(0.0);
