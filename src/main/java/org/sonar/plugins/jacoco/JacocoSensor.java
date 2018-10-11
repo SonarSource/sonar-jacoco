@@ -58,7 +58,11 @@ public class JacocoSensor implements Sensor {
         LOG.warn("Report doesn't exist: '{}'", reportPath);
       } else {
         LOG.debug("Reading report '{}'", reportPath);
-        importReport(new XmlReportParser(reportPath), locator, importer);
+        try {
+          importReport(new XmlReportParser(reportPath), locator, importer);
+        } catch (Exception e) {
+          LOG.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
+        }
       }
     }
   }
@@ -72,7 +76,11 @@ public class JacocoSensor implements Sensor {
         continue;
       }
 
-      importer.importCoverage(sourceFile, inputFile);
+      try {
+        importer.importCoverage(sourceFile, inputFile);
+      } catch (IllegalStateException e) {
+        LOG.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}", inputFile, e);
+      }
     }
   }
 }
