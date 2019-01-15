@@ -53,6 +53,7 @@ public class ReportImporterTest {
     sourceFile.lines().add(new XmlReportParser.Line(1, 0, 0, 1, 1));
     sourceFile.lines().add(new XmlReportParser.Line(2, 1, 2, 0, 0));
     sourceFile.lines().add(new XmlReportParser.Line(3, 2, 0, 0, 0));
+    sourceFile.lines().add(new XmlReportParser.Line(11, 0, 3, 0, 0));
 
     importer.importCoverage(sourceFile, inputFile);
 

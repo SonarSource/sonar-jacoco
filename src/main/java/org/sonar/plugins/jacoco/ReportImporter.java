@@ -22,8 +22,11 @@ package org.sonar.plugins.jacoco;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.coverage.NewCoverage;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 public class ReportImporter {
+  private static final Logger LOG = Loggers.get(ReportImporter.class);
   private final SensorContext ctx;
 
   public ReportImporter(SensorContext ctx) {
@@ -41,9 +44,14 @@ public class ReportImporter {
         newCoverage.conditions(line.number(), branches, line.coveredBranches());
         conditions = true;
       }
+      if (line.number() > inputFile.lines()) {
+          LOG.warn("No matching line in source");
+          break;
+      }
       if (conditions || line.coveredInstrs() > 0 || line.missedInstrs() > 0) {
         newCoverage.lineHits(line.number(), line.coveredInstrs() > 0 ? 1 : 0);
       }
+
     }
 
     newCoverage.save();
