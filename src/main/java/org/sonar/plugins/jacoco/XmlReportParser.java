@@ -82,10 +82,10 @@ public class XmlReportParser {
 
             Line line = new Line(
               getIntAttr(parser, "nr", errorCtx),
-              getIntAttr(parser, "mi", errorCtx),
-              getIntAttr(parser, "ci", errorCtx),
-              getIntAttr(parser, "mb", errorCtx),
-              getIntAttr(parser, "cb", errorCtx));
+              getOptionalIntAttr(parser, "mi", errorCtx),
+              getOptionalIntAttr(parser, "ci", errorCtx),
+              getOptionalIntAttr(parser, "mb", errorCtx),
+              getOptionalIntAttr(parser, "cb", errorCtx));
             file.lines().add(line);
           }
         }
@@ -103,6 +103,18 @@ public class XmlReportParser {
       throw new IllegalStateException("Invalid report: couldn't find the attribute '" + name + "' " + errorContext.get());
     }
     return value;
+  }
+
+  private static int getOptionalIntAttr(XMLStreamReader parser, String name, Supplier<String> errorContext) {
+    String value = parser.getAttributeValue(null, name);
+    if (value == null) {
+      return 0;
+    }
+    try {
+      return Integer.parseInt(value);
+    } catch (Exception e) {
+      throw new IllegalStateException("Invalid report: failed to parse integer from the attribute '" + name + "' " + errorContext.get());
+    }
   }
 
   private static int getIntAttr(XMLStreamReader parser, String name, Supplier<String> errorContext) {
