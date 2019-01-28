@@ -69,6 +69,23 @@ public class XmlReportParserTest {
   }
 
   @Test
+  public void should_treat_missing_mi_ci_mb_cb_in_line_as_zeros() throws Exception {
+    Path sample = load("line_without_mi_ci_mb_cb.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+    List<XmlReportParser.SourceFile> sourceFiles = report.parse();
+
+    assertThat(sourceFiles).hasSize(1);
+    assertThat(sourceFiles.stream().mapToInt(sf -> sf.lines().size()).sum()).isEqualTo(1);
+    assertThat(sourceFiles.get(0).name()).isEqualTo("Example.java");
+    assertThat(sourceFiles.get(0).packageName()).isEqualTo("org/example");
+    assertThat(sourceFiles.get(0).lines().get(0).number()).isEqualTo(42);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredInstrs()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).missedBranches()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).missedInstrs()).isEqualTo(0);
+  }
+
+  @Test
   public void should_fail_if_report_is_not_xml() throws IOException {
     Path filePath = temp.newFile("report.xml").toPath();
     XmlReportParser report = new XmlReportParser(filePath);
