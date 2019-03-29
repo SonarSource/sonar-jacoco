@@ -44,7 +44,7 @@ public class JacocoTest {
   public TemporaryFolder temp = new TemporaryFolder();
 
   static {
-    String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "7.2-RC1";
+    String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "7.7";
     OrchestratorBuilder builder = Orchestrator.builderEnv()
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
       .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
