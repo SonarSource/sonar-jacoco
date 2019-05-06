@@ -1,7 +1,7 @@
 buildscript {
   repositories {
     maven {
-      url 'https://repox.sonarsource.com/plugins.gradle.org/'
+      url 'https://repox.jfrog.io/repox/plugins.gradle.org/'
     }
   }
 }
@@ -34,7 +34,7 @@ allprojects {
     repositories {
         mavenCentral()
         maven {
-            url "https://repox.sonarsource.com/sonarsource"
+            url "https://repox.jfrog.io/repox/sonarsource"
         }
     }
 }
