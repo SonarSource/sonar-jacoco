@@ -79,6 +79,16 @@ public class XmlReportParserTest {
   }
 
   @Test
+  public void should_fail_if_name_missing_in_package() throws URISyntaxException {
+    Path sample = load("name_missing_in_package.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Invalid report: couldn't find the attribute 'name' for a 'package' in line 4");
+    report.parse();
+  }
+
+  @Test
   public void should_fail_if_name_missing_in_sourcefile() throws URISyntaxException {
     Path sample = load("name_missing_in_sourcefile.xml");
     XmlReportParser report = new XmlReportParser(sample);

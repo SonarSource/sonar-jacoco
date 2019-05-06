@@ -66,7 +66,7 @@ public class XmlReportParser {
           String element = parser.getLocalName();
 
           if (element.equals("package")) {
-            packageName = getStringAttr(parser, "name", () -> "for a sourcefile in line " + parser.getLocation().getLineNumber());
+            packageName = getStringAttr(parser, "name", () -> "for a 'package' in line " + parser.getLocation().getLineNumber());
           } else if (element.equals("sourcefile")) {
             if (packageName == null) {
               throw new IllegalStateException("Invalid report: expected to find 'sourcefile' within a 'package' in line " + parser.getLocation().getLineNumber());
