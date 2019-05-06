@@ -17,12 +17,12 @@ pipeline {
         }
         stage('QA') {
             parallel {
-                stage('plugin-dev') {
+                stage('plugin-dogfood') {
                     agent {
                         label 'linux'
                     }
                     steps {
-                        runTests "DEV"
+                        runTests "DOGFOOD"
                     }
                 }
                 stage('plugin-lts') {
@@ -56,13 +56,13 @@ pipeline {
 def runTests(String sqRuntimeVersion) {
     withQAEnv {
         sh "./gradlew -DbuildNumber=${params.CI_BUILD_NUMBER} -Dsonar.runtimeVersion=${sqRuntimeVersion} " +
-                "-Dorchestrator.artifactory.apiKey=${env.ARTIFACTORY_PRIVATE_API_KEY}  --console plain --no-daemon --info -PintegrationTests=true build test"
+                "-Dorchestrator.artifactory.apiKey=${env.ARTIFACTORY_API_KEY}  --console plain --no-daemon --info -PintegrationTests=true build test"
     }
 }
 
 def withQAEnv(def body) {
     checkout scm
-    withCredentials([string(credentialsId: 'ARTIFACTORY_PRIVATE_API_KEY', variable: 'ARTIFACTORY_PRIVATE_API_KEY'),
+    withCredentials([string(credentialsId: 'ARTIFACTORY_PRIVATE_API_KEY', variable: 'ARTIFACTORY_API_KEY'),
                      usernamePassword(credentialsId: 'ARTIFACTORY_PRIVATE_USER', passwordVariable: 'ARTIFACTORY_PRIVATE_PASSWORD', usernameVariable: 'ARTIFACTORY_PRIVATE_USERNAME')]) {
         wrap([$class: 'Xvfb']) {
             body.call()
