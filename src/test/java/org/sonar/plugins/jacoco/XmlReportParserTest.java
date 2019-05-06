@@ -62,10 +62,11 @@ public class XmlReportParserTest {
     assertThat(sourceFiles.stream().mapToInt(sf -> sf.lines().size()).sum()).isEqualTo(1);
     assertThat(sourceFiles.get(0).name()).isEqualTo("File.java");
     assertThat(sourceFiles.get(0).packageName()).isEqualTo("org/sonarlint/cli");
-    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(0);
-    assertThat(sourceFiles.get(0).lines().get(0).coveredInstrs()).isEqualTo(3);
-    assertThat(sourceFiles.get(0).lines().get(0).missedBranches()).isEqualTo(0);
-    assertThat(sourceFiles.get(0).lines().get(0).missedInstrs()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).number()).isEqualTo(24);
+    assertThat(sourceFiles.get(0).lines().get(0).missedInstrs()).isEqualTo(1);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredInstrs()).isEqualTo(2);
+    assertThat(sourceFiles.get(0).lines().get(0).missedBranches()).isEqualTo(3);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(4);
   }
 
   @Test
@@ -79,10 +80,10 @@ public class XmlReportParserTest {
     assertThat(sourceFiles.get(0).name()).isEqualTo("Example.java");
     assertThat(sourceFiles.get(0).packageName()).isEqualTo("org/example");
     assertThat(sourceFiles.get(0).lines().get(0).number()).isEqualTo(42);
-    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).missedInstrs()).isEqualTo(0);
     assertThat(sourceFiles.get(0).lines().get(0).coveredInstrs()).isEqualTo(0);
     assertThat(sourceFiles.get(0).lines().get(0).missedBranches()).isEqualTo(0);
-    assertThat(sourceFiles.get(0).lines().get(0).missedInstrs()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(0);
   }
 
   @Test
