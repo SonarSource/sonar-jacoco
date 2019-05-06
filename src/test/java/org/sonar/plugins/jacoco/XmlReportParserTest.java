@@ -156,6 +156,16 @@ public class XmlReportParserTest {
   }
 
   @Test
+  public void should_fail_if_nr_missing_in_line() throws URISyntaxException {
+    Path sample = load("nr_missing_in_line.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Invalid report: couldn't find the attribute 'nr' for the sourcefile 'File.java' in line 6");
+    report.parse();
+  }
+
+  @Test
   public void should_import_kotlin_report() throws URISyntaxException {
     Path sample = load("kotlin.xml");
     XmlReportParser report = new XmlReportParser(sample);
