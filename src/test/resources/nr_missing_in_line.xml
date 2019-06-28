@@ -3,7 +3,7 @@
 <report name="SonarLint CLI">
     <package name="org/sonarlint/cli">
         <sourcefile name="File.java">
-            <line nr="24" mi="1" ci="2" mb="3" cb="4"/>
+            <line />
         </sourcefile>
     </package>
 </report>

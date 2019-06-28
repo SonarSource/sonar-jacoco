@@ -62,10 +62,28 @@ public class XmlReportParserTest {
     assertThat(sourceFiles.stream().mapToInt(sf -> sf.lines().size()).sum()).isEqualTo(1);
     assertThat(sourceFiles.get(0).name()).isEqualTo("File.java");
     assertThat(sourceFiles.get(0).packageName()).isEqualTo("org/sonarlint/cli");
-    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(0);
-    assertThat(sourceFiles.get(0).lines().get(0).coveredInstrs()).isEqualTo(3);
-    assertThat(sourceFiles.get(0).lines().get(0).missedBranches()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).number()).isEqualTo(24);
+    assertThat(sourceFiles.get(0).lines().get(0).missedInstrs()).isEqualTo(1);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredInstrs()).isEqualTo(2);
+    assertThat(sourceFiles.get(0).lines().get(0).missedBranches()).isEqualTo(3);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(4);
+  }
+
+  @Test
+  public void should_treat_missing_mi_ci_mb_cb_in_line_as_zeros() throws Exception {
+    Path sample = load("line_without_mi_ci_mb_cb.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+    List<XmlReportParser.SourceFile> sourceFiles = report.parse();
+
+    assertThat(sourceFiles).hasSize(1);
+    assertThat(sourceFiles.stream().mapToInt(sf -> sf.lines().size()).sum()).isEqualTo(1);
+    assertThat(sourceFiles.get(0).name()).isEqualTo("Example.java");
+    assertThat(sourceFiles.get(0).packageName()).isEqualTo("org/example");
+    assertThat(sourceFiles.get(0).lines().get(0).number()).isEqualTo(42);
     assertThat(sourceFiles.get(0).lines().get(0).missedInstrs()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredInstrs()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).missedBranches()).isEqualTo(0);
+    assertThat(sourceFiles.get(0).lines().get(0).coveredBranches()).isEqualTo(0);
   }
 
   @Test
@@ -119,22 +137,32 @@ public class XmlReportParserTest {
   }
 
   @Test
-  public void should_fail_if_ci_missing_in_line() throws URISyntaxException {
-    Path sample = load("ci_missing_in_line.xml");
-    XmlReportParser report = new XmlReportParser(sample);
-
-    exception.expect(IllegalStateException.class);
-    exception.expectMessage("Invalid report: couldn't find the attribute 'ci' for the sourcefile 'File.java' in line 6");
-    report.parse();
-  }
-
-  @Test
   public void should_fail_if_ci_is_invalid_in_line() throws URISyntaxException {
     Path sample = load("invalid_ci_in_line.xml");
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
     exception.expectMessage("Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' in line 6");
+    report.parse();
+  }
+
+  @Test
+  public void should_fail_if_nr_is_invalid_in_line() throws URISyntaxException {
+    Path sample = load("invalid_nr_in_line.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Invalid report: failed to parse integer from the attribute 'nr' for the sourcefile 'File.java' in line 6");
+    report.parse();
+  }
+
+  @Test
+  public void should_fail_if_nr_missing_in_line() throws URISyntaxException {
+    Path sample = load("nr_missing_in_line.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("Invalid report: couldn't find the attribute 'nr' for the sourcefile 'File.java' in line 6");
     report.parse();
   }
 
