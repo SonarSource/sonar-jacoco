@@ -22,7 +22,8 @@ package org.sonar.plugins.jacoco;
 import org.sonar.api.Plugin;
 
 public class JacocoPlugin implements Plugin {
-  @Override public void define(Context context) {
+  @Override
+  public void define(Context context) {
     context.addExtension(JacocoSensor.class);
   }
 }

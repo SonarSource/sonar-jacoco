@@ -33,11 +33,13 @@ import org.sonar.api.utils.log.Loggers;
 public class JacocoSensor implements Sensor {
   private static final Logger LOG = Loggers.get(JacocoSensor.class);
 
-  @Override public void describe(SensorDescriptor descriptor) {
+  @Override
+  public void describe(SensorDescriptor descriptor) {
     descriptor.name("JaCoCo XML Report Importer");
   }
 
-  @Override public void execute(SensorContext context) {
+  @Override
+  public void execute(SensorContext context) {
     ReportPathsProvider reportPathsProvider = new ReportPathsProvider(context);
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
     FileLocator locator = new FileLocator(inputFiles);
