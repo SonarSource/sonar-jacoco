@@ -30,9 +30,14 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
     if (JavaVersion.current().isJava9Compatible()) {
         options.compilerArgs.addAll(['--release', '8'])
     }
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
 }
 
 allprojects {
