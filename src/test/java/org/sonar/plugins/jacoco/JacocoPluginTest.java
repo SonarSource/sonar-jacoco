@@ -20,9 +20,14 @@
 package org.sonar.plugins.jacoco;
 
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.sonar.api.Plugin;
+import org.sonar.api.config.PropertyDefinition;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -32,7 +37,15 @@ public class JacocoPluginTest {
   @Test
   public void should_add_sensor() {
     plugin.define(ctx);
-    verify(ctx).addExtension(JacocoSensor.class);
+
+    ArgumentCaptor<Object> arg = ArgumentCaptor.forClass(Object.class);
+    verify(ctx, times(2)).addExtension(arg.capture());
     verifyNoMoreInteractions(ctx);
+
+    assertThat(arg.getAllValues().get(0)).isEqualTo(JacocoSensor.class);
+    assertThat(arg.getAllValues().get(1)).isInstanceOf(PropertyDefinition.class);
+    PropertyDefinition propertyDefinition = (PropertyDefinition) arg.getAllValues().get(1);
+    assertThat(propertyDefinition.key()).isEqualTo("sonar.coverage.jacoco.xmlReportPaths");
+    assertThat(propertyDefinition.category()).isEqualTo("JaCoCo");
   }
 }
