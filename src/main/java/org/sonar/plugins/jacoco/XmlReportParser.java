@@ -66,19 +66,19 @@ public class XmlReportParser {
           String element = parser.getLocalName();
 
           if (element.equals("package")) {
-            packageName = getStringAttr(parser, "name", () -> "for a 'package' in line " + parser.getLocation().getLineNumber());
+            packageName = getStringAttr(parser, "name", () -> "for a 'package' at line " + parser.getLocation().getLineNumber() + " column " + parser.getLocation().getColumnNumber());
           } else if (element.equals("sourcefile")) {
             if (packageName == null) {
-              throw new IllegalStateException("Invalid report: expected to find 'sourcefile' within a 'package' in line " + parser.getLocation().getLineNumber());
+              throw new IllegalStateException("Invalid report: expected to find 'sourcefile' within a 'package' at line " + parser.getLocation().getLineNumber() + " column " + parser.getLocation().getColumnNumber());
             }
-            sourceFileName = getStringAttr(parser, "name", () -> "for a sourcefile in line " + parser.getLocation().getLineNumber());
+            sourceFileName = getStringAttr(parser, "name", () -> "for a sourcefile at line " + parser.getLocation().getLineNumber() + " column " + parser.getLocation().getColumnNumber());
             sourceFiles.add(new SourceFile(packageName, sourceFileName));
           } else if (element.equals("line")) {
             if (sourceFileName == null) {
-              throw new IllegalStateException("Invalid report: expected to find 'line' within a 'sourcefile' in line " + parser.getLocation().getLineNumber());
+              throw new IllegalStateException("Invalid report: expected to find 'line' within a 'sourcefile' at line " + parser.getLocation().getLineNumber() + " column " + parser.getLocation().getColumnNumber());
             }
             SourceFile file = sourceFiles.get(sourceFiles.size() - 1);
-            Supplier<String> errorCtx = () -> "for the sourcefile '" + file.name() + "' in line " + parser.getLocation().getLineNumber();
+            Supplier<String> errorCtx = () -> "for the sourcefile '" + file.name() + "' at line " + parser.getLocation().getLineNumber() + " column " + parser.getLocation().getColumnNumber();
 
             Line line = new Line(
               getIntAttr(parser, "nr", errorCtx),

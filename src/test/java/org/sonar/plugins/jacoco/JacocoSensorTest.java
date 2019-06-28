@@ -123,7 +123,7 @@ public class JacocoSensorTest {
 
     verify(reportPathsProvider).getPaths();
     String expectedErrorMessage = String.format(
-      "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' in line 6",
+      "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
       invalidFile.toString());
     assertThat(logTester.logs()).contains(expectedErrorMessage);
     verify(importer, times(1)).importCoverage(any(), eq(inputFile));

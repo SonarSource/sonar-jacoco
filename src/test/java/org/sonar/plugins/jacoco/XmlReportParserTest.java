@@ -102,7 +102,7 @@ public class XmlReportParserTest {
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
-    exception.expectMessage("Invalid report: couldn't find the attribute 'name' for a 'package' in line 4");
+    exception.expectMessage("Invalid report: couldn't find the attribute 'name' for a 'package' at line 4 column 14");
     report.parse();
   }
 
@@ -112,7 +112,7 @@ public class XmlReportParserTest {
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
-    exception.expectMessage("Invalid report: couldn't find the attribute 'name' for a sourcefile in line 5");
+    exception.expectMessage("Invalid report: couldn't find the attribute 'name' for a sourcefile at line 5 column 21");
     report.parse();
   }
 
@@ -122,7 +122,7 @@ public class XmlReportParserTest {
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
-    exception.expectMessage( "Invalid report: expected to find 'line' within a 'sourcefile' in line 5");
+    exception.expectMessage( "Invalid report: expected to find 'line' within a 'sourcefile' at line 5 column 52");
     report.parse();
   }
 
@@ -132,7 +132,7 @@ public class XmlReportParserTest {
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
-    exception.expectMessage( "Invalid report: expected to find 'sourcefile' within a 'package' in line 4");
+    exception.expectMessage( "Invalid report: expected to find 'sourcefile' within a 'package' at line 4 column 17");
     report.parse();
   }
 
@@ -142,7 +142,7 @@ public class XmlReportParserTest {
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
-    exception.expectMessage("Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' in line 6");
+    exception.expectMessage("Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61");
     report.parse();
   }
 
@@ -152,7 +152,7 @@ public class XmlReportParserTest {
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
-    exception.expectMessage("Invalid report: failed to parse integer from the attribute 'nr' for the sourcefile 'File.java' in line 6");
+    exception.expectMessage("Invalid report: failed to parse integer from the attribute 'nr' for the sourcefile 'File.java' at line 6 column 31");
     report.parse();
   }
 
@@ -162,7 +162,7 @@ public class XmlReportParserTest {
     XmlReportParser report = new XmlReportParser(sample);
 
     exception.expect(IllegalStateException.class);
-    exception.expectMessage("Invalid report: couldn't find the attribute 'nr' for the sourcefile 'File.java' in line 6");
+    exception.expectMessage("Invalid report: couldn't find the attribute 'nr' for the sourcefile 'File.java' at line 6 column 21");
     report.parse();
   }
 
