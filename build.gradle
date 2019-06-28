@@ -29,6 +29,11 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.compilerArgs.addAll(['--release', '8'])
+    }
+}
 
 allprojects {
     repositories {
