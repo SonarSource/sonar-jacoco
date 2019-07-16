@@ -36,6 +36,13 @@ public class FileLocatorTest {
   }
 
   @Test
+  public void should_match_default_package() {
+    InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/File.java").build();
+    FileLocator locator = new FileLocator(Collections.singleton(inputFile));
+    assertThat(locator.getInputFile("", "File.java")).isEqualTo(inputFile);
+  }
+
+  @Test
   public void should_not_match() {
     InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
     FileLocator locator = new FileLocator(Collections.singleton(inputFile));

@@ -41,7 +41,7 @@ public class FileLocator {
 
   @CheckForNull
   public InputFile getInputFile(String packagePath, String fileName) {
-    String filePath = packagePath + "/" + fileName;
+    String filePath = packagePath.isEmpty() ? fileName : (packagePath + "/" + fileName);
     String[] path = filePath.split("/");
     return tree.getFileWithSuffix(path);
   }
