@@ -19,33 +19,35 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 
-public class ReportImporterTest {
-  @Rule
-  public TemporaryFolder temp = new TemporaryFolder();
+class ReportImporterTest {
+  @TempDir
+  Path temp;
 
   private SensorContextTester ctx;
   private ReportImporter importer;
 
-  @Before
-  public void setUp() throws IOException {
-    File module = temp.newFolder("module");
-    ctx = SensorContextTester.create(module.toPath());
+  @BeforeEach
+  void setUp() throws IOException {
+    Path module = temp.resolve("module");
+    Files.createDirectory(module);
+    ctx = SensorContextTester.create(module);
     importer = new ReportImporter(ctx);
   }
 
   @Test
-  public void should_import_coverage() {
+  void should_import_coverage() {
     InputFile inputFile = TestInputFileBuilder.create("module", "filePath")
       .setLines(10)
       .build();

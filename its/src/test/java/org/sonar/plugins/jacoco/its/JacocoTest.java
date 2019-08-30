@@ -20,9 +20,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonarqube.ws.WsMeasures;
 import org.sonarqube.ws.client.HttpConnector;
@@ -32,18 +33,19 @@ import org.sonarqube.ws.client.measure.ComponentWsRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport
 public class JacocoTest {
   private final static String PROJECT_KEY = "jacoco-test-project";
   private static final String FILE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/Calc.java";
   private static final String FILE_WITHOUT_COVERAGE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/CalcNoCoverage.java";
 
-  @ClassRule
-  public static Orchestrator orchestrator;
+  private static Orchestrator orchestrator;
 
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
-  static {
+  @BeforeAll
+  static void beforeAll() {
     String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "7.7";
     OrchestratorBuilder builder = Orchestrator.builderEnv()
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
@@ -63,10 +65,16 @@ public class JacocoTest {
       throw new IllegalStateException("Failed to download plugin", e);
     }
     orchestrator = builder.build();
+    orchestrator.start();
+  }
+
+  @AfterAll
+  static void afterAll() {
+    orchestrator.stop();
   }
 
   @Test
-  public void should_import_coverage() throws IOException {
+  void should_import_coverage() throws IOException {
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
       .setDebugLogs(true)
@@ -82,7 +90,7 @@ public class JacocoTest {
   }
 
   @Test
-  public void should_import_coverage_even_when_java_also_imports() throws IOException {
+  void should_import_coverage_even_when_java_also_imports() throws IOException {
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
       .setDebugLogs(true)
@@ -99,7 +107,7 @@ public class JacocoTest {
   }
 
   @Test
-  public void should_give_warning_if_report_doesnt_exist() throws IOException {
+  void should_give_warning_if_report_doesnt_exist() throws IOException {
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
       .setDebugLogs(true)
@@ -113,7 +121,7 @@ public class JacocoTest {
   }
 
   @Test
-  public void should_not_import_coverage_if_no_property_given() throws IOException {
+  void should_not_import_coverage_if_no_property_given() throws IOException {
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
       .setDebugLogs(true)
@@ -126,7 +134,7 @@ public class JacocoTest {
   }
 
   @Test
-  public void should_not_import_coverage_if_report_contains_files_that_cant_be_found() throws IOException {
+  void should_not_import_coverage_if_report_contains_files_that_cant_be_found() throws IOException {
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
       .setDebugLogs(true)
@@ -140,7 +148,7 @@ public class JacocoTest {
   }
 
   @Test
-  public void no_failure_with_invalid_reports() throws IOException {
+  void no_failure_with_invalid_reports() throws IOException {
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
       .setDebugLogs(true)

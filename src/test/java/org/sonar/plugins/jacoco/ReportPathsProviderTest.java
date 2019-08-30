@@ -23,27 +23,27 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ReportPathsProviderTest {
-  @Rule
-  public TemporaryFolder temp = new TemporaryFolder();
+class ReportPathsProviderTest {
+  @TempDir
+  Path temp;
 
   private SensorContextTester tester;
   private ReportPathsProvider provider;
   private Path mavenPath = Paths.get("target", "site", "jacoco", "jacoco.xml");
   private Path baseDir;
 
-  @Before
-  public void setUp() throws IOException {
-    baseDir = temp.newFolder("baseDir").toPath();
+  @BeforeEach
+  void setUp() throws IOException {
+    baseDir = temp.resolve("baseDir");
+    Files.createDirectory(baseDir);
     tester = SensorContextTester.create(baseDir);
     provider = new ReportPathsProvider(tester);
   }
@@ -55,7 +55,7 @@ public class ReportPathsProviderTest {
   }
 
   @Test
-  public void should_use_provided_paths() throws IOException {
+  void should_use_provided_paths() throws IOException {
     // even though a report will exist in a default location, it shouldn't get loaded since a path is passed as a parameter.
     createMavenReport();
 
@@ -67,7 +67,7 @@ public class ReportPathsProviderTest {
   }
 
   @Test
-  public void should_use_provided_absolute_path() {
+  void should_use_provided_absolute_path() {
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "/my/path");
     tester.setSettings(settings);
@@ -76,13 +76,13 @@ public class ReportPathsProviderTest {
   }
 
   @Test
-  public void should_fallback_to_defaults_if_exist() throws IOException {
+  void should_fallback_to_defaults_if_exist() throws IOException {
     createMavenReport();
     assertThat(provider.getPaths()).containsOnly(baseDir.resolve(mavenPath));
   }
 
   @Test
-  public void should_return_empty_if_nothing_specified_and_default_doesnt_exist() throws IOException {
+  void should_return_empty_if_nothing_specified_and_default_doesnt_exist() throws IOException {
     assertThat(provider.getPaths()).isEmpty();
   }
 }

@@ -19,9 +19,8 @@
  */
 package org.sonar.plugins.jacoco;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
 
@@ -31,11 +30,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-public class JacocoPluginTest {
+class JacocoPluginTest {
   private JacocoPlugin plugin = new JacocoPlugin();
   private Plugin.Context ctx = mock(Plugin.Context.class);
   @Test
-  public void should_add_sensor() {
+  void should_add_sensor() {
     plugin.define(ctx);
 
     ArgumentCaptor<Object> arg = ArgumentCaptor.forClass(Object.class);

@@ -26,8 +26,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
@@ -45,7 +46,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-public class JacocoSensorTest {
+@org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport
+class JacocoSensorTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
@@ -55,14 +57,14 @@ public class JacocoSensorTest {
   private JacocoSensor sensor = new JacocoSensor();
 
   @Test
-  public void describe_sensor() {
+  void describe_sensor() {
     SensorDescriptor descriptor = mock(SensorDescriptor.class);
     sensor.describe(descriptor);
     verify(descriptor).name("JaCoCo XML Report Importer");
   }
 
   @Test
-  public void import_coverage() {
+  void import_coverage() {
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
     XmlReportParser parser = mock(XmlReportParser.class);
@@ -80,7 +82,7 @@ public class JacocoSensorTest {
   }
 
   @Test
-  public void do_nothing_if_no_path() {
+  void do_nothing_if_no_path() {
     ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
@@ -93,7 +95,7 @@ public class JacocoSensorTest {
   }
 
   @Test
-  public void do_nothing_if_report_doesnt_exist() {
+  void do_nothing_if_report_doesnt_exist() {
     ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
@@ -107,7 +109,7 @@ public class JacocoSensorTest {
   }
 
   @Test
-  public void parse_failure_do_not_fail_analysis() {
+  void parse_failure_do_not_fail_analysis() {
     ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
@@ -130,7 +132,7 @@ public class JacocoSensorTest {
   }
 
   @Test
-  public void do_nothing_if_file_not_found() {
+  void do_nothing_if_file_not_found() {
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
     XmlReportParser parser = mock(XmlReportParser.class);
@@ -143,7 +145,7 @@ public class JacocoSensorTest {
   }
 
   @Test
-  public void test_load_real_report() throws URISyntaxException, IOException {
+  void test_load_real_report() throws URISyntaxException, IOException {
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "jacoco.xml");
     SensorContextTester tester = SensorContextTester.create(temp.getRoot());
@@ -163,7 +165,7 @@ public class JacocoSensorTest {
   }
 
   @Test
-  public void import_failure_do_not_fail_analysis() throws URISyntaxException, IOException {
+  void import_failure_do_not_fail_analysis() throws URISyntaxException, IOException {
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "invalid_line_number.xml");
     SensorContextTester tester = SensorContextTester.create(temp.getRoot());
