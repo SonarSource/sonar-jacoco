@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
+import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
@@ -66,6 +67,7 @@ class JacocoSensorTest {
   @Test
   void import_coverage() {
     FileLocator locator = mock(FileLocator.class);
+    SensorContext context = mock(SensorContext.class);
     ReportImporter importer = mock(ReportImporter.class);
     XmlReportParser parser = mock(XmlReportParser.class);
     InputFile inputFile = mock(InputFile.class);
@@ -76,7 +78,7 @@ class JacocoSensorTest {
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
     when(locator.getInputFile("package", "File.java")).thenReturn(inputFile);
 
-    sensor.importReport(parser, locator, importer);
+    sensor.importReport(parser, locator, importer, context);
 
     verify(importer).importCoverage(sourceFile, inputFile);
   }
@@ -84,11 +86,12 @@ class JacocoSensorTest {
   @Test
   void do_nothing_if_no_path() {
     ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
+    SensorContext context = mock(SensorContext.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
 
     when(reportPathsProvider.getPaths()).thenReturn(Collections.emptySet());
-    sensor.importReports(reportPathsProvider, locator, importer);
+    sensor.importReports(reportPathsProvider, locator, importer, context);
 
     verify(reportPathsProvider).getPaths();
     verifyZeroInteractions(locator, importer);
@@ -97,11 +100,12 @@ class JacocoSensorTest {
   @Test
   void do_nothing_if_report_doesnt_exist() {
     ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
+    SensorContext context = mock(SensorContext.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
 
     when(reportPathsProvider.getPaths()).thenReturn(Collections.singletonList(Paths.get("invalid.xml")));
-    sensor.importReports(reportPathsProvider, locator, importer);
+    sensor.importReports(reportPathsProvider, locator, importer, context);
 
     verify(reportPathsProvider).getPaths();
     assertThat(logTester.logs()).contains("Report doesn't exist: 'invalid.xml'");
@@ -111,6 +115,7 @@ class JacocoSensorTest {
   @Test
   void parse_failure_do_not_fail_analysis() {
     ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
+    SensorContext context = mock(SensorContext.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
     InputFile inputFile = mock(InputFile.class);
@@ -121,7 +126,7 @@ class JacocoSensorTest {
     when(locator.getInputFile("org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
     when(reportPathsProvider.getPaths()).thenReturn(Arrays.asList(invalidFile, validFile));
 
-    sensor.importReports(reportPathsProvider, locator, importer);
+    sensor.importReports(reportPathsProvider, locator, importer, context);
 
     verify(reportPathsProvider).getPaths();
     String expectedErrorMessage = String.format(
@@ -134,12 +139,13 @@ class JacocoSensorTest {
   @Test
   void do_nothing_if_file_not_found() {
     FileLocator locator = mock(FileLocator.class);
+    SensorContext context = mock(SensorContext.class);
     ReportImporter importer = mock(ReportImporter.class);
     XmlReportParser parser = mock(XmlReportParser.class);
     XmlReportParser.SourceFile sourceFile = mock(XmlReportParser.SourceFile.class);
 
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
-    sensor.importReport(parser, locator, importer);
+    sensor.importReport(parser, locator, importer, context);
 
     verifyZeroInteractions(importer);
   }
