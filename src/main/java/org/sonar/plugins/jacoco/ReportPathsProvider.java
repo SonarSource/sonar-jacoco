@@ -28,17 +28,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.sonar.api.batch.sensor.SensorContext;
 
-class ReportPathsProvider {
+public class ReportPathsProvider {
   private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"};
   static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
 
   private final SensorContext context;
 
-  ReportPathsProvider(SensorContext context) {
+  public ReportPathsProvider(SensorContext context) {
     this.context = context;
   }
 
-  Collection<Path> getPaths() {
+  public Collection<Path> getPaths() {
     Set<Path> reportPaths = Stream.of(context.config().getStringArray(REPORT_PATHS_PROPERTY_KEY))
       .map(this::toAbsolutePath)
       .collect(Collectors.toSet());
