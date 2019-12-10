@@ -1,0 +1,178 @@
+buildscript {
+  repositories {
+    maven {
+      url 'https://repox.jfrog.io/repox/plugins.gradle.org/'
+    }
+  }
+}
+plugins {
+    id 'org.sonarqube' version '2.7.1'
+    id 'com.jfrog.artifactory' version '4.9.6'
+    id 'java'
+    id 'jacoco'
+    id 'maven-publish'
+    id 'com.github.hierynomus.license' version '0.14.0'
+}
+
+apply plugin: 'com.jfrog.artifactory'
+apply plugin: 'maven-publish'
+
+ext {
+    release = project.hasProperty('release') && project.getProperty('release')
+    buildNumber = System.getProperty("buildNumber")
+}
+// Replaces the version defined in sources, usually x.y-SNAPSHOT, by a version identifying the build.
+if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
+    def versionSuffix = (version.toString().count('.') == 1 ? ".0.${ext.buildNumber}" : ".${ext.buildNumber}")
+    version = version.replace('-SNAPSHOT', versionSuffix)
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.compilerArgs.addAll(['--release', '8'])
+    }
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://repox.jfrog.io/repox/sonarsource"
+        }
+    }
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', projectTitle
+        property 'sonar.projectKey', project.group + ':sonar-jacoco'
+    }
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport:5.5.1'
+    testCompile 'org.mockito:mockito-core:1.10.19'
+    testCompile 'org.assertj:assertj-core:3.10.0'
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+    compileOnly 'org.sonarsource.sonarqube:sonar-plugin-api:7.7'
+    testCompile 'org.sonarsource.sonarqube:sonar-plugin-api:7.7'
+
+} 
+
+test {
+    useJUnitPlatform()
+}
+
+license {
+    header = rootProject.file('LICENSE')
+    ext.year = Calendar.getInstance().get(Calendar.YEAR)
+    strictCheck true
+    mapping {
+      java = 'SLASHSTAR_STYLE'
+      js = 'SLASHSTAR_STYLE'
+      ts = 'SLASHSTAR_STYLE'
+      tsx = 'SLASHSTAR_STYLE'
+      css = 'SLASHSTAR_STYLE'
+      less = 'SLASHSTAR_STYLE'
+    }
+    excludes(['**/*.txt', '**/*.properties', '**/*.xml', '**/*.xsd', '**/*.html', '**/*.json', '**/*.sql', '**/*.rb', '**/*.vm', '**/*.snap', '**/*.svg', '**/*.jar', '**/*.zip', '**/*.log', '**/*.cnf', '**/*.jks', '**/README', '**/*.pdf'])
+}
+
+
+jar {
+    manifest {
+        def displayVersion = project.hasProperty('buildNumber') ? version.substring(0, version.lastIndexOf('.')) + " (build ${project.buildNumber})" : version
+        def buildDate = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        attributes(
+                'Build-Time': buildDate,
+                'Implementation-Build': 'git rev-parse HEAD'.execute().text.trim(),
+                'Plugin-BuildDate': buildDate,
+                'Plugin-ChildFirstClassLoader': 'false',
+                'Plugin-Class': 'org.sonar.plugins.jacoco.JacocoPlugin',
+                'Plugin-Description': 'JaCoCo XML report importer',
+                'Plugin-Display-Version': displayVersion,
+                'Plugin-IssueTrackerUrl': 'https://jira.sonarsource.com/browse/JACOCO',
+                'Plugin-Key': 'jacoco',
+                'Plugin-License': 'GNU LGPL 3',
+                'Plugin-Name': 'JaCoCo',
+                'Plugin-Organization': 'SonarSource',
+                'Plugin-OrganizationUrl': 'http://www.sonarsource.com',
+                'Plugin-SourcesUrl': 'https://github.com/SonarSource/sonar-jacoco',
+                'Plugin-Version': version,
+                'Sonar-Version': '6.7',
+                'SonarLint-Supported': 'false',
+                'Version': "${version}",
+        )
+    }
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            artifact tasks.sourcesJar
+            artifact tasks.javadocJar
+        }
+    }
+}
+
+artifactory {
+    clientConfig.setIncludeEnvVars(true)
+    clientConfig.setEnvVarsExcludePatterns('*password*,*PASSWORD*,*secret*,*MAVEN_CMD_LINE_ARGS*,sun.java.command,*token*,*TOKEN*,*LOGIN*,*login*')
+    contextUrl = System.getenv('ARTIFACTORY_URL')
+    publish {
+        repository {
+            repoKey = System.getenv('ARTIFACTORY_DEPLOY_REPO')
+            username = System.getenv('ARTIFACTORY_DEPLOY_USERNAME')
+            password = System.getenv('ARTIFACTORY_DEPLOY_PASSWORD')
+        }
+        defaults {
+            properties = [
+                'build.name': 'sonar-jacoco',
+                'build.number': (System.getenv('BUILD_ID') ?: System.getenv('BUILD_NUMBER')),
+                'pr.branch.target': System.getenv('PULL_REQUEST_BRANCH_TARGET'),
+                'pr.number': System.getenv('PULL_REQUEST_NUMBER'),
+                'vcs.branch': System.getenv('GIT_BRANCH'),
+                'vcs.revision': System.getenv('GIT_COMMIT'),
+                'version': version
+            ]
+            publications('mavenJava')
+            publishPom = true
+            publishIvy = false
+        }
+    }
+
+    clientConfig.info.setBuildName('sonar-jacoco')
+    clientConfig.info.setBuildNumber(System.getenv('BUILD_NUMBER'))
+    // Define the artifacts to be deployed to https://binaries.sonarsource.com on releases
+    clientConfig.info.addEnvironmentProperty('ARTIFACTS_TO_PUBLISH', "${project.group}:sonar-jacoco-plugin:jar")
+    // The name of this variable is important because it's used by the delivery process when extracting version from Artifactory build info.
+    clientConfig.info.addEnvironmentProperty('PROJECT_VERSION', "${version}")
+
+}

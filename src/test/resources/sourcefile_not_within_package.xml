@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN" "report.dtd">
+<report name="SonarLint CLI">
+    <sourcefile>
+        <line nr="24" mi="0" ci="3" mb="0" cb="0"/>
+    </sourcefile>
+</report>
