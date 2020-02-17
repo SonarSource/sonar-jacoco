@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import org.sonar.api.batch.sensor.SensorContext;
 
 class ReportPathsProvider {
-  private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"};
+  private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "target/site/jacoco-it/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"};
   static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
 
   private final SensorContext context;
