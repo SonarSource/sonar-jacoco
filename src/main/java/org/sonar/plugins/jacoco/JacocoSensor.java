@@ -19,57 +19,20 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
+
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
-import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
-public class JacocoSensor implements Sensor {
-  private static final Logger LOG = Loggers.get(JacocoSensor.class);
+public class JacocoSensor extends AbstractJacocoSensor {
 
   @Override
-  public void describe(SensorDescriptor descriptor) {
-    descriptor.name("JaCoCo XML Report Importer");
+  protected String getSensorName() {
+    return "JaCoCo XML Report Importer";
   }
 
   @Override
-  public void execute(SensorContext context) {
-    ReportPathsProvider reportPathsProvider = new ReportPathsProvider(context);
-    Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
-    FileLocator locator = new FileLocator(inputFiles);
-    ReportImporter importer = new ReportImporter(context);
-
-    importReports(reportPathsProvider, locator, importer);
-  }
-
-  void importReports(ReportPathsProvider reportPathsProvider, FileLocator locator, ReportImporter importer) {
-    Collection<Path> reportPaths = reportPathsProvider.getPaths();
-    if (reportPaths.isEmpty()) {
-      LOG.debug("No reports found");
-      return;
-    }
-
-    for (Path reportPath : reportPaths) {
-      if (!Files.isRegularFile(reportPath)) {
-        LOG.warn("Report doesn't exist: '{}'", reportPath);
-      } else {
-        LOG.debug("Reading report '{}'", reportPath);
-        try {
-          importReport(new XmlReportParser(reportPath), locator, importer);
-        } catch (Exception e) {
-          LOG.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
-        }
-      }
-    }
-  }
-
-  void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer) {
+  protected void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer, SensorContext context) {
     List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
 
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
