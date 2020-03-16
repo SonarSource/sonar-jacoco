@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -46,7 +47,7 @@ public class JacocoTest {
 
   @BeforeAll
   static void beforeAll() {
-    String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "7.7";
+    String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "7.9.2";
     OrchestratorBuilder builder = Orchestrator.builderEnv()
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
       .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
@@ -60,7 +61,7 @@ public class JacocoTest {
     }
     builder.addPlugin(pluginLocation);
     try {
-      builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-5.6.0.15032.jar")));
+      builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-6.2.0.21135.jar")));
     } catch (MalformedURLException e) {
       throw new IllegalStateException("Failed to download plugin", e);
     }
@@ -81,6 +82,21 @@ public class JacocoTest {
       .setSourceDirs("src/main")
       .setTestDirs("src/test")
       .setProperty("sonar.coverage.jacoco.xmlReportPaths", "jacoco.xml")
+      .setProperty("sonar.java.binaries", ".")
+      .setProjectDir(prepareProject("simple-project-jacoco"));
+    orchestrator.executeBuild(build);
+
+    checkCoveredFile();
+    checkUncoveredFile();
+  }
+
+  @Test
+  void should_import_coverage_from_one_of_default_locations() throws IOException {
+    SonarScanner build = SonarScanner.create()
+      .setProjectKey(PROJECT_KEY)
+      .setDebugLogs(true)
+      .setSourceDirs("src/main")
+      .setTestDirs("src/test")
       .setProperty("sonar.java.binaries", ".")
       .setProjectDir(prepareProject("simple-project-jacoco"));
     orchestrator.executeBuild(build);
@@ -122,13 +138,15 @@ public class JacocoTest {
 
   @Test
   void should_not_import_coverage_if_no_property_given() throws IOException {
+    File baseDir = prepareProject("simple-project-jacoco");
+    Files.delete(baseDir.toPath().resolve("target/site/jacoco-it/jacoco.xml"));
     SonarScanner build = SonarScanner.create()
       .setProjectKey(PROJECT_KEY)
       .setDebugLogs(true)
       .setSourceDirs("src/main")
       .setTestDirs("src/test")
       .setProperty("sonar.java.binaries", ".")
-      .setProjectDir(prepareProject("simple-project-jacoco"));
+      .setProjectDir(baseDir);
     orchestrator.executeBuild(build);
     checkNoJacocoCoverage();
   }
