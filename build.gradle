@@ -141,6 +141,31 @@ publishing {
 
             artifact tasks.sourcesJar
             artifact tasks.javadocJar
+            pom {
+                name = projectTitle
+                description = project.description
+                url = 'http://www.sonarqube.org/'
+                organization {
+                    name = 'SonarSource'
+                    url = 'http://www.sonarsource.com'
+                }
+                licenses {
+                    license {
+                        name = 'GNU LGPL 3'
+                        url = 'http://www.gnu.org/licenses/lgpl.txt'
+                        distribution = 'repo'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/SonarSource/sonar-jacoco'
+                }
+                developers {
+                    developer {
+                        id = 'sonarsource-team'
+                        name = 'SonarSource Team'
+                    }
+                }
+            }
         }
     }
 }
