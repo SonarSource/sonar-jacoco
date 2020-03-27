@@ -60,8 +60,11 @@ jacocoTestReport {
     reports {
         xml.enabled true
         csv.enabled false
+        html.enabled false
     }
 }
+
+test.finalizedBy jacocoTestReport
 
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
