@@ -73,7 +73,7 @@ class ReportPathsProviderTest {
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "/my/path");
     tester.setSettings(settings);
 
-    assertThat(provider.getPaths()).containsOnly(Paths.get("/my/path"));
+    assertThat(provider.getPaths()).containsOnly(baseDir.resolve("/my/path"));
   }
 
   @Test
