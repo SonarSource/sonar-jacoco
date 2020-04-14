@@ -20,6 +20,7 @@
 package org.sonar.plugins.jacoco;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,8 +43,13 @@ public class XmlReportParser {
     XMLInputFactory factory = XMLInputFactory.newInstance();
     factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false);
     factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
-    try {
-      XMLStreamReader parser = factory.createXMLStreamReader(Files.newBufferedReader(xmlReportPath, StandardCharsets.UTF_8));
+
+    XMLStreamReader xmlStreamReaderParser = null;
+    try (Reader reader = Files.newBufferedReader(xmlReportPath, StandardCharsets.UTF_8)) {
+      xmlStreamReaderParser = factory.createXMLStreamReader(reader);
+      // Need to be effectively final to be used in Supplier lambdas
+      final XMLStreamReader parser = xmlStreamReaderParser;
+
       List<SourceFile> sourceFiles = new ArrayList<>();
 
       String packageName = null;
@@ -94,6 +100,14 @@ public class XmlReportParser {
       return sourceFiles;
     } catch (XMLStreamException | IOException e) {
       throw new IllegalStateException("Failed to parse JaCoCo XML report: " + xmlReportPath.toAbsolutePath(), e);
+    } finally {
+      if (xmlStreamReaderParser != null) {
+        try {
+          xmlStreamReaderParser.close();
+        } catch (XMLStreamException e) {
+          // do nothing - the stream used to read from will be closed by the try-with-resource
+        }
+      }
     }
   }
 
