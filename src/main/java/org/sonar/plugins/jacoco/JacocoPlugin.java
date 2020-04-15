@@ -21,12 +21,14 @@ package org.sonar.plugins.jacoco;
 
 import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
+import org.sonar.api.resources.Qualifiers;
 
 public class JacocoPlugin implements Plugin {
   @Override
   public void define(Context context) {
     context.addExtension(JacocoSensor.class);
     context.addExtension(PropertyDefinition.builder(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY)
+      .onQualifiers(Qualifiers.PROJECT)
       .multiValues(true)
       .category("JaCoCo")
       .description("Paths to JaCoCo XML coverage report files. Each path can be either absolute or relative to the project base directory.")
