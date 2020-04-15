@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.sonar.api.Plugin;
 import org.sonar.api.config.PropertyDefinition;
+import org.sonar.api.resources.Qualifiers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -46,5 +47,6 @@ class JacocoPluginTest {
     PropertyDefinition propertyDefinition = (PropertyDefinition) arg.getAllValues().get(1);
     assertThat(propertyDefinition.key()).isEqualTo("sonar.coverage.jacoco.xmlReportPaths");
     assertThat(propertyDefinition.category()).isEqualTo("JaCoCo");
+    assertThat(propertyDefinition.qualifiers()).containsOnly(Qualifiers.PROJECT);
   }
 }
