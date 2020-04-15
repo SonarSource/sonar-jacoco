@@ -94,5 +94,4 @@ promote_task:
   script:
     - source cirrus-env PROMOTE
     - curl -sfSL -H "Authorization: Bearer $GCF_ACCESS_TOKEN" "$PROMOTE_URL/$GITHUB_REPO/$GITHUB_BRANCH/$BUILD_NUMBER/$PULL_REQUEST"
-    - burgr-notify-promotion
-  
+    - ./cirrus/burgr_promote.sh
