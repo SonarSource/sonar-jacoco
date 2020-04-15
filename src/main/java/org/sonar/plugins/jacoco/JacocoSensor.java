@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -51,20 +50,18 @@ public class JacocoSensor implements Sensor {
   void importReports(ReportPathsProvider reportPathsProvider, FileLocator locator, ReportImporter importer) {
     Collection<Path> reportPaths = reportPathsProvider.getPaths();
     if (reportPaths.isEmpty()) {
-      LOG.debug("No reports found");
+      LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
       return;
     }
 
+    LOG.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
+
     for (Path reportPath : reportPaths) {
-      if (!Files.isRegularFile(reportPath)) {
-        LOG.warn("Report doesn't exist: '{}'", reportPath);
-      } else {
-        LOG.debug("Reading report '{}'", reportPath);
-        try {
-          importReport(new XmlReportParser(reportPath), locator, importer);
-        } catch (Exception e) {
-          LOG.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
-        }
+      LOG.debug("Reading report '{}'", reportPath);
+      try {
+        importReport(new XmlReportParser(reportPath), locator, importer);
+      } catch (Exception e) {
+        LOG.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
       }
     }
   }

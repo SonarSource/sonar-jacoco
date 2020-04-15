@@ -23,12 +23,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 class ReportPathsProvider {
+  private static final Logger LOG = Loggers.get(ReportPathsProvider.class);
+
   private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "target/site/jacoco-it/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"};
   static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
 
@@ -39,18 +43,28 @@ class ReportPathsProvider {
   }
 
   Collection<Path> getPaths() {
-    Set<Path> reportPaths = Stream.of(context.config().getStringArray(REPORT_PATHS_PROPERTY_KEY))
-      .map(this::toAbsolutePath)
-      .collect(Collectors.toSet());
+    Set<Path> reportPaths = new HashSet<>();
+
+    for (String pathName : context.config().getStringArray(REPORT_PATHS_PROPERTY_KEY)) {
+      Path path = toAbsolutePath(pathName);
+      if (reportExists(path)) {
+        reportPaths.add(path);
+      } else {
+        LOG.warn("Coverage report doesn't exist: '{}'", path);
+      }
+    }
 
     if (!reportPaths.isEmpty()) {
       return reportPaths;
-    }
+    } else {
 
-    return Arrays.stream(DEFAULT_PATHS)
-      .map(this::toAbsolutePath)
-      .filter(ReportPathsProvider::reportExists)
-      .collect(Collectors.toSet());
+      LOG.info("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. Using default locations: {}", String.join(",", DEFAULT_PATHS));
+
+      return Arrays.stream(DEFAULT_PATHS)
+        .map(this::toAbsolutePath)
+        .filter(ReportPathsProvider::reportExists)
+        .collect(Collectors.toSet());
+    }
   }
 
   private Path toAbsolutePath(String reportPath) {
