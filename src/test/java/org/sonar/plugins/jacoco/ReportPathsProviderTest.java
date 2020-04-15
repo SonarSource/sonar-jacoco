@@ -23,17 +23,25 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.utils.log.LogTester;
+import org.sonar.api.utils.log.LoggerLevel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport
 class ReportPathsProviderTest {
   @TempDir
   Path temp;
+
+  @Rule
+  public LogTester logTester = new LogTester();
 
   private SensorContextTester tester;
   private ReportPathsProvider provider;
@@ -59,21 +67,43 @@ class ReportPathsProviderTest {
   void should_use_provided_paths() throws IOException {
     // even though a report will exist in a default location, it shouldn't get loaded since a path is passed as a parameter.
     createMavenReport(mavenPath1);
+    createMavenReport(Paths.get("mypath1"));
+    createMavenReport(Paths.get("mypath2"));
 
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1,mypath2");
     tester.setSettings(settings);
 
-    assertThat(provider.getPaths()).containsOnly(baseDir.resolve("mypath1"), baseDir.resolve("mypath2"));
+    Collection<Path> paths = provider.getPaths();
+    assertThat(paths).containsOnly(baseDir.resolve("mypath1"), baseDir.resolve("mypath2"));
   }
 
   @Test
-  void should_use_provided_absolute_path() {
+  void should_use_provided_absolute_path() throws IOException {
     MapSettings settings = new MapSettings();
-    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "/my/path");
+    Path absolutePath = baseDir.resolve("path");
+
+    createMavenReport(absolutePath);
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, absolutePath.toString());
     tester.setSettings(settings);
 
-    assertThat(provider.getPaths()).containsOnly(Paths.get("/my/path"));
+    Collection<Path> paths = provider.getPaths();
+    assertThat(paths).containsOnly(absolutePath);
+  }
+
+  @Test
+  void should_return_empty_if_provided_and_default_does_not_exist() throws IOException {
+    MapSettings settings = new MapSettings();
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1,mypath2");
+    tester.setSettings(settings);
+
+    Collection<Path> paths = provider.getPaths();
+
+    assertThat(paths).isEmpty();
+    assertThat(logTester.logs(LoggerLevel.WARN)).allMatch(s -> s.startsWith("Coverage report doesn't exist:"));
+    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
+    + "Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 
   @Test
@@ -81,11 +111,17 @@ class ReportPathsProviderTest {
     createMavenReport(mavenPath1);
     createMavenReport(mavenPath2);
 
-    assertThat(provider.getPaths()).containsOnly(baseDir.resolve(mavenPath1), baseDir.resolve(mavenPath2));
+    Collection<Path> paths = provider.getPaths();
+    assertThat(paths).containsOnly(baseDir.resolve(mavenPath1), baseDir.resolve(mavenPath2));
+    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
+      + "Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 
   @Test
   void should_return_empty_if_nothing_specified_and_default_doesnt_exist() throws IOException {
-    assertThat(provider.getPaths()).isEmpty();
+    Collection<Path> paths = provider.getPaths();
+    assertThat(paths).isEmpty();
+    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
+      + "Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 }
