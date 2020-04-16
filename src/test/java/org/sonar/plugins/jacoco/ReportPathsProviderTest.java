@@ -43,6 +43,7 @@ class ReportPathsProviderTest {
   @Rule
   public LogTester logTester = new LogTester();
 
+  private MapSettings settings;
   private SensorContextTester tester;
   private ReportPathsProvider provider;
   private Path mavenPath1 = Paths.get("target", "site", "jacoco", "jacoco.xml");
@@ -53,7 +54,9 @@ class ReportPathsProviderTest {
   void setUp() throws IOException {
     baseDir = temp.resolve("baseDir");
     Files.createDirectory(baseDir);
+    settings = new MapSettings();
     tester = SensorContextTester.create(baseDir);
+    tester.setSettings(settings);
     provider = new ReportPathsProvider(tester);
   }
 
@@ -70,9 +73,7 @@ class ReportPathsProviderTest {
     createMavenReport(Paths.get("mypath1"));
     createMavenReport(Paths.get("mypath2"));
 
-    MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1,mypath2");
-    tester.setSettings(settings);
 
     Collection<Path> paths = provider.getPaths();
     assertThat(paths).containsOnly(baseDir.resolve("mypath1"), baseDir.resolve("mypath2"));
@@ -80,30 +81,81 @@ class ReportPathsProviderTest {
 
   @Test
   void should_use_provided_absolute_path() throws IOException {
-    MapSettings settings = new MapSettings();
     Path absolutePath = baseDir.resolve("path");
 
     createMavenReport(absolutePath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, absolutePath.toString());
-    tester.setSettings(settings);
 
     Collection<Path> paths = provider.getPaths();
     assertThat(paths).containsOnly(absolutePath);
   }
 
   @Test
+  void should_resolve_relative_path_pattern() throws IOException {
+    Path reportPath = baseDir.resolve(Paths.get("target", "custom", "jacoco.xml"));
+    Files.createDirectories(reportPath.getParent());
+    Files.createFile(reportPath);
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/custom/*.xml");
+    assertThat(provider.getPaths()).containsOnly(reportPath);
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/ja*.xml");
+    assertThat(provider.getPaths()).containsOnly(reportPath);
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target\\**\\ja*.xml");
+    assertThat(provider.getPaths()).containsOnly(reportPath);
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/unknown.xml");
+    assertThat(provider.getPaths()).isEmpty();
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "**/*.xml");
+    assertThat(provider.getPaths()).containsOnly(reportPath);
+  }
+
+  @Test
+  void should_resolve_absolute_path_pattern() throws IOException {
+    Path reportPath = baseDir.resolve(Paths.get("target", "custom", "jacoco.xml"));
+    Files.createDirectories(reportPath.getParent());
+    Files.createFile(reportPath);
+
+    String unixLikeAbsoluteBaseDir = baseDir.toRealPath().toString().replace('\\', '/');
+    String unixLikeAbsoluteXmlPattern = unixLikeAbsoluteBaseDir + "/**/*.xml";
+    String windowsLikeAbsoluteXmlPattern = unixLikeAbsoluteXmlPattern.replace('/', '\\');
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, unixLikeAbsoluteXmlPattern);
+    assertThat(provider.getPaths()).containsOnly(reportPath);
+
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, windowsLikeAbsoluteXmlPattern);
+    assertThat(provider.getPaths()).containsOnly(reportPath);
+  }
+
+  @Test
   void should_return_empty_if_provided_and_default_does_not_exist() throws IOException {
-    MapSettings settings = new MapSettings();
-    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1,mypath2");
-    tester.setSettings(settings);
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1");
 
     Collection<Path> paths = provider.getPaths();
 
     assertThat(paths).isEmpty();
-    assertThat(logTester.logs(LoggerLevel.WARN)).allMatch(s -> s.startsWith("Coverage report doesn't exist:"));
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
-    + "Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
+    assertThat(logTester.logs(LoggerLevel.WARN)).allMatch(s -> s.startsWith("No coverage report can be found using: mypath1"));
+    assertThat(logTester.logs(LoggerLevel.INFO)).containsExactly(
+      "Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
+      + "Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
+  }
+
+  @Test
+  void should_return_empty_with_log_details_if_several_provided_paths_does_not_exist() throws IOException {
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1,mypath2,");
+
+    Collection<Path> paths = provider.getPaths();
+
+    assertThat(paths).isEmpty();
+    assertThat(logTester.logs(LoggerLevel.WARN)).allMatch(s -> s.startsWith("No coverage report can be found using: mypath1,mypath2"));
+    assertThat(logTester.logs(LoggerLevel.INFO)).containsExactly(
+      "Coverage report doesn't exist for pattern: 'mypath1'",
+      "Coverage report doesn't exist for pattern: 'mypath2'",
+      "Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
+      + "Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 
   @Test
@@ -121,7 +173,8 @@ class ReportPathsProviderTest {
   void should_return_empty_if_nothing_specified_and_default_doesnt_exist() throws IOException {
     Collection<Path> paths = provider.getPaths();
     assertThat(paths).isEmpty();
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
+    assertThat(logTester.logs(LoggerLevel.INFO))
+      .containsExactly("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. "
       + "Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 }
