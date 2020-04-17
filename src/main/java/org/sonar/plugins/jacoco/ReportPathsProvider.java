@@ -54,25 +54,23 @@ class ReportPathsProvider {
     Set<Path> reportPaths = new HashSet<>();
     if (!patternPathList.isEmpty()) {
       for (String patternPath : patternPathList) {
-        Set<Path> currentReportPaths = new HashSet<>();
-        FileSystemWildcardPatternScanner.of(patternPath)
-          .scan(baseDir, Files::isRegularFile, currentReportPaths::add, error -> LOG.error("Failed to get Jacoco report paths: {}", error));
-        if (currentReportPaths.isEmpty() && patternPathList.size() > 1) {
+        List<Path> paths = WildcardPatternFileScanner.scan(baseDir, patternPath);
+        if (paths.isEmpty() && patternPathList.size() > 1) {
           LOG.info("Coverage report doesn't exist for pattern: '{}'", patternPath);
         }
-        reportPaths.addAll(currentReportPaths);
-      }
-      if (reportPaths.isEmpty()) {
-        LOG.warn("No coverage report can be found using: {}", String.join(",", patternPathList));
+        reportPaths.addAll(paths);
       }
     }
 
     if (!reportPaths.isEmpty()) {
       return reportPaths;
     } else {
-
-      LOG.info("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. Using default locations: {}", String.join(",", DEFAULT_PATHS));
-
+      if (!patternPathList.isEmpty()) {
+        LOG.warn("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='{}'. Using default locations: {}",
+          String.join(",", patternPathList), String.join(",", DEFAULT_PATHS));
+      } else {
+        LOG.info("'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: {}", String.join(",", DEFAULT_PATHS));
+      }
       return Arrays.stream(DEFAULT_PATHS)
         .map(baseDir::resolve)
         .filter(Files::isRegularFile)
