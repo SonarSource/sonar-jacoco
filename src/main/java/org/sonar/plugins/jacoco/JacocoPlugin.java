@@ -31,7 +31,8 @@ public class JacocoPlugin implements Plugin {
       .onQualifiers(Qualifiers.PROJECT)
       .multiValues(true)
       .category("JaCoCo")
-      .description("Paths to JaCoCo XML coverage report files. Each path can be either absolute or relative to the project base directory.")
+      .description("Paths to JaCoCo XML coverage report files. Each path can be either absolute or relative" +
+        " to the project base directory. Wildcard patterns are accepted (*, ** and ?).")
       .build());
   }
 }

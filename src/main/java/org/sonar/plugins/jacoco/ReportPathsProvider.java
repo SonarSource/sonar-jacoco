@@ -24,8 +24,10 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -43,36 +45,38 @@ class ReportPathsProvider {
   }
 
   Collection<Path> getPaths() {
-    Set<Path> reportPaths = new HashSet<>();
+    Path baseDir = context.fileSystem().baseDir().toPath().toAbsolutePath();
 
-    for (String pathName : context.config().getStringArray(REPORT_PATHS_PROPERTY_KEY)) {
-      Path path = toAbsolutePath(pathName);
-      if (reportExists(path)) {
-        reportPaths.add(path);
-      } else {
-        LOG.warn("Coverage report doesn't exist: '{}'", path);
+    List<String> patternPathList = Stream.of(context.config().getStringArray(REPORT_PATHS_PROPERTY_KEY))
+      .filter(pattern -> !pattern.isEmpty())
+      .collect(Collectors.toList());
+
+    Set<Path> reportPaths = new HashSet<>();
+    if (!patternPathList.isEmpty()) {
+      for (String patternPath : patternPathList) {
+        List<Path> paths = WildcardPatternFileScanner.scan(baseDir, patternPath);
+        if (paths.isEmpty() && patternPathList.size() > 1) {
+          LOG.info("Coverage report doesn't exist for pattern: '{}'", patternPath);
+        }
+        reportPaths.addAll(paths);
       }
     }
 
     if (!reportPaths.isEmpty()) {
       return reportPaths;
     } else {
-
-      LOG.info("Can not find JaCoCo reports from property 'sonar.coverage.jacoco.xmlReportPaths'. Using default locations: {}", String.join(",", DEFAULT_PATHS));
-
+      if (!patternPathList.isEmpty()) {
+        LOG.warn("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='{}'. Using default locations: {}",
+          String.join(",", patternPathList), String.join(",", DEFAULT_PATHS));
+      } else {
+        LOG.info("'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: {}", String.join(",", DEFAULT_PATHS));
+      }
       return Arrays.stream(DEFAULT_PATHS)
-        .map(this::toAbsolutePath)
-        .filter(ReportPathsProvider::reportExists)
+        .map(baseDir::resolve)
+        .filter(Files::isRegularFile)
         .collect(Collectors.toSet());
     }
   }
 
-  private Path toAbsolutePath(String reportPath) {
-    return context.fileSystem().baseDir().toPath().resolve(reportPath);
-  }
-
-  private static boolean reportExists(Path path) {
-    return Files.isRegularFile(path);
-  }
 
 }
