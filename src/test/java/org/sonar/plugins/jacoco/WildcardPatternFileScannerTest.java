@@ -73,8 +73,10 @@ class WildcardPatternFileScannerTest {
     assertThat(scan(RELATIVE_BASE_FOLDER, "**/*")).containsExactlyInAnyOrder(ABSOLUTE_F1, ABSOLUTE_F2, ABSOLUTE_G1, ABSOLUTE_G2);
     assertThat(scan(RELATIVE_BASE_FOLDER, "*/**")).containsExactlyInAnyOrder(ABSOLUTE_G1, ABSOLUTE_G2);
     assertThat(scan(RELATIVE_BASE_FOLDER, "subfolder/*")).containsExactlyInAnyOrder(ABSOLUTE_G1, ABSOLUTE_G2);
+    assertThat(scan(RELATIVE_BASE_FOLDER, "**/?2.xml")).containsExactlyInAnyOrder(ABSOLUTE_F2, ABSOLUTE_G2);
     assertThat(scan(RELATIVE_BASE_FOLDER, "**/g*.xml")).containsExactlyInAnyOrder(ABSOLUTE_G1, ABSOLUTE_G2);
     assertThat(scan(RELATIVE_BASE_FOLDER, ABSOLUTE_BASE_FOLDER + "/f*.xml")).containsExactlyInAnyOrder(ABSOLUTE_F1, ABSOLUTE_F2);
+    assertThat(scan(RELATIVE_BASE_FOLDER, "**.txt")).isEmpty();
     assertThat(logTester.logs()).isEmpty();
   }
 

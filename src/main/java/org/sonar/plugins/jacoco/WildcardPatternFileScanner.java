@@ -51,6 +51,10 @@ public final class WildcardPatternFileScanner {
     if (specialCharIndex == -1) {
       return scanNonWildcardPattern(baseDirectory, unixLikePatternPath);
     } else {
+      // For performance reason, we don't want to scan recursively all files in baseDirectory
+      // when patternPath start with "none wildcard" subfolder names. For example,
+      // scanWildcardPattern("/base", "sub1/sub2/**/file*.xml") is converted into
+      // scanWildcardPattern("/base/sub1/sub2", "**/file*.xml")
       int additionalBaseDirectoryPart = unixLikePatternPath.lastIndexOf('/', specialCharIndex);
       if (additionalBaseDirectoryPart != -1) {
         Path additionalBaseDirectory = toFileSystemPath(unixLikePatternPath.substring(0, additionalBaseDirectoryPart + 1));
