@@ -69,8 +69,27 @@ public class JacocoSensor implements Sensor {
   void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer) {
     List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
 
+    boolean kotlinPackageScheme = false;
+    if (sourceFiles.size() != 0) {
+      XmlReportParser.SourceFile sourceFile = sourceFiles.get(0);
+
+      String packageName = sourceFile.packageName();
+      String fileName = sourceFile.name();
+
+      InputFile inputFile = locator.getInputFile(packageName, fileName);
+      if (inputFile == null) {
+        inputFile = locator.getInputFile(packageName.replace(sourceFile.rootPackageName() + "/", ""), fileName);
+        kotlinPackageScheme = inputFile != null;
+      }
+    }
+
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
-      InputFile inputFile = locator.getInputFile(sourceFile.packageName(), sourceFile.name());
+      String packagePath = sourceFile.packageName();
+      if (kotlinPackageScheme) {
+        packagePath = packagePath.replace(sourceFile.rootPackageName() + "/", "");
+      }
+
+      InputFile inputFile = locator.getInputFile(packagePath, sourceFile.name());
       if (inputFile == null) {
         continue;
       }
