@@ -42,6 +42,8 @@ public class XmlReportParser {
   }
 
   public List<SourceFile> parse() {
+    RootPackage rootPackage = new RootPackage();
+
     XMLInputFactory factory = XMLInputFactory.newInstance();
     factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false);
     factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
@@ -75,6 +77,7 @@ public class XmlReportParser {
 
           if (element.equals("package")) {
             packageName = getStringAttr(parser, "name", () -> "for a 'package' at line " + parser.getLocation().getLineNumber() + COLUMN + parser.getLocation().getColumnNumber());
+            rootPackage.update(packageName);
           } else if (element.equals("sourcefile")) {
             if (packageName == null) {
               throw new IllegalStateException("Invalid report: expected to find 'sourcefile' within a 'package' at line "
@@ -82,7 +85,7 @@ public class XmlReportParser {
             }
             sourceFileName = getStringAttr(parser, "name", () -> "for a sourcefile at line "
               + parser.getLocation().getLineNumber() + COLUMN + parser.getLocation().getColumnNumber());
-            sourceFiles.add(new SourceFile(packageName, sourceFileName));
+            sourceFiles.add(new SourceFile(packageName, sourceFileName, rootPackage));
           } else if (element.equals("line")) {
             if (sourceFileName == null) {
               throw new IllegalStateException("Invalid report: expected to find 'line' within a 'sourcefile' at line "
@@ -146,7 +149,35 @@ public class XmlReportParser {
     }
   }
 
+  static class RootPackage {
+    private String name;
+
+    RootPackage() {
+      this.name = "";
+    }
+
+    RootPackage(String name) {
+      this.name = name;
+    }
+
+    public String getName() { return name; }
+
+    public void update(String input) {
+      if (this.name.isEmpty()) {
+        this.name = input;
+        return;
+      }
+
+      if (!this.name.startsWith(input)) {
+        return;
+      }
+
+      this.name = input;
+    }
+  }
+
   static class SourceFile {
+    private RootPackage rootPackage;
     private String name;
     private String packageName;
     private List<Line> lines = new ArrayList<>();
@@ -154,6 +185,13 @@ public class XmlReportParser {
     SourceFile(String packageName, String name) {
       this.name = name;
       this.packageName = packageName;
+      this.rootPackage = new RootPackage();
+    }
+
+    SourceFile(String packageName, String name, RootPackage rootPackage) {
+      this.name = name;
+      this.packageName = packageName;
+      this.rootPackage = rootPackage;
     }
 
     public String name() {
@@ -163,6 +201,8 @@ public class XmlReportParser {
     public String packageName() {
       return packageName;
     }
+
+    public String rootPackageName() { return rootPackage.name ; }
 
     public List<Line> lines() {
       return lines;
