@@ -50,6 +50,16 @@ class XmlReportParserTest {
   }
 
   @Test
+  void should_parse_root_package_in_report() throws URISyntaxException {
+    Path sample = load("jacoco.xml");
+    XmlReportParser report = new XmlReportParser(sample);
+    List<XmlReportParser.SourceFile> sourceFiles = report.parse();
+
+    assertThat(sourceFiles).hasSize(36);
+    assertThat(sourceFiles.stream().allMatch(sf -> sf.rootPackageName().equals("org/sonarlint/cli"))).isTrue();
+  }
+
+  @Test
   void should_parse_all_attributes() throws URISyntaxException {
     Path sample = load("simple.xml");
     XmlReportParser report = new XmlReportParser(sample);
