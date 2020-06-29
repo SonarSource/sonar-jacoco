@@ -98,18 +98,19 @@ class ReportPathsProviderTest {
     Path reportPath = baseDir.resolve(Paths.get("target", "custom", "jacoco.xml"));
     Files.createDirectories(reportPath.getParent());
     Files.createFile(reportPath);
+    Path realReportPath = reportPath.toRealPath();
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/custom/*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realReportPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/ja*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realReportPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target\\**\\ja*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realReportPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "**/*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realReportPath);
     assertThat(logTester.logs()).isEmpty();
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/unknown.xml");
@@ -124,16 +125,17 @@ class ReportPathsProviderTest {
     Path reportPath = baseDir.resolve(Paths.get("target", "custom", "jacoco.xml"));
     Files.createDirectories(reportPath.getParent());
     Files.createFile(reportPath);
+    Path realReportPath = reportPath.toRealPath();
 
     String unixLikeAbsoluteBaseDir = baseDir.toRealPath().toString().replace('\\', '/');
     String unixLikeAbsoluteXmlPattern = unixLikeAbsoluteBaseDir + "/**/*.xml";
     String windowsLikeAbsoluteXmlPattern = unixLikeAbsoluteXmlPattern.replace('/', '\\');
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, unixLikeAbsoluteXmlPattern);
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realReportPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, windowsLikeAbsoluteXmlPattern);
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realReportPath);
     assertThat(logTester.logs()).isEmpty();
   }
 
