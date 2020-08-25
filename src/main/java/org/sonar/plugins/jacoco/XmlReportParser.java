@@ -41,6 +41,10 @@ public class XmlReportParser {
     this.xmlReportPath = xmlReportPath;
   }
 
+  public Path getXmlReportPath() {
+    return xmlReportPath;
+  }
+
   public List<SourceFile> parse() {
     XMLInputFactory factory = XMLInputFactory.newInstance();
     factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, false);
