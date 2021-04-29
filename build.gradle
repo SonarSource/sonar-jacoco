@@ -12,6 +12,7 @@ plugins {
     id 'jacoco'
     id 'maven-publish'
     id 'com.github.hierynomus.license' version '0.15.0'
+    id 'signing'
 }
 
 apply plugin: 'com.jfrog.artifactory'
@@ -169,9 +170,22 @@ publishing {
     }
 }
 
+signing {
+  def signingKey = findProperty("signingKey")
+  def signingKeyId = findProperty("signingKeyId")
+  def signingPassword = findProperty("signingPassword")
+  useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+  required {
+    def branch = System.getenv()["CIRRUS_BRANCH"]
+    return (branch == 'master' || branch ==~ 'branch-[\\d.]+') &&
+      gradle.taskGraph.hasTask(":artifactoryPublish")
+  }
+  sign publishing.publications
+}
+
 artifactory {
     clientConfig.setIncludeEnvVars(true)
-    clientConfig.setEnvVarsExcludePatterns('*password*,*PASSWORD*,*secret*,*MAVEN_CMD_LINE_ARGS*,sun.java.command,*token*,*TOKEN*,*LOGIN*,*login*,*key*,*KEY*,*PASSPHRASE*,*signing*')
+    clientConfig.setEnvVarsExcludePatterns('*password*,*PASSWORD*,*secret*,*MAVEN_CMD_LINE_ARGS*,sun.java.command,*token*,*TOKEN*,*LOGIN*,*login*,*key*,*KEY*,*signing*')
     contextUrl = System.getenv('ARTIFACTORY_URL')
     publish {
         repository {
