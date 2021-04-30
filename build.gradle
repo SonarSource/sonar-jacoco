@@ -70,11 +70,11 @@ test.finalizedBy jacocoTestReport
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport:5.6.2'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'org.assertj:assertj-core:3.10.0'
+    testImplementation 'org.mockito:mockito-core:1.10.19'
+    testImplementation 'org.assertj:assertj-core:3.10.0'
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     compileOnly 'org.sonarsource.sonarqube:sonar-plugin-api:7.9'
-    testCompile 'org.sonarsource.sonarqube:sonar-plugin-api:7.9'
+    testImplementation 'org.sonarsource.sonarqube:sonar-plugin-api:7.9'
 } 
 
 test {
@@ -99,6 +99,7 @@ license {
 
 jar {
     manifest {
+        def version = archiveVersion.getOrNull()
         def displayVersion = project.hasProperty('buildNumber') ? version.substring(0, version.lastIndexOf('.')) + " (build ${project.buildNumber})" : version
         def buildDate = new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         attributes(
@@ -116,10 +117,10 @@ jar {
                 'Plugin-Organization': 'SonarSource',
                 'Plugin-OrganizationUrl': 'http://www.sonarsource.com',
                 'Plugin-SourcesUrl': 'https://github.com/SonarSource/sonar-jacoco',
-                'Plugin-Version': version,
+                'Plugin-Version': archiveVersion,
                 'Sonar-Version': '6.7',
                 'SonarLint-Supported': 'false',
-                'Version': "${version}",
+                'Version': "${archiveVersion}",
         )
     }
 }
