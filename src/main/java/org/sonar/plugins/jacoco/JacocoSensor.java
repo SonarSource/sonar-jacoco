@@ -69,9 +69,14 @@ public class JacocoSensor implements Sensor {
   void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer) {
     List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
 
+    if(sourceFiles.isEmpty()) {
+      LOG.warn("Coverage report '{}' no source files loaded.", reportParser.getXmlReportPath());
+    }
+
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
       InputFile inputFile = locator.getInputFile(sourceFile.packageName(), sourceFile.name());
       if (inputFile == null) {
+        LOG.info("Coverage report '{}' could not locate source file {} in package {}.", reportParser.getXmlReportPath(), sourceFile.name(), sourceFile.packageName());
         continue;
       }
 
