@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -43,6 +44,11 @@ public class FileLocator {
   public InputFile getInputFile(String packagePath, String fileName) {
     String filePath = packagePath.isEmpty() ? fileName : (packagePath + "/" + fileName);
     String[] path = filePath.split("/");
-    return tree.getFileWithSuffix(path);
+    InputFile file;
+    for (int i = 0; i < path.length; ++i) {
+      file = tree.getFileWithSuffix(Arrays.stream(path).skip(i).toArray(String[]::new));
+      if (file != null) return file;
+    }
+    return null;
   }
 }

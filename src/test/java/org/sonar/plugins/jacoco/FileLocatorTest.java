@@ -58,4 +58,12 @@ public class FileLocatorTest {
     FileLocator locator = new FileLocator(Arrays.asList(inputFile1, inputFile2));
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile1);
   }
+
+  @Test
+  public void should_match_kotlin_style_directory_structure() {
+    InputFile inputFile1 = new TestInputFileBuilder("module1", "src/main/kotlin/test/File.kt").build();
+
+    FileLocator locator = new FileLocator(Collections.singletonList(inputFile1));
+    assertThat(locator.getInputFile("org/sonar/test", "File.kt")).isEqualTo(inputFile1);
+  }
 }
