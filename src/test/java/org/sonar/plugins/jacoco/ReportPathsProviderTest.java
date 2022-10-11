@@ -99,17 +99,19 @@ class ReportPathsProviderTest {
     Files.createDirectories(reportPath.getParent());
     Files.createFile(reportPath);
 
+    Path realPath = reportPath.toRealPath();
+
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/custom/*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/ja*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target\\**\\ja*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "**/*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
     assertThat(logTester.logs()).isEmpty();
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/unknown.xml");
@@ -128,12 +130,13 @@ class ReportPathsProviderTest {
     String unixLikeAbsoluteBaseDir = baseDir.toRealPath().toString().replace('\\', '/');
     String unixLikeAbsoluteXmlPattern = unixLikeAbsoluteBaseDir + "/**/*.xml";
     String windowsLikeAbsoluteXmlPattern = unixLikeAbsoluteXmlPattern.replace('/', '\\');
+    Path realPath = reportPath.toRealPath();
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, unixLikeAbsoluteXmlPattern);
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, windowsLikeAbsoluteXmlPattern);
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
     assertThat(logTester.logs()).isEmpty();
   }
 
