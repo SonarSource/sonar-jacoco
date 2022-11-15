@@ -49,6 +49,7 @@ public class JacocoTest {
   static void beforeAll() {
     String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "7.9.2";
     OrchestratorBuilder builder = Orchestrator.builderEnv()
+      .useDefaultAdminCredentialsForBuilds(true)
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
       .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
 
