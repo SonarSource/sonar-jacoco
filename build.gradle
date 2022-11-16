@@ -39,6 +39,8 @@ tasks.withType(JavaCompile) {
 
 tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
+    // Workaround for bug in JDK 11.0.7 - https://bugs.openjdk.org/browse/JDK-8295850
+    options.addStringOption("tag", "javax.annotation.ParametersAreNonnullByDefault:ParametersAreNonnullByDefault")
 }
 
 allprojects {
