@@ -19,20 +19,20 @@
  */
 package org.sonar.plugins.jacoco;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.sonar.api.utils.log.LogTesterJUnit5;
+import org.sonar.api.utils.log.LoggerLevel;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.Rule;
-import org.junit.jupiter.api.Test;
-import org.sonar.api.utils.log.LogTester;
-import org.sonar.api.utils.log.LoggerLevel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.sonar.plugins.jacoco.WildcardPatternFileScanner.indexOfMatcherSpecialChar;
 import static org.sonar.plugins.jacoco.WildcardPatternFileScanner.scan;
 import static org.sonar.plugins.jacoco.WildcardPatternFileScanner.toUnixLikePath;
 
-@org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport
 class WildcardPatternFileScannerTest {
 
   static final Path RELATIVE_BASE_FOLDER = Paths.get("src", "test", "resources", "search");
@@ -62,8 +62,8 @@ class WildcardPatternFileScannerTest {
     }
   }
 
-  @Rule
-  public LogTester logTester = new LogTester();
+  @RegisterExtension
+  public LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
   @Test
   void search_pattern_paths_in_folder() throws IOException {
