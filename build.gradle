@@ -28,15 +28,6 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
     version = version.replace('-SNAPSHOT', versionSuffix)
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-    if (JavaVersion.current().isJava9Compatible()) {
-        options.compilerArgs.addAll(['--release', '8'])
-    }
-}
-
 tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
     // Workaround for bug in JDK 11.0.7 - https://bugs.openjdk.org/browse/JDK-8295850
