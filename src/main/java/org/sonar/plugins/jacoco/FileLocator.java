@@ -27,12 +27,14 @@ import org.sonar.api.batch.fs.InputFile;
 
 public class FileLocator {
   private final ReversePathTree tree = new ReversePathTree();
+  private final KotlinFileLocator kotlinFileLocator;
 
-  public FileLocator(Iterable<InputFile> inputFiles) {
-    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()));
+  public FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
+    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
   }
 
-  public FileLocator(List<InputFile> inputFiles) {
+  public FileLocator(List<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
+    this.kotlinFileLocator = kotlinFileLocator;
     for (InputFile inputFile : inputFiles) {
       String[] path = inputFile.relativePath().split("/");
       tree.index(inputFile, path);
@@ -43,6 +45,11 @@ public class FileLocator {
   public InputFile getInputFile(String packagePath, String fileName) {
     String filePath = packagePath.isEmpty() ? fileName : (packagePath + "/" + fileName);
     String[] path = filePath.split("/");
-    return tree.getFileWithSuffix(path);
+    InputFile fileWithSuffix = tree.getFileWithSuffix(path);
+    if (fileWithSuffix == null && fileName.endsWith(".kt")) {
+      fileWithSuffix = kotlinFileLocator.getInputFile(packagePath, fileName);
+    }
+
+    return fileWithSuffix;
   }
 }
