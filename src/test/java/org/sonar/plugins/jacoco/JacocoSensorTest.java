@@ -19,6 +19,18 @@
  */
 package org.sonar.plugins.jacoco;
 
+import org.junit.Rule;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.rules.TemporaryFolder;
+import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
+import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.utils.log.LogTesterJUnit5;
+import org.sonar.api.utils.log.LoggerLevel;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -27,24 +39,13 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Rule;
-import org.junit.jupiter.api.Test;
-import org.junit.rules.TemporaryFolder;
-import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
-import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.utils.log.LogTester;
-import org.sonar.api.utils.log.LoggerLevel;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport
@@ -52,8 +53,8 @@ class JacocoSensorTest {
   @Rule
   public TemporaryFolder temp = new TemporaryFolder();
 
-  @Rule
-  public LogTester logTester = new LogTester();
+  @RegisterExtension
+  public LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
   private JacocoSensor sensor = new JacocoSensor();
 
@@ -92,7 +93,7 @@ class JacocoSensorTest {
     sensor.importReports(reportPathsProvider, locator, importer);
 
     verify(reportPathsProvider).getPaths();
-    verifyZeroInteractions(locator, importer);
+    verifyNoInteractions(locator, importer);
 
     assertThat(logTester.logs(LoggerLevel.INFO)).contains("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
   }
@@ -113,7 +114,7 @@ class JacocoSensorTest {
     assertThat(logTester.logs(LoggerLevel.ERROR)).hasSize(1);
     assertThat(logTester.logs(LoggerLevel.ERROR)).allMatch(s -> s.startsWith("Coverage report 'invalid.xml' could not be read/imported"));
 
-    verifyZeroInteractions(locator, importer);
+    verifyNoInteractions(locator, importer);
   }
 
   @Test
@@ -153,7 +154,7 @@ class JacocoSensorTest {
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
     sensor.importReport(parser, locator, importer);
 
-    verifyZeroInteractions(importer);
+    verifyNoInteractions(importer);
   }
 
   @Test

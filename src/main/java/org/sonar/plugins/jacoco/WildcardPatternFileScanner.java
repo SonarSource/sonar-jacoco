@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
-import org.sonar.api.internal.google.common.annotations.VisibleForTesting;
 import org.sonar.api.utils.WildcardPattern;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -99,17 +98,17 @@ public final class WildcardPatternFileScanner {
     }
   }
 
-  @VisibleForTesting
+  /* Is visible for testing reasons */
   static String toUnixLikePath(String path) {
     return path.indexOf('\\') != -1 ? path.replace('\\', '/') : path;
   }
 
-  @VisibleForTesting
+  /* Is visible for testing reasons */
   static Path toFileSystemPath(String unixLikePath) {
     return Paths.get(unixLikePath.replace('/', File.separatorChar));
   }
 
-  @VisibleForTesting
+  /* Is visible for testing reasons */
   static int indexOfMatcherSpecialChar(String path) {
     for (int i = 0; i < path.length(); i++) {
       if (PATH_MATCHER_SPECIAL_CHAR.indexOf(path.charAt(i)) != -1) {

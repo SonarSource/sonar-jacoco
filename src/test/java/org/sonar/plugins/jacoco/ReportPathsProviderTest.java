@@ -19,29 +19,29 @@
  */
 package org.sonar.plugins.jacoco;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
+import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.utils.log.LogTesterJUnit5;
+import org.sonar.api.utils.log.LoggerLevel;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.utils.log.LogTester;
-import org.sonar.api.utils.log.LoggerLevel;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport
 class ReportPathsProviderTest {
   @TempDir
   Path temp;
 
-  @Rule
-  public LogTester logTester = new LogTester();
+  @RegisterExtension
+  public LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
   private MapSettings settings;
   private SensorContextTester tester;
@@ -99,17 +99,19 @@ class ReportPathsProviderTest {
     Files.createDirectories(reportPath.getParent());
     Files.createFile(reportPath);
 
+    Path realPath = reportPath.toRealPath();
+
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/custom/*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/ja*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target\\**\\ja*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "**/*.xml");
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
     assertThat(logTester.logs()).isEmpty();
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/unknown.xml");
@@ -129,11 +131,13 @@ class ReportPathsProviderTest {
     String unixLikeAbsoluteXmlPattern = unixLikeAbsoluteBaseDir + "/**/*.xml";
     String windowsLikeAbsoluteXmlPattern = unixLikeAbsoluteXmlPattern.replace('/', '\\');
 
+    Path realPath = reportPath.toRealPath();
+
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, unixLikeAbsoluteXmlPattern);
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
 
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, windowsLikeAbsoluteXmlPattern);
-    assertThat(provider.getPaths()).containsOnly(reportPath);
+    assertThat(provider.getPaths()).containsOnly(realPath);
     assertThat(logTester.logs()).isEmpty();
   }
 
