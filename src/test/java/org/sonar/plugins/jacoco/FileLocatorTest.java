@@ -27,35 +27,70 @@ import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class FileLocatorTest {
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+class FileLocatorTest {
+
+  private static KotlinFileLocator kotlinFileLocator = new KotlinFileLocator(null);
   @Test
-  public void should_match_suffix() {
+  void should_match_suffix() {
     InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
-    FileLocator locator = new FileLocator(Collections.singleton(inputFile));
+    FileLocator locator = new FileLocator(Collections.singleton(inputFile), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile);
   }
 
   @Test
-  public void should_match_default_package() {
+  void should_match_default_package() {
     InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/File.java").build();
-    FileLocator locator = new FileLocator(Collections.singleton(inputFile));
+    FileLocator locator = new FileLocator(Collections.singleton(inputFile), kotlinFileLocator);
     assertThat(locator.getInputFile("", "File.java")).isEqualTo(inputFile);
   }
 
   @Test
-  public void should_not_match() {
+  void should_not_match() {
     InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
-    FileLocator locator = new FileLocator(Collections.singleton(inputFile));
+    FileLocator locator = new FileLocator(Collections.singleton(inputFile), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File2.java")).isNull();
     assertThat(locator.getInputFile("org/sonar/test2", "File.java")).isNull();
   }
 
   @Test
-  public void should_match_first_with_many_options() {
+  void should_match_first_with_many_options() {
     InputFile inputFile1 = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
     InputFile inputFile2 = new TestInputFileBuilder("module1", "src/test/java/org/sonar/test/File.java").build();
 
-    FileLocator locator = new FileLocator(Arrays.asList(inputFile1, inputFile2));
+    FileLocator locator = new FileLocator(Arrays.asList(inputFile1, inputFile2), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile1);
   }
+
+  @Test
+  void should_fallback_on_Kotlin_file_locator_if_file_was_not_found() {
+    InputFile inputFile = new TestInputFileBuilder("module1", "src/main/kotlin/File.kt").build();
+
+    KotlinFileLocator kotlinFileLocatorMock = mock(KotlinFileLocator.class);
+
+    when(kotlinFileLocatorMock.getInputFile("org/sonar/test", "File.kt")).thenReturn(inputFile);
+
+    FileLocator locator = new FileLocator(Arrays.asList(inputFile), kotlinFileLocatorMock);
+
+    assertThat(locator.getInputFile("org/sonar/test", "File.kt")).isEqualTo(inputFile);
+  }
+
+  @Test
+  void should_not_fallback_on_Kotlin_file_locator_if_file_is_not_Kotlin() {
+    InputFile inputFile = new TestInputFileBuilder("module1", "src/main/kotlin/File.java").build();
+
+    KotlinFileLocator kotlinFileLocatorMock = mock(KotlinFileLocator.class);
+    when(kotlinFileLocatorMock.getInputFile(any(), any())).thenReturn(inputFile);
+
+    FileLocator locator = new FileLocator(Arrays.asList(inputFile), kotlinFileLocatorMock);
+
+    assertThat(locator.getInputFile("org/sonar/test", "File.java")).isNull();
+    verify(kotlinFileLocatorMock, never()).getInputFile(any(), any());
+  }
+
 }

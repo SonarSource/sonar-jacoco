@@ -22,6 +22,9 @@ package org.sonar.plugins.jacoco;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
@@ -41,7 +44,8 @@ public class JacocoSensor implements Sensor {
   public void execute(SensorContext context) {
     ReportPathsProvider reportPathsProvider = new ReportPathsProvider(context);
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
-    FileLocator locator = new FileLocator(inputFiles);
+    Stream<InputFile> kotlinInputFileStream = StreamSupport.stream(inputFiles.spliterator(), false).filter(f -> "kotlin".equals(f.language()));
+    FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
     importReports(reportPathsProvider, locator, importer);
