@@ -42,22 +42,20 @@ public class JacocoSensor implements Sensor {
 
   @Override
   public void execute(SensorContext context) {
-    ReportPathsProvider reportPathsProvider = new ReportPathsProvider(context);
+    Collection<Path> reportPaths = new ReportPathsProvider(context).getPaths();
+    if (reportPaths.isEmpty()) {
+      LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
+      return;
+    }
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
     Stream<InputFile> kotlinInputFileStream = StreamSupport.stream(inputFiles.spliterator(), false).filter(f -> "kotlin".equals(f.language()));
     FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPathsProvider, locator, importer);
+    importReports(reportPaths, locator, importer);
   }
 
-  void importReports(ReportPathsProvider reportPathsProvider, FileLocator locator, ReportImporter importer) {
-    Collection<Path> reportPaths = reportPathsProvider.getPaths();
-    if (reportPaths.isEmpty()) {
-      LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
-      return;
-    }
-
+  void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer) {
     LOG.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
 
     for (Path reportPath : reportPaths) {
