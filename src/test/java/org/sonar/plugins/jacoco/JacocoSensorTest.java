@@ -19,11 +19,13 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.io.File;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.rules.TemporaryFolder;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
@@ -43,6 +45,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -84,30 +88,26 @@ class JacocoSensorTest {
   }
 
   @Test
-  void do_nothing_if_no_path() {
-    ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
-    FileLocator locator = mock(FileLocator.class);
-    ReportImporter importer = mock(ReportImporter.class);
-
-    when(reportPathsProvider.getPaths()).thenReturn(Collections.emptySet());
-    sensor.importReports(reportPathsProvider, locator, importer);
-
-    verify(reportPathsProvider).getPaths();
-    verifyNoInteractions(locator, importer);
-
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
+  void do_not_index_files_when_no_report_was_found() throws IOException {
+    File emptyFolderWithoutReport = temp.newFolder();
+    SensorContextTester spiedContext = spy(SensorContextTester.create(emptyFolderWithoutReport));
+    DefaultFileSystem spiedFileSystem = spy(spiedContext.fileSystem());
+    when(spiedContext.fileSystem()).thenReturn(spiedFileSystem);
+    sensor.execute(spiedContext);
+    // indexing all files in the filesystem is time consuming and should not be done if there no jacoco reports to import
+    // one way to assert this is to ensure there's no calls on fileSystem.inputFiles(...)
+    verify(spiedFileSystem, never()).inputFiles(any());
+    assertThat(logTester.logs()).containsExactlyInAnyOrder(
+      "'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml",
+      "No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
   }
 
   @Test
   void do_nothing_if_report_parse_failure() {
-    ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
 
-    when(reportPathsProvider.getPaths()).thenReturn(Collections.singletonList(Paths.get("invalid.xml")));
-    sensor.importReports(reportPathsProvider, locator, importer);
-
-    verify(reportPathsProvider).getPaths();
+    sensor.importReports(Collections.singletonList(Paths.get("invalid.xml")), locator, importer);
 
     assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
@@ -119,7 +119,6 @@ class JacocoSensorTest {
 
   @Test
   void parse_failure_do_not_fail_analysis() {
-    ReportPathsProvider reportPathsProvider = mock(ReportPathsProvider.class);
     FileLocator locator = mock(FileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
     InputFile inputFile = mock(InputFile.class);
@@ -128,11 +127,9 @@ class JacocoSensorTest {
     Path validFile = baseDir.resolve("jacoco.xml");
 
     when(locator.getInputFile("org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
-    when(reportPathsProvider.getPaths()).thenReturn(Arrays.asList(invalidFile, validFile));
 
-    sensor.importReports(reportPathsProvider, locator, importer);
+    sensor.importReports(Arrays.asList(invalidFile, validFile), locator, importer);
 
-    verify(reportPathsProvider).getPaths();
     String expectedErrorMessage = String.format(
       "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
       invalidFile.toString());
