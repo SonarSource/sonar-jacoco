@@ -68,7 +68,7 @@ dependencies {
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     compileOnly 'org.sonarsource.api.plugin:sonar-plugin-api:9.13.0.360'
     testImplementation 'org.sonarsource.sonarqube:sonar-plugin-api-impl:9.7.1.62043'
-} 
+}
 
 test {
     useJUnitPlatform()
@@ -111,6 +111,7 @@ jar {
                 'Plugin-OrganizationUrl': 'http://www.sonarsource.com',
                 'Plugin-SourcesUrl': 'https://github.com/SonarSource/sonar-jacoco',
                 'Plugin-Version': archiveVersion,
+                'Plugin-RequiredForLanguages': 'java,kotlin,scala',
                 'Sonar-Version': '6.7',
                 'SonarLint-Supported': 'false',
                 'Version': "${archiveVersion}",
