@@ -111,7 +111,7 @@ jar {
                 'Plugin-OrganizationUrl': 'http://www.sonarsource.com',
                 'Plugin-SourcesUrl': 'https://github.com/SonarSource/sonar-jacoco',
                 'Plugin-Version': archiveVersion,
-                'Plugin-RequiredForLanguages': 'java,kotlin,scala',
+                'Plugin-RequiredForLanguages': 'groovy,java,kotlin,scala',
                 'Sonar-Version': '6.7',
                 'SonarLint-Supported': 'false',
                 'Version': "${archiveVersion}",
