@@ -49,7 +49,7 @@ class ReportPathsProvider {
 
     List<String> patternPathList = Stream.of(context.config().getStringArray(REPORT_PATHS_PROPERTY_KEY))
       .filter(pattern -> !pattern.isEmpty())
-      .collect(Collectors.toList());
+      .toList();
 
     Set<Path> reportPaths = new HashSet<>();
     if (!patternPathList.isEmpty()) {

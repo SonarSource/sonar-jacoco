@@ -20,7 +20,6 @@
 package org.sonar.plugins.jacoco;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
 import org.sonar.api.batch.fs.InputFile;
@@ -30,7 +29,7 @@ public class FileLocator {
   private final KotlinFileLocator kotlinFileLocator;
 
   public FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
-    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+    this(StreamSupport.stream(inputFiles.spliterator(), false).toList(), kotlinFileLocator);
   }
 
   public FileLocator(List<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
