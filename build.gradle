@@ -28,6 +28,11 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
     version = version.replace('-SNAPSHOT', versionSuffix)
 }
 
+compileJava {
+    // Setting the compatibility to Java 11 (https://docs.gradle.org/7.6.3/userguide/building_java_projects.html#sec:java_cross_compilation)
+    options.release = 11
+}
+
 tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
     // Workaround for bug in JDK 11.0.7 - https://bugs.openjdk.org/browse/JDK-8295850
