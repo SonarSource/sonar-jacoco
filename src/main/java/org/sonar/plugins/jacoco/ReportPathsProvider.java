@@ -35,7 +35,7 @@ import org.sonar.api.utils.log.Loggers;
 class ReportPathsProvider {
   private static final Logger LOG = Loggers.get(ReportPathsProvider.class);
 
-  private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "target/site/jacoco-it/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"};
+  private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "target/site/jacoco-it/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"};
   static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
 
   private final SensorContext context;
