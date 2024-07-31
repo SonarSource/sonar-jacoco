@@ -11,10 +11,6 @@ env:
   #Possible values for ARTIFACTORY_DEPLOY_REPO: sonarsource-private-qa, sonarsource-public-qa
   ARTIFACTORY_DEPLOY_REPO: sonarsource-public-qa
   ARTIFACTORY_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-private-reader access_token]
-  # burgr notification
-  BURGR_URL: VAULT[development/kv/data/burgr data.url]
-  BURGR_USERNAME: VAULT[development/kv/data/burgr data.cirrus_username]
-  BURGR_PASSWORD: VAULT[development/kv/data/burgr data.cirrus_password]
   GRADLE_USER_HOME: ${CIRRUS_WORKING_DIR}/.gradle
 
 container_definition: &CONTAINER_DEFINITION
@@ -109,13 +105,11 @@ promote_task:
   depends_on:
     - plugin_qa
   <<: *ONLY_SONARSOURCE_QA
-  eks_container:    
+  eks_container:
     <<: *CONTAINER_DEFINITION
     cpu: 1
     memory: 1G
   env:
     ARTIFACTORY_PROMOTE_ACCESS_TOKEN: VAULT[development/artifactory/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promoter access_token]
     GITHUB_TOKEN: VAULT[development/github/token/${CIRRUS_REPO_OWNER}-${CIRRUS_REPO_NAME}-promotion token]
-    #artifacts that will have downloadable links in burgr
-    ARTIFACTS: org.sonarsource.jacoco:sonar-jacoco-plugin:jar
   script: cirrus_promote_gradle
