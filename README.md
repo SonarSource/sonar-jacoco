@@ -19,6 +19,6 @@ If you have a question on how to use plugin (and the [guide](https://community.s
 
 ### License
 
-Copyright 2018-2020 SonarSource.
+Copyright 2018-2025 SonarSource.
 
 Licensed under the [GNU Lesser General Public License, Version 3.0](http://www.gnu.org/licenses/lgpl.txt)
