@@ -1,7 +1,7 @@
 package org.sonar.plugins.jacoco.its;
 
-import com.sonar.orchestrator.Orchestrator;
-import com.sonar.orchestrator.OrchestratorBuilder;
+import com.sonar.orchestrator.junit4.OrchestratorRule;
+import com.sonar.orchestrator.junit4.OrchestratorRuleBuilder;
 import com.sonar.orchestrator.build.BuildResult;
 import com.sonar.orchestrator.build.MavenBuild;
 import com.sonar.orchestrator.build.SonarScanner;
@@ -41,7 +41,7 @@ public class JacocoTest {
   private static final String KOTLIN_FILE_KEY = "org.sonarsource.it.projects:kotlin-jacoco-project:src/main/kotlin/CoverMe.kt";
   private static final String FILE_WITHOUT_COVERAGE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/CalcNoCoverage.java";
 
-  private static Orchestrator orchestrator;
+  private static OrchestratorRule orchestrator;
 
 
   @TempDir
@@ -50,7 +50,7 @@ public class JacocoTest {
   @BeforeAll
   static void beforeAll() {
     String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "LATEST_RELEASE";
-    OrchestratorBuilder builder = Orchestrator.builderEnv()
+    OrchestratorRuleBuilder builder = OrchestratorRule.builderEnv()
       .useDefaultAdminCredentialsForBuilds(true)
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
       .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
