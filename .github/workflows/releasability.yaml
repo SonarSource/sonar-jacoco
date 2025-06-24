@@ -9,8 +9,9 @@ jobs:
     name: Releasability status
     permissions:
       id-token: write
+      statuses: write
       contents: read
     steps:
-      - uses: SonarSource/gh-action_releasability/releasability-status@v1
+      - uses: SonarSource/gh-action_releasability/releasability-status@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
