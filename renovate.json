@@ -11,6 +11,14 @@
   "packageRules": [
     {
       "matchManagers": [
+        "github-actions"
+      ],
+      "pinDigests": false,
+      "groupName": "all github actions",
+      "groupSlug": "all-github-actions"
+    },
+    {
+      "matchManagers": [
         "gradle-wrapper"
       ],
       "matchUpdateTypes": [
