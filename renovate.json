@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>SonarSource/renovate-config:languages-team.json"
+    "github>SonarSource/renovate-config:languages-team.json"
   ],
   "enabledManagers": [
     "gradle",
