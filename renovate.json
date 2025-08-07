@@ -8,6 +8,17 @@
     "gradle-wrapper",
     "github-actions"
   ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "gradle-wrapper"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ]
+    }
+  ],
   "reviewers": [
     "team:quality-jvm-squad"
   ]
