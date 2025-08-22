@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>SonarSource/renovate-config:languages-team.json"
+    "github>SonarSource/renovate-config:languages-team"
   ],
   "enabledManagers": [
     "gradle",
@@ -13,18 +13,23 @@
       "matchManagers": [
         "github-actions"
       ],
+      "matchPackageNames": [
+        "SonarSource/*"
+      ],
       "pinDigests": false,
-      "groupName": "all github actions",
-      "groupSlug": "all-github-actions"
+      "groupName": "all Sonar GitHub Actions",
+      "groupSlug": "all-sonar-github-actions"
     },
     {
       "matchManagers": [
-        "gradle-wrapper"
+        "github-actions"
       ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ]
+      "matchPackageNames": [
+        "!SonarSource/*"
+      ],
+      "pinDigests": true,
+      "groupName": "all third-party GitHub Actions",
+      "groupSlug": "all-3rd-party-github-actions"
     },
     {
       "matchManagers": [
