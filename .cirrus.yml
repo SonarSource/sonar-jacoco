@@ -56,6 +56,36 @@ build_task:
     - regular_gradle_build_deploy_analyze
   <<: *CLEANUP_GRADLE_CACHE_SCRIPT
 
+sonar_shadow_scan_and_issue_replication_task:
+  depends_on:
+    - build
+  # Only run when triggered by the cirrus-ci cron job named "nightly"
+  only_if: $CIRRUS_CRON == "nightly"
+  eks_container:
+    <<: *CONTAINER_DEFINITION
+    cpu: 2
+    memory: 2G
+  env:
+    SONAR_PROJECT_KEY: "org.sonarsource.jacoco:sonar-jacoco"
+    SHADOW_ORGANIZATION: "sonarsource"
+    SHADOW_PROJECT_KEY: "SonarSource_sonar-jacoco"
+    # to replicate issue states from next
+    SONAR_TOKEN: VAULT[development/kv/data/next data.token]
+    SONAR_HOST_URL: https://next.sonarqube.com/sonarqube
+    CIRRUS_CLONE_DEPTH: 50
+    matrix:
+      - name: "sonarcloud.io"
+        SHADOW_SONAR_TOKEN: VAULT[development/kv/data/sonarcloud data.token]
+        SHADOW_SONAR_HOST_URL: "https://sonarcloud.io"
+      - name: "sonarqube.us"
+        SHADOW_SONAR_TOKEN: VAULT[development/kv/data/sonarqube-us data.token]
+        SHADOW_SONAR_HOST_URL: "https://sonarqube.us"
+  <<: *SETUP_GRADLE_CACHE
+  build_and_shadow_scan_script:
+    - source cirrus-env BUILD
+    - ./shadow-scan-and-issue-replication.sh
+  <<: *CLEANUP_GRADLE_CACHE_SCRIPT
+
 ws_scan_task:
   eks_container:
     <<: *CONTAINER_DEFINITION
@@ -104,6 +134,7 @@ plugin_qa_task:
 promote_task:
   depends_on:
     - plugin_qa
+    - sonar_shadow_scan_and_issue_replication
   <<: *ONLY_SONARSOURCE_QA
   eks_container:
     <<: *CONTAINER_DEFINITION
