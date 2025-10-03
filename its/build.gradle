@@ -11,7 +11,7 @@ dependencies {
   testImplementation 'org.assertj:assertj-core:3.10.0'
   testImplementation 'org.sonarsource.orchestrator:sonar-orchestrator-junit4:5.5.0.2535'
   testImplementation 'org.sonarsource.sonarqube:sonar-ws:6.7'
-  testImplementation 'com.google.code.findbugs:jsr305:2.0.2'
+  testImplementation 'com.google.code.findbugs:jsr305:3.0.2'
 }
 
 test {
