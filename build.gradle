@@ -68,7 +68,7 @@ test.finalizedBy jacocoTestReport
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport:5.6.2'
-    testImplementation 'org.mockito:mockito-core:4.9.0'
+    testImplementation 'org.mockito:mockito-core:5.20.0'
     testImplementation 'org.assertj:assertj-core:3.10.0'
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     compileOnly 'org.sonarsource.api.plugin:sonar-plugin-api:9.13.0.360'
