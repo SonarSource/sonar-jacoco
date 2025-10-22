@@ -21,7 +21,7 @@ function build_and_analyze_the_project() {
     -Dsonar.host.url="${SHADOW_SONAR_HOST_URL}" \
     -Dsonar.token="${SHADOW_SONAR_TOKEN}" \
     -Dsonar.organization="${SHADOW_ORGANIZATION}" \
-    -Dsonar.projectKey="${SHADOW_PROJECT_KEY}" \
+    -Dsonar.projectKey="${SONAR_PROJECT_KEY}" \
     -Dsonar.analysis.buildNumber="${BUILD_NUMBER}" \
     -Dsonar.analysis.repository="${GITHUB_REPO}" \
     "$@"
@@ -64,9 +64,9 @@ function wait_for_sonarcloud_compute_engine_to_finish() {
   local LAST_STATUS=""
   local STATUS
 
-  echo "Waiting for SonarCloud compute engine to finish for project key: ${SHADOW_PROJECT_KEY}"
+  echo "Waiting for SonarCloud compute engine to finish for project key: ${SONAR_PROJECT_KEY}"
   while (( ELAPSED_TIME < MAX_WAIT_TIME_SECONDS )); do
-    STATUS=$(sonarcloud_compute_engine_status_for_given_project "${SHADOW_PROJECT_KEY}")
+    STATUS=$(sonarcloud_compute_engine_status_for_given_project "${SONAR_PROJECT_KEY}")
     if [[ "${STATUS}" != "${LAST_STATUS}" ]]; then
       echo -n " ${STATUS} "
       LAST_STATUS="${STATUS}"
@@ -97,7 +97,7 @@ function run_iris() {
     -Diris.source.projectKey="${SONAR_PROJECT_KEY}" \
     -Diris.source.url="${SONAR_HOST_URL}" \
     -Diris.source.token="${SONAR_TOKEN}" \
-    -Diris.destination.projectKey="${SHADOW_PROJECT_KEY}" \
+    -Diris.destination.projectKey="${SONAR_PROJECT_KEY}" \
     -Diris.destination.organization="${SHADOW_ORGANIZATION}" \
     -Diris.destination.url="${SHADOW_SONAR_HOST_URL}" \
     -Diris.destination.token="${SHADOW_SONAR_TOKEN}" \
