@@ -23,8 +23,8 @@ jobs:
         uses: SonarSource/unified-dogfooding-actions/run-iris@v1
         with:
           primary_project_key: "org.sonarsource.jacoco:sonar-jacoco"
-          primary_platform: "SQC-EU"
+          primary_platform: "Next"
           shadow1_project_key: "org.sonarsource.jacoco:sonar-jacoco"
-          shadow1_platform: "Next"
+          shadow1_platform: "SQC-EU"
           shadow2_project_key: "org.sonarsource.jacoco:sonar-jacoco"
           shadow2_platform: "SQC-US"
