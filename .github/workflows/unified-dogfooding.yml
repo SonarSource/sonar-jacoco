@@ -3,9 +3,6 @@ on:
   schedule:
     - cron: '45 3 * * *' # Run the workflow every day at 03:45 UTC
   workflow_dispatch:
-  push:
-    branches:
-      - tt/gha-unified-dogfood
 
 jobs:
   unified-platform-dogfooding:
