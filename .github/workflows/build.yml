@@ -71,8 +71,7 @@ jobs:
   # QA is broken due to JACOCO-56
 
   promote:
-    needs:
-      - build
+    needs: [build, qa]
     runs-on: github-ubuntu-latest-s
     name: Promote
     permissions:
