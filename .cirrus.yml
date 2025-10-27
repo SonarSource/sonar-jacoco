@@ -103,7 +103,7 @@ plugin_qa_task:
   <<: *SETUP_GRADLE_CACHE
   qa_script:
     - source cirrus-env QA
-    - ./gradlew -DbuildNumber=$BUILD_NUMBER -Dsonar.runtimeVersion=$SQ_VERSION -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN --console plain --no-daemon --info -PintegrationTests=true build test
+    - ./gradlew -DbuildNumber=$BUILD_NUMBER -Dsonar.runtimeVersion="${SQ_VERSION}" -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN --console plain --no-daemon --info -PintegrationTests=true build test
 
   <<: *CLEANUP_GRADLE_CACHE_SCRIPT
 
