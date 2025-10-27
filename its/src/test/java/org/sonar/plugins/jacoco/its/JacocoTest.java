@@ -64,8 +64,8 @@ public class JacocoTest {
     }
     builder.addPlugin(pluginLocation);
     try {
-      builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-8.19.0.40387.jar")));
-      builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-kotlin-plugin/sonar-kotlin-plugin-3.3.0.7402.jar")));
+      builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-8.9.3.40136.jar")));
+      builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-kotlin-plugin/sonar-kotlin-plugin-2.22.1.6674.jar")));
     } catch (MalformedURLException e) {
       throw new IllegalStateException("Failed to download plugin", e);
     }
