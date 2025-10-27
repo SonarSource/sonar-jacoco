@@ -55,6 +55,15 @@ public class JacocoTest {
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
       .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
 
+    System.out.println("###############################################################################################");
+    System.out.println("###############################################################################################");
+    System.out.println("###############################################################################################");
+    System.out.println("###############################################################################################");
+    System.out.println(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
+    System.out.println("###############################################################################################");
+    System.out.println("###############################################################################################");
+    System.out.println("###############################################################################################");
+
     String pluginVersion = System.getProperty("jacocoVersion");
     Location pluginLocation;
     if (StringUtils.isEmpty(pluginVersion) || pluginVersion.endsWith("-SNAPSHOT")) {
