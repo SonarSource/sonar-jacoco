@@ -6,7 +6,7 @@ buildscript {
   }
 }
 plugins {
-    id 'org.sonarqube' version '7.0.0.6105'
+    id 'org.sonarqube' version '7.0.1.6134'
     id 'com.jfrog.artifactory' version '5.2.5'
     id 'java'
     id 'jacoco'
@@ -67,13 +67,13 @@ jacocoTestReport {
 test.finalizedBy jacocoTestReport
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport:5.6.2'
-    testImplementation 'org.mockito:mockito-core:4.9.0'
-    testImplementation 'org.assertj:assertj-core:3.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-migrationsupport:5.14.1'
+    testImplementation 'org.mockito:mockito-core:4.11.0'
+    testImplementation 'org.assertj:assertj-core:3.27.6'
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     compileOnly 'org.sonarsource.api.plugin:sonar-plugin-api:9.13.0.360'
-    testImplementation 'org.sonarsource.sonarqube:sonar-plugin-api-impl:9.7.1.62043'
+    testImplementation 'org.sonarsource.sonarqube:sonar-plugin-api-impl:9.9.9.104369'
 }
 
 test {
