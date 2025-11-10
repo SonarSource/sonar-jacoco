@@ -22,15 +22,15 @@ jobs:
       id-token: write  # Required for Vault OIDC authentication
       contents: write  # Required for repository access and tagging
     outputs:
-      build-number: ${{ steps.build.outputs.BUILD_NUMBER }}
-      deployed: ${{ steps.build.outputs.deployed }}
+      build-number: ${{ steps.build-step.outputs.BUILD_NUMBER }}
+      deployed: ${{ steps.build-step.outputs.deployed }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
         with:
           version: 2025.7.12
       - uses: SonarSource/ci-github-actions/build-gradle@v1
-        id: build
+        id: build-step
         with:
           deploy-pull-request: true
           artifactory-reader-role: private-reader
@@ -47,9 +47,9 @@ jobs:
       fail-fast: false
       matrix:
         item:
-        - { SQ_VERSION: LATEST_RELEASE }
-        - { SQ_VERSION: DEV }
-    name: "QA Tests - SQ : ${{ matrix.item.SQ_VERSION }}"
+        - { sq-version: LATEST_RELEASE }
+        - { sq-version: DEV }
+    name: "QA Tests - SQ : ${{ matrix.item.sq-version }}"
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
     steps:
@@ -74,14 +74,14 @@ jobs:
         shell: bash
         env:
           ARTIFACTORY_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ARTIFACTORY_ACCESS_TOKEN }}
-          SQ_VERSION: ${{ matrix.item.SQ_VERSION }}
-        run: |
-          ./gradlew -DbuildNumber=$BUILD_NUMBER \
-            -PintegrationTests=true \
-            -Dsonar.runtimeVersion=$SQ_VERSION \
-            -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN \
-            --console plain --no-daemon --info \
-            build test
+          SQ_VERSION: ${{ matrix.item.sq-version }}
+        run: >-
+          ./gradlew -DbuildNumber=$BUILD_NUMBER
+          -PintegrationTests=true
+          -Dsonar.runtimeVersion=$SQ_VERSION
+          -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN
+          --console plain --no-daemon --info
+          build test
 
   promote:
     needs: [build, qa]
