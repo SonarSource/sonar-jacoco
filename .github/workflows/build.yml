@@ -47,7 +47,8 @@ jobs:
       fail-fast: false
       matrix:
         item:
-        - { sq-version: LATEST_RELEASE }
+        - { sq-version: LATEST_RELEASE[2025.1] }
+        - { sq-version: LATEST_RELEASE[2025.4] }
         - { sq-version: DEV }
     name: "QA Tests - SQ : ${{ matrix.item.sq-version }}"
     env:
