@@ -9,7 +9,6 @@ import com.sonar.orchestrator.locator.FileLocation;
 import com.sonar.orchestrator.locator.Location;
 import com.sonar.orchestrator.locator.MavenLocation;
 import com.sonar.orchestrator.locator.URLLocation;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -44,8 +43,6 @@ public class JacocoTest {
 
   private static OrchestratorRule orchestrator;
 
-  private static Logger LOGGER = Logger.getLogger(JacocoTest.class.getName());
-
   @TempDir
   Path temp;
 
@@ -56,14 +53,6 @@ public class JacocoTest {
       .useDefaultAdminCredentialsForBuilds(true)
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
       .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
-
-    LOGGER.info("###############################################################################################");
-    LOGGER.info("###############################################################################################");
-    LOGGER.info("###############################################################################################");
-    LOGGER.info(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
-    LOGGER.info("###############################################################################################");
-    LOGGER.info("###############################################################################################");
-    LOGGER.info("###############################################################################################");
 
     String pluginVersion = System.getProperty("jacocoVersion");
     Location pluginLocation;
