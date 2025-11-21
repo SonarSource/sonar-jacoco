@@ -51,8 +51,10 @@ jacocoTestReport {
 test.finalizedBy jacocoTestReport
 
 dependencies {
-    testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')
-    testImplementation('org.junit.jupiter:junit-jupiter-migrationsupport:5.6.2')
+    testImplementation(platform('org.junit:junit-bom:5.6.2'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testImplementation('org.junit.jupiter:junit-jupiter-migrationsupport')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
     testImplementation('org.mockito:mockito-core:4.9.0')
     testImplementation('org.assertj:assertj-core:3.10.0')
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
