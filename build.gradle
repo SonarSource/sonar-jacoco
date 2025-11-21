@@ -1,10 +1,3 @@
-buildscript {
-  repositories {
-    maven {
-      url 'https://repox.jfrog.io/repox/plugins.gradle.org/'
-    }
-  }
-}
 plugins {
     id 'org.sonarqube' version '7.0.0.6105'
     id 'com.jfrog.artifactory' version '5.2.5'
@@ -37,15 +30,6 @@ tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
     // Workaround for bug in JDK 11.0.7 - https://bugs.openjdk.org/browse/JDK-8295850
     options.addStringOption("tag", "javax.annotation.ParametersAreNonnullByDefault:ParametersAreNonnullByDefault")
-}
-
-allprojects {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://repox.jfrog.io/repox/sonarsource"
-        }
-    }
 }
 
 sonarqube {
@@ -83,7 +67,7 @@ test {
 license {
     header = rootProject.file('LICENSE_HEADER')
     ext.year = Calendar.getInstance().get(Calendar.YEAR)
-    strictCheck true
+    strictCheck = true
     mapping {
       java = 'SLASHSTAR_STYLE'
       js = 'SLASHSTAR_STYLE'
@@ -127,12 +111,12 @@ jar {
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 task javadocJar(type: Jar) {
     from javadoc
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
 }
 
 publishing {
@@ -176,7 +160,7 @@ signing {
   def signingKeyId = findProperty("signingKeyId")
   def signingPassword = findProperty("signingPassword")
   useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
-  required {
+  required = {
     def branch = System.getenv()["GITHUB_REF_NAME"]
     return (branch == 'master' || branch ==~ 'branch-[\\d.]+') &&
       gradle.taskGraph.hasTask(":artifactoryPublish")
