@@ -21,6 +21,12 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
     version = version.replace('-SNAPSHOT', versionSuffix)
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 compileJava {
     // Setting the compatibility to Java 17
     options.release = 17
