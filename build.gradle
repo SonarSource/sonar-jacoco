@@ -37,6 +37,7 @@ sonarqube {
         property 'sonar.organization', 'sonarsource'
         property 'sonar.projectName', projectTitle
         property 'sonar.projectKey', project.group + ':sonar-jacoco'
+        property 'sonar.sca.exclusions', 'its/src/test/resources/**'
     }
 }
 
