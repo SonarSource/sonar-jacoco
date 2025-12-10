@@ -19,6 +19,11 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -27,12 +32,6 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.utils.log.LogTesterJUnit5;
 import org.sonar.api.utils.log.LoggerLevel;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -64,6 +63,27 @@ class ReportPathsProviderTest {
     Path reportPath = baseDir.resolve(relativePath);
     Files.createDirectories(reportPath.getParent());
     Files.createFile(reportPath);
+  }
+
+  @Test
+  void should_return_null_if_the_aggregate_report_property_is_not_defined() {
+    assertThat(provider.getAggregateReportPath()).isNull();
+  }
+
+  @Test
+  void should_return_null_if_the_aggregate_report_property_points_to_a_file_that_should_not_exist() {
+    Path reportThatDoesNotExist = temp.resolve("report-that-does-not-exist.xml");
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, reportThatDoesNotExist.toString());
+    assertThat(provider.getAggregateReportPath()).isNull();
+  }
+
+  @Test
+  void should_return_the_expected_report_path_when_the_aggregate_report_property_is_set_correctly() throws IOException {
+    Path report = temp.resolve("aggregate-report.xml");
+    Files.createDirectories(report.getParent());
+    Files.createFile(report);
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, report.toString());
+    assertThat(provider.getAggregateReportPath()).isEqualTo(report);
   }
 
   @Test

@@ -20,29 +20,28 @@
 package org.sonar.plugins.jacoco;
 
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.scanner.sensor.ProjectSensor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
-public class JacocoSensor implements Sensor {
-  private static final Logger LOG = Loggers.get(JacocoSensor.class);
+public class JacocoAggregateSensor implements ProjectSensor {
+  private static final Logger LOG = Loggers.get(JacocoAggregateSensor.class);
 
   @Override
   public void describe(SensorDescriptor descriptor) {
-    descriptor.name("JaCoCo XML Report Importer");
+    descriptor.name("JaCoCo Aggregate XML Report Importer");
   }
 
   @Override
   public void execute(SensorContext context) {
-    Collection<Path> reportPaths = new ReportPathsProvider(context).getPaths();
-    if (reportPaths.isEmpty()) {
-      LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
+    Path reportPath = new ReportPathsProvider(context).getAggregateReportPath();
+    if (reportPath == null) {
+      LOG.debug("No aggregate XML report found. No coverage coverage information will be added at project level.");
       return;
     }
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
@@ -50,19 +49,6 @@ public class JacocoSensor implements Sensor {
     FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer);
-  }
-
-  void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer) {
-    LOG.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
-
-    for (Path reportPath : reportPaths) {
-      LOG.debug("Reading report '{}'", reportPath);
-      try {
-        SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, LOG);
-      } catch (Exception e) {
-        LOG.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
-      }
-    }
+    SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, LOG);
   }
 }

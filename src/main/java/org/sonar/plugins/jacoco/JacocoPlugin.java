@@ -20,6 +20,7 @@
 package org.sonar.plugins.jacoco;
 
 import org.sonar.api.Plugin;
+import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
 
@@ -33,6 +34,15 @@ public class JacocoPlugin implements Plugin {
       .category("JaCoCo")
       .description("Paths to JaCoCo XML coverage report files. Each path can be either absolute or relative" +
         " to the project base directory. Wildcard patterns are accepted (*, ** and ?).")
+      .build());
+
+    context.addExtension(JacocoAggregateSensor.class);
+    context.addExtension(PropertyDefinition.builder(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY)
+      .onQualifiers(Qualifiers.PROJECT)
+      .type(PropertyType.STRING)
+      .multiValues(false)
+      .category("JaCoCo")
+      .description("Single path to aggregate XML coverage report file.")
       .build());
   }
 }

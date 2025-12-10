@@ -165,4 +165,24 @@ class XmlReportParserTest {
     assertThat(sourceFiles.stream().mapToInt(sf -> sf.lines().size()).sum()).isEqualTo(79);
   }
 
+  @Test
+  void line_equality_checks_work_as_expected() {
+    var line = new XmlReportParser.Line(1, 2, 3, 4, 5);
+    var identicalLine = new XmlReportParser.Line(1, 2, 3, 4, 5);
+
+    assertThat(line)
+            //Equality
+            .isEqualTo(line)
+            .hasSameHashCodeAs(line)
+            .isEqualTo(identicalLine)
+            .hasSameHashCodeAs(identicalLine)
+            // Inequality
+            .isNotEqualTo(null)
+            .isNotEqualTo(new Object())
+            .isNotEqualTo(new XmlReportParser.Line(42, 2, 3, 4, 5))
+            .isNotEqualTo(new XmlReportParser.Line(1, 42, 3, 4, 5))
+            .isNotEqualTo(new XmlReportParser.Line(1, 2, 42, 4, 5))
+            .isNotEqualTo(new XmlReportParser.Line(1, 2, 3, 42, 5))
+            .isNotEqualTo(new XmlReportParser.Line(1, 2, 3, 4, 42));
+  }
 }

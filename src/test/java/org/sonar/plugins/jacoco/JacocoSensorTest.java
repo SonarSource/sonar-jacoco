@@ -70,24 +70,6 @@ class JacocoSensorTest {
   }
 
   @Test
-  void import_coverage() {
-    FileLocator locator = mock(FileLocator.class);
-    ReportImporter importer = mock(ReportImporter.class);
-    XmlReportParser parser = mock(XmlReportParser.class);
-    InputFile inputFile = mock(InputFile.class);
-
-    XmlReportParser.SourceFile sourceFile = new XmlReportParser.SourceFile("package", "File.java");
-    sourceFile.lines().add(new XmlReportParser.Line(1, 0, 1, 0, 0));
-
-    when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
-    when(locator.getInputFile("package", "File.java")).thenReturn(inputFile);
-
-    sensor.importReport(parser, locator, importer);
-
-    verify(importer).importCoverage(sourceFile, inputFile);
-  }
-
-  @Test
   void do_not_index_files_when_no_report_was_found() throws IOException {
     File emptyFolderWithoutReport = temp.newFolder();
     SensorContextTester spiedContext = spy(SensorContextTester.create(emptyFolderWithoutReport));
@@ -139,19 +121,6 @@ class JacocoSensorTest {
     assertThat(logTester.logs(LoggerLevel.ERROR)).contains(expectedErrorMessage);
 
     verify(importer, times(1)).importCoverage(any(), eq(inputFile));
-  }
-
-  @Test
-  void do_nothing_if_file_not_found() {
-    FileLocator locator = mock(FileLocator.class);
-    ReportImporter importer = mock(ReportImporter.class);
-    XmlReportParser parser = mock(XmlReportParser.class);
-    XmlReportParser.SourceFile sourceFile = mock(XmlReportParser.SourceFile.class);
-
-    when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
-    sensor.importReport(parser, locator, importer);
-
-    verifyNoInteractions(importer);
   }
 
   @Test

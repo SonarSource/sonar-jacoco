@@ -25,9 +25,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import javax.annotation.CheckForNull;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -36,6 +38,8 @@ class ReportPathsProvider {
   private static final Logger LOG = Loggers.get(ReportPathsProvider.class);
 
   private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "target/site/jacoco-it/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"};
+
+  static final String AGGREGATE_REPORT_PATH_PROPERTY_KEY = "sonar.coverage.jacoco.aggregateXmlReportPath";
   static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
 
   private final SensorContext context;
@@ -76,6 +80,19 @@ class ReportPathsProvider {
         .filter(Files::isRegularFile)
         .collect(Collectors.toSet());
     }
+  }
+
+  @CheckForNull
+  Path getAggregateReportPath() {
+    Optional<String> property = context.config().get(AGGREGATE_REPORT_PATH_PROPERTY_KEY);
+    if (!property.isPresent()) {
+      return null;
+    }
+    List<Path> scanned = WildcardPatternFileScanner.scan(context.fileSystem().baseDir().toPath(), property.get());
+    if (scanned.isEmpty()) {
+      return null;
+    }
+    return scanned.get(0);
   }
 
 

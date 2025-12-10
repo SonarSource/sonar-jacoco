@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -202,6 +203,20 @@ public class XmlReportParser {
 
     public int coveredBranches() {
       return coveredBranches;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (!(o instanceof Line)) return false;
+      Line line = (Line) o;
+      return number == line.number &&
+              missedInstrs == line.missedInstrs && coveredInstrs == line.coveredInstrs &&
+              missedBranches == line.missedBranches && coveredBranches == line.coveredBranches;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(number, missedInstrs, coveredInstrs, missedBranches, coveredBranches);
     }
   }
 

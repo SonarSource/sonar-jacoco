@@ -22,6 +22,7 @@ package org.sonar.plugins.jacoco;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.sonar.api.Plugin;
+import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
 
@@ -35,18 +36,27 @@ class JacocoPluginTest {
   private JacocoPlugin plugin = new JacocoPlugin();
   private Plugin.Context ctx = mock(Plugin.Context.class);
   @Test
-  void should_add_sensor() {
+  void should_add_sensors_and_property_definitions() {
     plugin.define(ctx);
 
     ArgumentCaptor<Object> arg = ArgumentCaptor.forClass(Object.class);
-    verify(ctx, times(2)).addExtension(arg.capture());
+    verify(ctx, times(4)).addExtension(arg.capture());
     verifyNoMoreInteractions(ctx);
 
     assertThat(arg.getAllValues().get(0)).isEqualTo(JacocoSensor.class);
     assertThat(arg.getAllValues().get(1)).isInstanceOf(PropertyDefinition.class);
-    PropertyDefinition propertyDefinition = (PropertyDefinition) arg.getAllValues().get(1);
-    assertThat(propertyDefinition.key()).isEqualTo("sonar.coverage.jacoco.xmlReportPaths");
-    assertThat(propertyDefinition.category()).isEqualTo("JaCoCo");
-    assertThat(propertyDefinition.qualifiers()).containsOnly(Qualifiers.PROJECT);
+    PropertyDefinition multiValueReportPaths = (PropertyDefinition) arg.getAllValues().get(1);
+    assertThat(multiValueReportPaths.key()).isEqualTo("sonar.coverage.jacoco.xmlReportPaths");
+    assertThat(multiValueReportPaths.multiValues()).isTrue();
+    assertThat(multiValueReportPaths.category()).isEqualTo("JaCoCo");
+    assertThat(multiValueReportPaths.qualifiers()).containsOnly(Qualifiers.PROJECT);
+
+    assertThat(arg.getAllValues().get(2)).isEqualTo(JacocoAggregateSensor.class);
+    PropertyDefinition aggregateReportPath = (PropertyDefinition) arg.getAllValues().get(3);
+    assertThat(aggregateReportPath.key()).isEqualTo("sonar.coverage.jacoco.aggregateXmlReportPath");
+    assertThat(aggregateReportPath.type()).isEqualTo(PropertyType.STRING);
+    assertThat(aggregateReportPath.multiValues()).isFalse();
+    assertThat(aggregateReportPath.category()).isEqualTo("JaCoCo");
+    assertThat(aggregateReportPath.qualifiers()).containsOnly(Qualifiers.PROJECT);
   }
 }
