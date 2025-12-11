@@ -21,9 +21,15 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
     version = version.replace('-SNAPSHOT', versionSuffix)
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 compileJava {
-    // Setting the compatibility to Java 11 (https://docs.gradle.org/7.6.3/userguide/building_java_projects.html#sec:java_cross_compilation)
-    options.release = 11
+    // Setting the compatibility to Java 17
+    options.release = 17
 }
 
 tasks.withType(Javadoc) {
