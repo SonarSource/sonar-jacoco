@@ -194,6 +194,34 @@ public class JacocoTest {
   }
 
   @Test
+  void aggregate_reports_should_be_loaded_properly() {
+    Path project = Path.of("src", "test", "resources", "aggregate-maven-project");
+    Path rootPom = project.resolve("pom.xml");
+    Path reportLocation = project.resolve("report")
+            .resolve("target")
+            .resolve("site")
+            .resolve("jacoco-aggregate")
+            .resolve("jacoco.xml");
+    MavenBuild build = MavenBuild.create()
+            .setPom(rootPom.toFile())
+            .addGoal("clean verify")
+            .addSonarGoal()
+            .setProperty("sonar.coverage.jacoco.aggregateXmlReportPath", reportLocation.toAbsolutePath().toString());
+
+    orchestrator.executeBuild(build, true);
+
+    Map<String, Double> measures = getCoverageMeasures("org.example:aggregate-maven-project:library/src/main/java/org/example/Library.java");
+    assertThat(measures)
+            .containsEntry("line_coverage", 50.0)
+            .containsEntry("lines_to_cover", 4.0)
+            .containsEntry("uncovered_lines", 2.0)
+            .containsEntry("branch_coverage", 50.0)
+            .containsEntry("conditions_to_cover", 2.0)
+            .containsEntry("uncovered_conditions", 1.0)
+            .containsEntry("coverage", 50.0);
+  }
+
+  @Test
   void kotlin_files_should_be_located_and_covered() {
     Path BASE_DIRECTORY = Paths.get("src/test/resources");
     MavenBuild build = MavenBuild.create()
