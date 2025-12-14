@@ -185,4 +185,25 @@ class XmlReportParserTest {
             .isNotEqualTo(new XmlReportParser.Line(1, 2, 3, 42, 5))
             .isNotEqualTo(new XmlReportParser.Line(1, 2, 3, 4, 42));
   }
+
+  @Test
+  void should_import_aggregate_report() throws URISyntaxException {
+    Path sample = load("jacoco-aggregate.xml");
+    XmlReportParser parser = new XmlReportParser(sample);
+
+    List<XmlReportParser.SourceFile> sourceFiles = parser.parse();
+
+    assertThat(sourceFiles).hasSize(1);
+    var singleFile = sourceFiles.get(0);
+    assertThat(singleFile.packageName()).isEqualTo("org/example");
+    assertThat(singleFile.name()).isEqualTo("Library.java");
+    assertThat(singleFile.lines()).containsExactly(
+            new XmlReportParser.Line(3, 3, 0, 0, 0),
+            new XmlReportParser.Line(5, 0, 2, 1, 1),
+            new XmlReportParser.Line(6, 2, 0, 0, 0),
+            new XmlReportParser.Line(8, 0, 5, 0, 0)
+    );
+
+    assertThat(singleFile.groupName()).isEqualTo("library");
+  }
 }
