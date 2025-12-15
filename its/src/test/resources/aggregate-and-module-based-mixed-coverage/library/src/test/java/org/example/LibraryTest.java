@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 
 class LibraryTest {
   @Test
-  void incompleteTest() {
-    Assertions.assertEquals(2, Library.div(2, 1));
+  void returns_null_when_dividing_by_zero() {
+    Library library = new Library();
+    Assertions.assertNull(library.div(2, 0));
   }
 }

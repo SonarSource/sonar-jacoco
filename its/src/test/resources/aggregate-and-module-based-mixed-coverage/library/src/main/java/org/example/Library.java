@@ -1,7 +1,7 @@
 package org.example;
 
 public class Library {
-  public static Integer div(int a, int b) {
+  public Integer div(int a, int b) {
     if (b == 0) {
       return null;
     }

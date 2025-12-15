@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.example</groupId>
-    <artifactId>aggregate-maven-project</artifactId>
+    <artifactId>aggregate-and-module-based-mixed-coverage</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
@@ -13,6 +13,7 @@
         <module>library</module>
         <module>library-test</module>
         <module>report</module>
+        <module>self-covered</module>
     </modules>
 
     <build>

@@ -194,8 +194,8 @@ public class JacocoTest {
   }
 
   @Test
-  void aggregate_reports_should_be_loaded_properly() {
-    Path project = Path.of("src", "test", "resources", "aggregate-maven-project");
+  void aggregate_and_module_based_reports_complement_each_over_to_build_total_coverage() {
+    Path project = Path.of("src", "test", "resources", "aggregate-and-module-based-mixed-coverage");
     Path rootPom = project.resolve("pom.xml");
     Path reportLocation = project.resolve("report")
             .resolve("target")
@@ -210,15 +210,22 @@ public class JacocoTest {
 
     orchestrator.executeBuild(build, true);
 
-    Map<String, Double> measures = getCoverageMeasures("org.example:aggregate-maven-project:library/src/main/java/org/example/Library.java");
-    assertThat(measures)
-            .containsEntry("line_coverage", 50.0)
+    Map<String, Double> measuresForLibrary = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:library/src/main/java/org/example/Library.java");
+    assertThat(measuresForLibrary)
+            .containsEntry("line_coverage", 100.0)
             .containsEntry("lines_to_cover", 4.0)
-            .containsEntry("uncovered_lines", 2.0)
-            .containsEntry("branch_coverage", 50.0)
+            .containsEntry("uncovered_lines", 0.0)
+            .containsEntry("branch_coverage", 100.0)
             .containsEntry("conditions_to_cover", 2.0)
-            .containsEntry("uncovered_conditions", 1.0)
-            .containsEntry("coverage", 50.0);
+            .containsEntry("uncovered_conditions", 0.0)
+            .containsEntry("coverage", 100.0);
+
+    Map<String, Double> measuresForSquarer = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:self-covered/src/main/java/org/example/Squarer.java");
+    assertThat(measuresForSquarer)
+            .containsEntry("line_coverage", 100.0)
+            .containsEntry("lines_to_cover", 2.0)
+            .containsEntry("uncovered_lines", 0.0)
+            .containsEntry("coverage", 100.0);
   }
 
   @Test
