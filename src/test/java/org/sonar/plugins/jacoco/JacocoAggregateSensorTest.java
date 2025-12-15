@@ -77,6 +77,7 @@ class JacocoAggregateSensorTest {
     sensor.execute(context);
 
     assertThat(logTester.logs(LoggerLevel.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(LoggerLevel.INFO)).isEmpty();
   }
 
   @Test
@@ -91,6 +92,9 @@ class JacocoAggregateSensorTest {
     var sensor = new JacocoAggregateSensor();
     sensor.execute(context);
     assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
+            String.format("Importing aggregate report %s.", reportPath)
+    );
   }
 
 }

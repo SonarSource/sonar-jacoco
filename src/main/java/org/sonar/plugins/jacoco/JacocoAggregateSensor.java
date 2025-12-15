@@ -49,6 +49,7 @@ public class JacocoAggregateSensor implements ProjectSensor {
     FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
+    LOG.info("Importing aggregate report {}.", reportPath);
     SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, LOG);
   }
 }
