@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -82,15 +83,21 @@ class ReportPathsProvider {
     }
   }
 
+  /**
+   * Checks if the aggregate report path property is set, finds the first path matching and returns it.
+   *
+   * @return Path to the existing aggregate report if the property is set. Null if none specified.
+   * @throws FileNotFoundException If a path is set but does not match with an existing file.
+   */
   @CheckForNull
-  Path getAggregateReportPath() {
+  Path getAggregateReportPath() throws FileNotFoundException {
     Optional<String> property = context.config().get(AGGREGATE_REPORT_PATH_PROPERTY_KEY);
     if (!property.isPresent()) {
       return null;
     }
     List<Path> scanned = WildcardPatternFileScanner.scan(context.fileSystem().baseDir().toPath(), property.get());
     if (scanned.isEmpty()) {
-      return null;
+      throw new FileNotFoundException(String.format("Aggregate report %s was not found", property.get()));
     }
     return scanned.get(0);
   }

@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,7 @@ import org.sonar.api.utils.log.LogTesterJUnit5;
 import org.sonar.api.utils.log.LoggerLevel;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReportPathsProviderTest {
   @TempDir
@@ -66,15 +68,17 @@ class ReportPathsProviderTest {
   }
 
   @Test
-  void should_return_null_if_the_aggregate_report_property_is_not_defined() {
+  void should_return_null_if_the_aggregate_report_property_is_not_defined() throws FileNotFoundException {
     assertThat(provider.getAggregateReportPath()).isNull();
   }
 
   @Test
-  void should_return_null_if_the_aggregate_report_property_points_to_a_file_that_should_not_exist() {
+  void should_throw_an_exception_if_the_aggregate_report_property_points_to_a_file_that_should_not_exist() {
     Path reportThatDoesNotExist = temp.resolve("report-that-does-not-exist.xml");
     settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, reportThatDoesNotExist.toString());
-    assertThat(provider.getAggregateReportPath()).isNull();
+    assertThatThrownBy(() -> assertThat(provider.getAggregateReportPath()).isNull())
+            .isInstanceOf(FileNotFoundException.class)
+            .hasMessage(String.format("Aggregate report %s was not found", reportThatDoesNotExist));
   }
 
   @Test

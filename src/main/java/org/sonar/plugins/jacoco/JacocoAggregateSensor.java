@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -39,7 +40,13 @@ public class JacocoAggregateSensor implements ProjectSensor {
 
   @Override
   public void execute(SensorContext context) {
-    Path reportPath = new ReportPathsProvider(context).getAggregateReportPath();
+    Path reportPath = null;
+    try {
+      reportPath = new ReportPathsProvider(context).getAggregateReportPath();
+    } catch (FileNotFoundException e) {
+      LOG.error(String.format("The aggregate JaCoCo sensor will stop: %s", e.getMessage()));
+      return;
+    }
     if (reportPath == null) {
       LOG.debug("No aggregate XML report found. No coverage coverage information will be added at project level.");
       return;

@@ -76,7 +76,9 @@ class JacocoAggregateSensorTest {
     var sensor = new JacocoAggregateSensor();
     sensor.execute(context);
 
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(LoggerLevel.ERROR)).
+            containsExactly("The aggregate JaCoCo sensor will stop: Aggregate report non-existing-report.xml was not found");
+    assertThat(logTester.logs(LoggerLevel.DEBUG)).isEmpty();
     assertThat(logTester.logs(LoggerLevel.INFO)).isEmpty();
   }
 
