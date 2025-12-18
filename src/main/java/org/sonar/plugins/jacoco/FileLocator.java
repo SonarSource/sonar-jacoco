@@ -50,18 +50,15 @@ public class FileLocator {
 
   @CheckForNull
   public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
-    String filePath = "";
-    if (groupName != null) {
-      // FIXME This hacky source directory computation should be replaced with a call to the <module>.sonar.sources
-      filePath = groupName + '/' + String.format("src/main/%s", fileName.substring(fileName.lastIndexOf('.') + 1)) + '/';
-    }
-    if (!packagePath.isEmpty()) {
-      filePath += packagePath + '/';
-    }
-    filePath += fileName;
-
+    String filePath = packagePath.isEmpty() ?
+            fileName :
+            packagePath + '/' + fileName;
     String[] path = filePath.split("/");
-    InputFile fileWithSuffix = tree.getFileWithSuffix(path);
+
+    InputFile fileWithSuffix = groupName == null ?
+            tree.getFileWithSuffix(path) :
+            tree.getFileWithSuffix(groupName, path);
+
     if (fileWithSuffix == null && fileName.endsWith(".kt")) {
       fileWithSuffix = kotlinFileLocator.getInputFile(packagePath, fileName);
     }
