@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 
 public class FileLocator {
@@ -42,8 +43,23 @@ public class FileLocator {
   }
 
   @CheckForNull
+  /* Visible for testing */
   public InputFile getInputFile(String packagePath, String fileName) {
-    String filePath = packagePath.isEmpty() ? fileName : (packagePath + "/" + fileName);
+    return getInputFile(null, packagePath, fileName);
+  }
+
+  @CheckForNull
+  public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
+    String filePath = "";
+    if (groupName != null) {
+      // FIXME This hacky source directory computation should be replaced with a call to the <module>.sonar.sources
+      filePath = groupName + '/' + String.format("src/main/%s", fileName.substring(fileName.lastIndexOf('.') + 1)) + '/';
+    }
+    if (!packagePath.isEmpty()) {
+      filePath += packagePath + '/';
+    }
+    filePath += fileName;
+
     String[] path = filePath.split("/");
     InputFile fileWithSuffix = tree.getFileWithSuffix(path);
     if (fileWithSuffix == null && fileName.endsWith(".kt")) {

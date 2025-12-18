@@ -32,8 +32,7 @@ class SensorUtils {
     List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
 
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
-      // FIXME for the case of project sensor, we need the group
-      InputFile inputFile = locator.getInputFile(sourceFile.packageName(), sourceFile.name());
+      InputFile inputFile = locator.getInputFile(sourceFile.groupName(), sourceFile.packageName(), sourceFile.name());
       if (inputFile == null) {
         continue;
       }

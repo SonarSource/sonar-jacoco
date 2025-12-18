@@ -41,7 +41,7 @@ class SensorUtilsTest {
     sourceFile.lines().add(new XmlReportParser.Line(1, 0, 1, 0, 0));
 
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
-    when(locator.getInputFile("package", "File.java")).thenReturn(inputFile);
+    when(locator.getInputFile(null,"package", "File.java")).thenReturn(inputFile);
 
     SensorUtils.importReport(parser, locator, importer, null);
 
