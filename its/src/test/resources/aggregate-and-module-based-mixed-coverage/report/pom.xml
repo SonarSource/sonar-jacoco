@@ -27,6 +27,12 @@
         </dependency>
         <dependency>
             <groupId>org.example</groupId>
+            <artifactId>library-nested</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.example</groupId>
             <artifactId>library-test</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
