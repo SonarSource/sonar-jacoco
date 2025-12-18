@@ -194,6 +194,41 @@ public class JacocoTest {
   }
 
   @Test
+  void aggregate_and_module_based_reports_complement_each_over_to_build_total_coverage() {
+    Path project = Path.of("src", "test", "resources", "aggregate-and-module-based-mixed-coverage");
+    Path rootPom = project.resolve("pom.xml");
+    Path reportLocation = project.resolve("report")
+            .resolve("target")
+            .resolve("site")
+            .resolve("jacoco-aggregate")
+            .resolve("jacoco.xml");
+    MavenBuild build = MavenBuild.create()
+            .setPom(rootPom.toFile())
+            .addGoal("clean verify")
+            .addSonarGoal()
+            .setProperty("sonar.coverage.jacoco.aggregateXmlReportPath", reportLocation.toAbsolutePath().toString());
+
+    orchestrator.executeBuild(build, true);
+
+    Map<String, Double> measuresForLibrary = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:library/src/main/java/org/example/Library.java");
+    assertThat(measuresForLibrary)
+            .containsEntry("line_coverage", 100.0)
+            .containsEntry("lines_to_cover", 4.0)
+            .containsEntry("uncovered_lines", 0.0)
+            .containsEntry("branch_coverage", 100.0)
+            .containsEntry("conditions_to_cover", 2.0)
+            .containsEntry("uncovered_conditions", 0.0)
+            .containsEntry("coverage", 100.0);
+
+    Map<String, Double> measuresForSquarer = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:self-covered/src/main/java/org/example/Squarer.java");
+    assertThat(measuresForSquarer)
+            .containsEntry("line_coverage", 100.0)
+            .containsEntry("lines_to_cover", 2.0)
+            .containsEntry("uncovered_lines", 0.0)
+            .containsEntry("coverage", 100.0);
+  }
+
+  @Test
   void kotlin_files_should_be_located_and_covered() {
     Path BASE_DIRECTORY = Paths.get("src/test/resources");
     MavenBuild build = MavenBuild.create()
