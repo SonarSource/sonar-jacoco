@@ -108,7 +108,7 @@ class JacocoSensorTest {
     Path invalidFile = baseDir.resolve("invalid_ci_in_line.xml");
     Path validFile = baseDir.resolve("jacoco.xml");
 
-    when(locator.getInputFile("org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
+    when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
 
     sensor.importReports(Arrays.asList(invalidFile, validFile), locator, importer);
 

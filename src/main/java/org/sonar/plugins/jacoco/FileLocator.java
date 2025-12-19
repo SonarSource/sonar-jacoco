@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 
 public class FileLocator {
@@ -42,10 +43,22 @@ public class FileLocator {
   }
 
   @CheckForNull
+  /* Visible for testing */
   public InputFile getInputFile(String packagePath, String fileName) {
-    String filePath = packagePath.isEmpty() ? fileName : (packagePath + "/" + fileName);
+    return getInputFile(null, packagePath, fileName);
+  }
+
+  @CheckForNull
+  public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
+    String filePath = packagePath.isEmpty() ?
+            fileName :
+            packagePath + '/' + fileName;
     String[] path = filePath.split("/");
-    InputFile fileWithSuffix = tree.getFileWithSuffix(path);
+
+    InputFile fileWithSuffix = groupName == null ?
+            tree.getFileWithSuffix(path) :
+            tree.getFileWithSuffix(groupName, path);
+
     if (fileWithSuffix == null && fileName.endsWith(".kt")) {
       fileWithSuffix = kotlinFileLocator.getInputFile(packagePath, fileName);
     }
