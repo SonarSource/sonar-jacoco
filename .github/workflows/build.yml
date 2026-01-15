@@ -54,8 +54,8 @@ jobs:
       fail-fast: false
       matrix:
         item:
-        # - { sq-version: "LATEST_RELEASE[2025.1]" }
-        # - { sq-version: "LATEST_RELEASE[2025.4]" }
+        - { sq-version: "LATEST_RELEASE[2025.1]" }
+        - { sq-version: "LATEST_RELEASE[2025.4]" }
         - { sq-version: "DEV" }
     name: "QA Tests - SQ : ${{ matrix.item.sq-version }}"
     env:
@@ -77,12 +77,4 @@ jobs:
         shell: bash
         env:
           SQ_VERSION: ${{ matrix.item.sq-version }}
-        run: >-
-          export &&
-          java -version &&
-          ./gradlew -DbuildNumber=$BUILD_NUMBER
-          -PintegrationTests=true
-          -Dsonar.runtimeVersion=$SQ_VERSION
-          -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN
-          --console plain --no-daemon --info
-          build test
+        run: export && java -version && ./gradlew -DbuildNumber=$BUILD_NUMBER -PintegrationTests=true -Dsonar.runtimeVersion=$SQ_VERSION -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN --console plain --no-daemon --info build test
