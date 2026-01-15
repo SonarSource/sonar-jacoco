@@ -30,6 +30,8 @@ jobs:
         with:
           version: 2025.7.12
           java: 17
+      - name: Select Java 17
+        run: mise use java@17
       - uses: SonarSource/ci-github-actions/build-gradle@v1
         id: build-step
         with:
@@ -61,6 +63,8 @@ jobs:
         with:
           version: 2025.7.12
           java: 21
+      - name: Select Java 21
+        run: mise use java@21
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v1
         with:
