@@ -46,6 +46,30 @@ public class ReversePathTree {
     return getFirstLeaf(currentNode);
   }
 
+  public InputFile getFileWithSuffix(String module, String[] path) {
+    Node currentNode = root;
+    for (int i = path.length - 1; i >= 0; i--) {
+      currentNode = currentNode.children.get(path[i]);
+      if (currentNode == null) {
+        return null;
+      }
+    }
+
+    while (!currentNode.children.isEmpty()) {
+      if (currentNode.children.size() == 1) {
+        currentNode = currentNode.children.values().iterator().next();
+      } else {
+        for (String candidate : currentNode.children.keySet()) {
+          if (module.equals(candidate)) {
+             return currentNode.children.get(candidate).file;
+          }
+        }
+        return null;
+      }
+    }
+    return null;
+  }
+
   private static InputFile getFirstLeaf(Node node) {
     while (!node.children.isEmpty()) {
       node = node.children.values().iterator().next();

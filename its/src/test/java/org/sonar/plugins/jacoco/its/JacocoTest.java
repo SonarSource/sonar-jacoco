@@ -220,6 +220,13 @@ public class JacocoTest {
             .containsEntry("uncovered_conditions", 0.0)
             .containsEntry("coverage", 100.0);
 
+    Map<String, Double> measuresForLibraryClash = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:library-clash/src/main/java/org/example/Library.java");
+    assertThat(measuresForLibraryClash)
+            .containsEntry("line_coverage", 100.0)
+            .containsEntry("lines_to_cover", 2.0)
+            .containsEntry("uncovered_lines", 0.0)
+            .containsEntry("coverage", 100.0);
+
     Map<String, Double> measuresForSquarer = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:self-covered/src/main/java/org/example/Squarer.java");
     assertThat(measuresForSquarer)
             .containsEntry("line_coverage", 100.0)

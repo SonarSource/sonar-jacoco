@@ -19,29 +19,31 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.nio.file.Path;
 import java.util.List;
-import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.utils.log.Logger;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-class SensorUtils {
-  private SensorUtils() {
-    /* This class should not be instantiated */
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ProjectCoverageContextTest {
+
+  @Test
+  void is_empty_when_initialized() {
+    assertThat(new ProjectCoverageContext().getModuleContexts()).isEmpty();
   }
 
-  static void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer, Logger logger) {
-    List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
+  @Test
+  void added_module_coverage_contexts_can_be_retrieved(@TempDir Path temp) {
+    ModuleCoverageContext moduleCoverageContext = new ModuleCoverageContext(
+            "top-level",
+            temp,
+            List.of(temp.resolve("src").resolve("main").resolve("java"))
+    );
 
-    for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
-      InputFile inputFile = locator.getInputFile(sourceFile.groupName(), sourceFile.packageName(), sourceFile.name());
-      if (inputFile == null) {
-        continue;
-      }
+    ProjectCoverageContext projectCoverageContext = new ProjectCoverageContext();
+    projectCoverageContext.add(moduleCoverageContext);
 
-      try {
-        importer.importCoverage(sourceFile, inputFile);
-      } catch (IllegalStateException e) {
-        logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}", inputFile, e);
-      }
-    }
+    assertThat(projectCoverageContext.getModuleContexts()).containsOnly(moduleCoverageContext);
   }
 }

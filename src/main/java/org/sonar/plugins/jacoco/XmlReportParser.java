@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -55,6 +57,7 @@ public class XmlReportParser {
 
       List<SourceFile> sourceFiles = new ArrayList<>();
 
+      String groupName = null;
       String packageName = null;
       String sourceFileName = null;
 
@@ -70,11 +73,15 @@ public class XmlReportParser {
             packageName = null;
           } else if (element.equals("sourcefile")) {
             sourceFileName = null;
+          } else if (element.equals("group")) {
+            groupName = null;
           }
         } else if (event == XMLStreamConstants.START_ELEMENT) {
           String element = parser.getLocalName();
 
-          if (element.equals("package")) {
+          if (element.equals("group")) {
+            groupName = getStringAttr(parser, "name", () -> "for a 'group' at line" + parser.getLocation().getLineNumber() + COLUMN + parser.getLocation().getColumnNumber());
+          } else if (element.equals("package")) {
             packageName = getStringAttr(parser, "name", () -> "for a 'package' at line " + parser.getLocation().getLineNumber() + COLUMN + parser.getLocation().getColumnNumber());
           } else if (element.equals("sourcefile")) {
             if (packageName == null) {
@@ -83,7 +90,7 @@ public class XmlReportParser {
             }
             sourceFileName = getStringAttr(parser, "name", () -> "for a sourcefile at line "
               + parser.getLocation().getLineNumber() + COLUMN + parser.getLocation().getColumnNumber());
-            sourceFiles.add(new SourceFile(packageName, sourceFileName));
+            sourceFiles.add(new SourceFile(packageName, sourceFileName, groupName));
           } else if (element.equals("line")) {
             if (sourceFileName == null) {
               throw new IllegalStateException("Invalid report: expected to find 'line' within a 'sourcefile' at line "
@@ -150,11 +157,17 @@ public class XmlReportParser {
   static class SourceFile {
     private String name;
     private String packageName;
+    private @Nullable String groupName;
     private List<Line> lines = new ArrayList<>();
 
     SourceFile(String packageName, String name) {
+      this(packageName, name, null);
+    }
+
+    SourceFile(String packageName, String name, @Nullable String groupName) {
       this.name = name;
       this.packageName = packageName;
+      this.groupName = groupName;
     }
 
     public String name() {
@@ -163,6 +176,14 @@ public class XmlReportParser {
 
     public String packageName() {
       return packageName;
+    }
+
+    @CheckForNull
+    /**
+     * Name of the group, aka (sub-)project, which is optional information grouping source files in aggregate reports.
+     */
+    public String groupName() {
+      return groupName;
     }
 
     public List<Line> lines() {

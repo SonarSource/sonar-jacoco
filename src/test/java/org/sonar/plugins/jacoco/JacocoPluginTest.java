@@ -40,19 +40,21 @@ class JacocoPluginTest {
     plugin.define(ctx);
 
     ArgumentCaptor<Object> arg = ArgumentCaptor.forClass(Object.class);
-    verify(ctx, times(4)).addExtension(arg.capture());
+    verify(ctx, times(5)).addExtension(arg.capture());
     verifyNoMoreInteractions(ctx);
 
-    assertThat(arg.getAllValues().get(0)).isEqualTo(JacocoSensor.class);
-    assertThat(arg.getAllValues().get(1)).isInstanceOf(PropertyDefinition.class);
-    PropertyDefinition multiValueReportPaths = (PropertyDefinition) arg.getAllValues().get(1);
+    assertThat(arg.getAllValues().get(0)).isEqualTo(ProjectCoverageContext.class);
+
+    assertThat(arg.getAllValues().get(1)).isEqualTo(JacocoSensor.class);
+    assertThat(arg.getAllValues().get(2)).isInstanceOf(PropertyDefinition.class);
+    PropertyDefinition multiValueReportPaths = (PropertyDefinition) arg.getAllValues().get(2);
     assertThat(multiValueReportPaths.key()).isEqualTo("sonar.coverage.jacoco.xmlReportPaths");
     assertThat(multiValueReportPaths.multiValues()).isTrue();
     assertThat(multiValueReportPaths.category()).isEqualTo("JaCoCo");
     assertThat(multiValueReportPaths.qualifiers()).containsOnly(Qualifiers.PROJECT);
 
-    assertThat(arg.getAllValues().get(2)).isEqualTo(JacocoAggregateSensor.class);
-    PropertyDefinition aggregateReportPath = (PropertyDefinition) arg.getAllValues().get(3);
+    assertThat(arg.getAllValues().get(3)).isEqualTo(JacocoAggregateSensor.class);
+    PropertyDefinition aggregateReportPath = (PropertyDefinition) arg.getAllValues().get(4);
     assertThat(aggregateReportPath.key()).isEqualTo("sonar.coverage.jacoco.aggregateXmlReportPath");
     assertThat(aggregateReportPath.type()).isEqualTo(PropertyType.STRING);
     assertThat(aggregateReportPath.multiValues()).isFalse();
