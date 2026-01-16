@@ -233,7 +233,7 @@ public class JacocoTest {
     Path BASE_DIRECTORY = Paths.get("src/test/resources");
     MavenBuild build = MavenBuild.create()
             .setPom(new File(BASE_DIRECTORY.toFile(), "kotlin-jacoco-project/pom.xml"))
-            .setGoals("clean install", "sonar:sonar");
+            .setGoals("clean install", "org.sonarsource.scanner.maven:sonar-maven-plugin:4.0.0.4121:sonar");
     orchestrator.executeBuild(build);
 
     checkCoveredKotlinFile();
