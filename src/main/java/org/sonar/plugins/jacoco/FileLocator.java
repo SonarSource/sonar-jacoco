@@ -19,6 +19,9 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -29,9 +32,14 @@ import org.sonar.api.batch.fs.InputFile;
 public class FileLocator {
   private final ReversePathTree tree = new ReversePathTree();
   private final KotlinFileLocator kotlinFileLocator;
+  private ProjectCoverageContext projectCoverageContext;
 
   public FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
     this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+  }
+
+  void setProjectCoverageContext(ProjectCoverageContext projectCoverageContext) {
+    this.projectCoverageContext = projectCoverageContext;
   }
 
   public FileLocator(List<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
@@ -55,9 +63,30 @@ public class FileLocator {
             packagePath + '/' + fileName;
     String[] path = filePath.split("/");
 
-    InputFile fileWithSuffix = groupName == null ?
-            tree.getFileWithSuffix(path) :
-            tree.getFileWithSuffix(groupName, path);
+    InputFile fileWithSuffix = tree.getFileWithSuffix(path);
+
+    if (groupName != null) {
+      fileWithSuffix = tree.getFileWithSuffix(groupName, path);
+      if (fileWithSuffix == null) {
+        var candidateGroups = projectCoverageContext.getModuleContexts()
+                .stream()
+                .filter(mcc -> groupName.equals(mcc.name))
+                .collect(Collectors.toList());
+        for (ModuleCoverageContext candidateGroup : candidateGroups) {
+          for (Path source : candidateGroup.sources) {
+            if (Files.isDirectory(source)) {
+              Path relativePath = projectCoverageContext.getProjectBaseDir().relativize(source.resolve(Paths.get(filePath)));
+              path  = relativePath.toString().split("/");
+              source.relativize(candidateGroup.baseDir);
+              fileWithSuffix = tree.getFileWithSuffix(path);
+              if (fileWithSuffix != null) {
+                return fileWithSuffix;
+              }
+            }
+          }
+        }
+      }
+    }
 
     if (fileWithSuffix == null && fileName.endsWith(".kt")) {
       fileWithSuffix = kotlinFileLocator.getInputFile(packagePath, fileName);
