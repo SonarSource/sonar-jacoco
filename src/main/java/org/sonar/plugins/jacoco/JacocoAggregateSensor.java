@@ -21,6 +21,7 @@ package org.sonar.plugins.jacoco;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.sonar.api.batch.fs.InputFile;
@@ -32,6 +33,11 @@ import org.sonar.api.utils.log.Loggers;
 
 public class JacocoAggregateSensor implements ProjectSensor {
   private static final Logger LOG = Loggers.get(JacocoAggregateSensor.class);
+  private final ProjectCoverageContext projectCoverageContext;
+
+  public JacocoAggregateSensor(ProjectCoverageContext projectCoverageContext) {
+    this.projectCoverageContext = projectCoverageContext;
+  }
 
   @Override
   public void describe(SensorDescriptor descriptor) {
@@ -40,6 +46,7 @@ public class JacocoAggregateSensor implements ProjectSensor {
 
   @Override
   public void execute(SensorContext context) {
+    this.projectCoverageContext.setProjectBaseDir(Paths.get(context.config().get("sonar.projectBaseDir").get()));
     Path reportPath = null;
     try {
       reportPath = new ReportPathsProvider(context).getAggregateReportPath();
@@ -54,6 +61,7 @@ public class JacocoAggregateSensor implements ProjectSensor {
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
     Stream<InputFile> kotlinInputFileStream = StreamSupport.stream(inputFiles.spliterator(), false).filter(f -> "kotlin".equals(f.language()));
     FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
+    locator.setProjectCoverageContext(projectCoverageContext);
     ReportImporter importer = new ReportImporter(context);
 
     LOG.info("Importing aggregate report {}.", reportPath);

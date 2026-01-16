@@ -33,6 +33,12 @@ import org.sonar.api.utils.log.Loggers;
 public class JacocoSensor implements Sensor {
   private static final Logger LOG = Loggers.get(JacocoSensor.class);
 
+  private final ProjectCoverageContext projectCoverageContext;
+
+  public JacocoSensor(ProjectCoverageContext projectCoverageContext) {
+    this.projectCoverageContext = projectCoverageContext;
+  }
+
   @Override
   public void describe(SensorDescriptor descriptor) {
     descriptor.name("JaCoCo XML Report Importer");
@@ -40,6 +46,7 @@ public class JacocoSensor implements Sensor {
 
   @Override
   public void execute(SensorContext context) {
+    recordModuleCoverageContext(context);
     Collection<Path> reportPaths = new ReportPathsProvider(context).getPaths();
     if (reportPaths.isEmpty()) {
       LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
@@ -64,5 +71,11 @@ public class JacocoSensor implements Sensor {
         LOG.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
       }
     }
+  }
+
+  private void recordModuleCoverageContext(SensorContext sensorContext) {
+    var moduleCoverageContext = ModuleCoverageContext.from(sensorContext);
+    this.projectCoverageContext.add(moduleCoverageContext);
+    LOG.debug(String.format("Recorded module coverage context for aggregation: %s", moduleCoverageContext));
   }
 }
