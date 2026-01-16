@@ -27,6 +27,7 @@ import org.sonar.api.resources.Qualifiers;
 public class JacocoPlugin implements Plugin {
   @Override
   public void define(Context context) {
+    context.addExtension(ProjectCoverageContext.class);
     context.addExtension(JacocoSensor.class);
     context.addExtension(PropertyDefinition.builder(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY)
       .onQualifiers(Qualifiers.PROJECT)
