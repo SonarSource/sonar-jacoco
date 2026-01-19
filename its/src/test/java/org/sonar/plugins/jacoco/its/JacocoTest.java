@@ -1,5 +1,6 @@
 package org.sonar.plugins.jacoco.its;
 
+import com.sonar.orchestrator.container.Edition;
 import com.sonar.orchestrator.junit4.OrchestratorRule;
 import com.sonar.orchestrator.junit4.OrchestratorRuleBuilder;
 import com.sonar.orchestrator.build.BuildResult;
@@ -48,11 +49,13 @@ public class JacocoTest {
 
   @BeforeAll
   static void beforeAll() {
-    String defaultRuntimeVersion = "true".equals(System.getenv("SONARSOURCE_QA")) ? null : "LATEST_RELEASE";
+    String defaultRuntimeVersion = "LATEST_RELEASE";
     OrchestratorRuleBuilder builder = OrchestratorRule.builderEnv()
       .useDefaultAdminCredentialsForBuilds(true)
       .setOrchestratorProperty("orchestrator.workspaceDir", "build")
-      .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion));
+      .setSonarVersion(System.getProperty("sonar.runtimeVersion", defaultRuntimeVersion))
+      .setEdition(Edition.ENTERPRISE)
+      .activateLicense();
 
     String pluginVersion = System.getProperty("jacocoVersion");
     Location pluginLocation;
