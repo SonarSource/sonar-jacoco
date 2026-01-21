@@ -16,13 +16,10 @@ dependencies {
   testImplementation('com.google.code.findbugs:jsr305:3.0.2')
 }
 
-test {
-  useJUnitPlatform()
-}
-
 sonarqube.skipProject = true
 
-task integrationTest(type: Test) {
+test {
+  useJUnitPlatform()
   systemProperty 'java.awt.headless', 'true'
 
   def orchestratorProps = System.getProperties().findAll { it.key.startsWith("orchestrator") || it.key.startsWith("sonar") }.collect { it.key }

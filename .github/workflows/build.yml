@@ -63,6 +63,12 @@ jobs:
           version: 2025.7.12
       - name: Select Java 21
         run: mise use java@21
+      - name: Get GitHub Token for QA Licenses
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/github/token/licenses-ro token | GITHUB_TOKEN;
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v1
         with:
@@ -71,6 +77,7 @@ jobs:
         shell: bash
         env:
           SQ_VERSION: ${{ matrix.item.sq-version }}
+          GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: >-
           ./gradlew -DbuildNumber=$BUILD_NUMBER
           -PintegrationTests=true
