@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.config.Configuration;
@@ -54,8 +55,9 @@ public class ModuleCoverageContext {
   }
 
   static String extractModuleKey(Configuration configuration) {
-    String moduleKey = configuration.get("sonar.moduleKey").isPresent()
-            ? configuration.get("sonar.moduleKey").get()
+    Optional<String> module = configuration.get("sonar.moduleKey");
+    String moduleKey = module.isPresent()
+            ? module.get()
             : configuration.get("sonar.projectKey").get();
     // If the module key contains a colon, we are looking at a subproject and should use the text that follows the last colon in the module key
     int indexOfLastColon = moduleKey.lastIndexOf(':');

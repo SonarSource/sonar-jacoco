@@ -61,7 +61,7 @@ public class ReversePathTree {
       } else {
         for (String candidate : currentNode.children.keySet()) {
           if (module.equals(candidate)) {
-             return currentNode.children.get(candidate).file;
+            return currentNode.children.get(candidate).file;
           }
         }
         return null;

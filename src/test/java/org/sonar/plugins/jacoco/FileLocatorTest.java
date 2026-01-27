@@ -191,7 +191,7 @@ class FileLocatorTest {
     assertThat(locator.getInputFile("app-utils", "", "File.java")).isEqualTo(nestedUtilsFile);
 
     // Test non-existing files
-    assertThat(locator.getInputFile("app", "org/example", "Main.java")).isEqualTo(null);
+    assertThat(locator.getInputFile("app", "org/example", "Main.java")).isNull();
   }
 
 }
