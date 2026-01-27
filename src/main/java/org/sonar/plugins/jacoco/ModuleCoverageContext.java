@@ -54,7 +54,9 @@ public class ModuleCoverageContext {
   }
 
   static String extractModuleKey(Configuration configuration) {
-    String moduleKey = configuration.get("sonar.moduleKey").get();
+    String moduleKey = configuration.get("sonar.moduleKey").isPresent()
+            ? configuration.get("sonar.moduleKey").get()
+            : configuration.get("sonar.projectKey").get();
     // If the module key contains a colon, we are looking at a subproject and should use the text that follows the last colon in the module key
     int indexOfLastColon = moduleKey.lastIndexOf(':');
     if (indexOfLastColon == -1 || moduleKey.length() <= (indexOfLastColon + 1)) {

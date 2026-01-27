@@ -26,27 +26,26 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.config.Configuration;
 import org.sonar.api.config.internal.MapSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ModuleCoverageContextTest {
+class ModuleCoverageContextTest {
   @TempDir
   Path temp;
 
   @Test
-  void extracts_information_for_a_single_module_project() {
+  void uses_the_project_key_as_the_name_when_module_key_is_not_defined() {
     SensorContextTester context = SensorContextTester.create(temp);
     MapSettings settings = new MapSettings();
-    settings.setProperty("sonar.moduleKey", "single-module");
+    settings.setProperty("sonar.projectKey", "single-module-project");
     Path projectBaseDir = temp.toAbsolutePath();
     settings.setProperty("sonar.projectBaseDir", projectBaseDir.toString());
     settings.setProperty("sonar.sources", "src/main/kotlin");
     context.setSettings(settings);
 
     ModuleCoverageContext expected = new ModuleCoverageContext(
-            "single-module",
+            "single-module-project",
             projectBaseDir,
             List.of(projectBaseDir.resolve("src").resolve("main").resolve("kotlin"))
     );
@@ -57,7 +56,6 @@ public class ModuleCoverageContextTest {
   @Test
   void extracts_information_for_multi_module_project() throws IOException {
     Path projectBaseDir = temp.toAbsolutePath();
-    SensorContextTester contextTester = SensorContextTester.create(temp);
     Path moduleBaseDir = temp.resolve("submodule");
     Files.createDirectories(moduleBaseDir);
 
