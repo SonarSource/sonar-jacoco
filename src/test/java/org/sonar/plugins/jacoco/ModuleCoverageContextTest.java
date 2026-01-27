@@ -77,4 +77,21 @@ class ModuleCoverageContextTest {
 
     assertThat(ModuleCoverageContext.from(context)).isEqualTo(expected);
   }
+
+  @Test
+  void equality() {
+    var mcc = new ModuleCoverageContext("name", Path.of("name"), List.of(Path.of("src", "main", "java")));
+    assertThat(mcc)
+            .isEqualTo(mcc)
+            .hasSameHashCodeAs(mcc);
+
+    var otherName = new ModuleCoverageContext("other", Path.of("name"), List.of(Path.of("src", "main", "java")));
+    var otherBaseDir = new ModuleCoverageContext("name", Path.of("other"), List.of(Path.of("src", "main", "java")));
+    var otherSources = new ModuleCoverageContext("name", Path.of("name"), List.of(Path.of("src", "main", "kotlin")));
+    assertThat(mcc)
+            .isNotEqualTo(otherName)
+            .isNotEqualTo(otherBaseDir)
+            .isNotEqualTo(otherSources)
+            .isNotEqualTo(new Object());
+  }
 }
