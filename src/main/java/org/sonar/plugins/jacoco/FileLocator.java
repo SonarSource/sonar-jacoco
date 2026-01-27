@@ -58,40 +58,51 @@ public class FileLocator {
 
   @CheckForNull
   public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
-    String filePath = packagePath.isEmpty() ?
-            fileName :
-            packagePath + '/' + fileName;
+    String filePath = packagePath.isEmpty()
+            ? fileName
+            : (packagePath + '/' + fileName);
     String[] path = filePath.split("/");
 
-    InputFile fileWithSuffix = tree.getFileWithSuffix(path);
-
-    if (groupName != null) {
-      fileWithSuffix = tree.getFileWithSuffix(groupName, path);
-      if (fileWithSuffix == null) {
-        var candidateGroups = projectCoverageContext.getModuleContexts()
-                .stream()
-                .filter(mcc -> groupName.equals(mcc.name))
-                .collect(Collectors.toList());
-        for (ModuleCoverageContext candidateGroup : candidateGroups) {
-          for (Path source : candidateGroup.sources) {
-            if (Files.isDirectory(source)) {
-              Path relativePath = projectCoverageContext.getProjectBaseDir().relativize(source.resolve(Paths.get(filePath)));
-              path  = relativePath.toString().split("/");
-              source.relativize(candidateGroup.baseDir);
-              fileWithSuffix = tree.getFileWithSuffix(path);
-              if (fileWithSuffix != null) {
-                return fileWithSuffix;
-              }
-            }
-          }
-        }
-      }
-    }
+    InputFile fileWithSuffix = groupName == null
+            ? tree.getFileWithSuffix(path)
+            : getInputFileForProject(groupName, filePath);
 
     if (fileWithSuffix == null && fileName.endsWith(".kt")) {
       fileWithSuffix = kotlinFileLocator.getInputFile(packagePath, fileName);
     }
 
     return fileWithSuffix;
+  }
+
+  @CheckForNull
+  private InputFile getInputFileForProject(String groupName, String filePath) {
+    // First, try to look up the file in the tree using the computed path
+    String[] pathSegments = filePath.split("/");
+    InputFile file = tree.getFileWithSuffix(groupName, pathSegments);
+    if (file != null) {
+      return file;
+    }
+    // If the file cannot be found by looking up the tree, due for instance to ambiguities between sub-projects with similar structures,
+    // then we must rebuild the path by identifying the correct sub-project, and building the path from its known sources
+    return projectCoverageContext.getModuleContexts()
+            .stream()
+            .filter(mcc -> groupName.equals(mcc.name))
+            .findFirst()
+            .map(mcc -> getInputFileForModule(mcc, filePath)).orElse(null);
+  }
+
+  @CheckForNull
+  private InputFile getInputFileForModule(ModuleCoverageContext moduleCoverageContext, String filePath) {
+    for (Path source : moduleCoverageContext.sources) {
+      if (Files.isDirectory(source)) {
+        Path relativePath = projectCoverageContext.getProjectBaseDir().relativize(source.resolve(Paths.get(filePath)));
+        String[] segments = relativePath.toString().split("/");
+        InputFile file = tree.getFileWithSuffix(segments);
+        if (file != null) {
+          return file;
+        }
+      }
+    }
+    return null;
   }
 }
