@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class JacocoTest {
+class JacocoTest {
   private final static String PROJECT_KEY = "jacoco-test-project";
   private static final String FILE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/Calc.java";
   private static final String KOTLIN_FILE_KEY = "org.sonarsource.it.projects:kotlin-jacoco-project:src/main/kotlin/CoverMe.kt";
@@ -229,6 +229,16 @@ public class JacocoTest {
             .containsEntry("lines_to_cover", 2.0)
             .containsEntry("uncovered_lines", 0.0)
             .containsEntry("coverage", 100.0);
+
+    Map<String, Double> measuresForLibraryNested = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:nested/library/src/main/java/org/example/Library.java");
+    assertThat(measuresForLibraryNested)
+            .containsEntry("branch_coverage", 100.0)
+            .containsEntry("conditions_to_cover", 2.0)
+            .containsEntry("coverage", 100.0)
+            .containsEntry("line_coverage", 100.0)
+            .containsEntry("lines_to_cover", 7.0)
+            .containsEntry("uncovered_conditions", 0.0)
+            .containsEntry("uncovered_lines", 0.0);
 
     Map<String, Double> measuresForSquarer = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:self-covered/src/main/java/org/example/Squarer.java");
     assertThat(measuresForSquarer)
