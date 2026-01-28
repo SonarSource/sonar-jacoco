@@ -101,6 +101,13 @@ public class FileLocator {
         if (file != null) {
           return file;
         }
+      } else if (source.endsWith(filePath)) {
+        Path relativePah = projectCoverageContext.getProjectBaseDir().relativize(source);
+        String[] segments = relativePah.toString().split("/");
+        InputFile file = tree.getFileWithSuffix(segments);
+        if (file != null) {
+          return file;
+        }
       }
     }
     return null;

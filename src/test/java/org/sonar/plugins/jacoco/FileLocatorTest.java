@@ -145,6 +145,7 @@ class FileLocatorTest {
     InputFile appFile = new TestInputFileBuilder("my-project", myProjectBaseDir.toFile(), appModuleFileJava.toFile()).build();
     InputFile utilsFile = new TestInputFileBuilder("my-project", myProjectBaseDir.toFile(), utilsModuleFileJava.toFile()).build();
     InputFile nestedUtilsFile = new TestInputFileBuilder("my-project", myProjectBaseDir.toFile(), nestedUtilsModuleFileJava.toFile()).build();
+    InputFile nestUtilsPomXmlFile = new TestInputFileBuilder("my-project", myProjectBaseDir.toFile(), nestedUtilsModulePomXml.toFile()).build();
     List<InputFile> filesToIndex = List.of(
             new TestInputFileBuilder("my-project", myProjectBaseDir.toFile(), myProjectPomXml.toFile()).build(),
             appFile,
@@ -152,7 +153,7 @@ class FileLocatorTest {
             utilsFile,
             new TestInputFileBuilder("my-project", myProjectBaseDir.toFile(), utilsModulePomXml.toFile()).build(),
             nestedUtilsFile,
-            new TestInputFileBuilder("my-project", myProjectBaseDir.toFile(), nestedUtilsModulePomXml.toFile()).build()
+            nestUtilsPomXmlFile
     );
 
     FileLocator locator = new FileLocator(filesToIndex, null);
@@ -189,6 +190,7 @@ class FileLocatorTest {
     assertThat(locator.getInputFile("app", "", "File.java")).isEqualTo(appFile);
     assertThat(locator.getInputFile("utils", "", "File.java")).isEqualTo(utilsFile);
     assertThat(locator.getInputFile("app-utils", "", "File.java")).isEqualTo(nestedUtilsFile);
+    assertThat(locator.getInputFile("app-utils", "", "pom.xml")).isEqualTo(nestUtilsPomXmlFile);
 
     // Test non-existing files
     assertThat(locator.getInputFile("app", "org/example", "Main.java")).isNull();
