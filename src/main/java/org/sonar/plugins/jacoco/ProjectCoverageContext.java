@@ -19,29 +19,31 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
-import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.utils.log.Logger;
+import org.sonar.api.scanner.ScannerSide;
 
-class SensorUtils {
-  private SensorUtils() {
-    /* This class should not be instantiated */
+@ScannerSide
+public class ProjectCoverageContext {
+  private Path projectBaseDir;
+
+  private List<ModuleCoverageContext> moduleContexts = new ArrayList<>();
+
+  public List<ModuleCoverageContext> getModuleContexts() {
+    return moduleContexts;
   }
 
-  static void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer, Logger logger) {
-    List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
+  public void add(ModuleCoverageContext moduleContext) {
+    this.moduleContexts.add(moduleContext);
+  }
 
-    for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
-      InputFile inputFile = locator.getInputFile(sourceFile.groupName(), sourceFile.packageName(), sourceFile.name());
-      if (inputFile == null) {
-        continue;
-      }
 
-      try {
-        importer.importCoverage(sourceFile, inputFile);
-      } catch (IllegalStateException e) {
-        logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}", inputFile, e);
-      }
-    }
+  public Path getProjectBaseDir() {
+    return projectBaseDir;
+  }
+
+  public void setProjectBaseDir(Path projectBaseDir) {
+    this.projectBaseDir = projectBaseDir;
   }
 }
