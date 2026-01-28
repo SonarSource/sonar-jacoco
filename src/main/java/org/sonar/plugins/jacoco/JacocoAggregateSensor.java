@@ -60,8 +60,7 @@ public class JacocoAggregateSensor implements ProjectSensor {
     }
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
     Stream<InputFile> kotlinInputFileStream = StreamSupport.stream(inputFiles.spliterator(), false).filter(f -> "kotlin".equals(f.language()));
-    FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
-    locator.setProjectCoverageContext(projectCoverageContext);
+    FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream), projectCoverageContext);
     ReportImporter importer = new ReportImporter(context);
 
     LOG.info("Importing aggregate report {}.", reportPath);

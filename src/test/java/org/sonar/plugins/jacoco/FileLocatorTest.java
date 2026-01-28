@@ -156,8 +156,6 @@ class FileLocatorTest {
             nestUtilsPomXmlFile
     );
 
-    FileLocator locator = new FileLocator(filesToIndex, null);
-
     ProjectCoverageContext pcc = new ProjectCoverageContext();
     pcc.setProjectBaseDir(myProjectBaseDir);
     pcc.add(
@@ -184,7 +182,7 @@ class FileLocatorTest {
             )
     );
 
-    locator.setProjectCoverageContext(pcc);
+    FileLocator locator = new FileLocator(filesToIndex, null, pcc);
 
     // Test existing files
     assertThat(locator.getInputFile("app", "", "File.java")).isEqualTo(appFile);

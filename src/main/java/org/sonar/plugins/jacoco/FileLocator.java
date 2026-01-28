@@ -35,19 +35,24 @@ public class FileLocator {
   private ProjectCoverageContext projectCoverageContext;
 
   public FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
-    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator,null);
   }
 
-  void setProjectCoverageContext(ProjectCoverageContext projectCoverageContext) {
-    this.projectCoverageContext = projectCoverageContext;
+  public FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, ProjectCoverageContext projectCoverageContext) {
+    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator, projectCoverageContext);
   }
 
   public FileLocator(List<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
+    this(inputFiles, kotlinFileLocator, null);
+  }
+
+  public FileLocator(List<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, @Nullable ProjectCoverageContext projectCoverageContext) {
     this.kotlinFileLocator = kotlinFileLocator;
     for (InputFile inputFile : inputFiles) {
       String[] path = inputFile.relativePath().split("/");
       tree.index(inputFile, path);
     }
+    this.projectCoverageContext = projectCoverageContext;
   }
 
   @CheckForNull
