@@ -20,6 +20,13 @@
 package org.sonar.plugins.jacoco;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collections;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -32,14 +39,6 @@ import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.utils.log.LogTesterJUnit5;
 import org.sonar.api.utils.log.LoggerLevel;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,7 +59,7 @@ class JacocoSensorTest {
   @RegisterExtension
   public LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
-  private JacocoSensor sensor = new JacocoSensor();
+  private JacocoSensor sensor = new JacocoSensor(new ProjectCoverageContext());
 
   @Test
   void describe_sensor() {
@@ -73,13 +72,21 @@ class JacocoSensorTest {
   void do_not_index_files_when_no_report_was_found() throws IOException {
     File emptyFolderWithoutReport = temp.newFolder();
     SensorContextTester spiedContext = spy(SensorContextTester.create(emptyFolderWithoutReport));
+    MapSettings settings = new MapSettings()
+      .setProperty("sonar.moduleKey", "module")
+      .setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
+    spiedContext.setSettings(settings);
     DefaultFileSystem spiedFileSystem = spy(spiedContext.fileSystem());
     when(spiedContext.fileSystem()).thenReturn(spiedFileSystem);
     sensor.execute(spiedContext);
     // indexing all files in the filesystem is time consuming and should not be done if there no jacoco reports to import
     // one way to assert this is to ensure there's no calls on fileSystem.inputFiles(...)
     verify(spiedFileSystem, never()).inputFiles(any());
-    assertThat(logTester.logs()).containsExactlyInAnyOrder(
+    var infoLevelLogs = logTester.getLogs(LoggerLevel.INFO)
+            .stream()
+            .map(laa -> laa.getFormattedMsg())
+            .toList();
+    assertThat(infoLevelLogs).containsExactlyInAnyOrder(
       "'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml",
       "No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
   }
@@ -108,7 +115,7 @@ class JacocoSensorTest {
     Path invalidFile = baseDir.resolve("invalid_ci_in_line.xml");
     Path validFile = baseDir.resolve("jacoco.xml");
 
-    when(locator.getInputFile("org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
+    when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
 
     sensor.importReports(Arrays.asList(invalidFile, validFile), locator, importer);
 
@@ -127,6 +134,8 @@ class JacocoSensorTest {
   void test_load_real_report() throws URISyntaxException, IOException {
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "jacoco.xml");
+    settings.setProperty("sonar.moduleKey", "module");
+    settings.setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
     SensorContextTester tester = SensorContextTester.create(temp.getRoot());
     tester.setSettings(settings);
     InputFile inputFile = TestInputFileBuilder
@@ -149,6 +158,8 @@ class JacocoSensorTest {
   void import_failure_do_not_fail_analysis() throws URISyntaxException, IOException {
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "invalid_line_number.xml");
+    settings.setProperty("sonar.moduleKey", "module");
+    settings.setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
     SensorContextTester tester = SensorContextTester.create(temp.getRoot());
     tester.setSettings(settings);
     InputFile inputFile = TestInputFileBuilder

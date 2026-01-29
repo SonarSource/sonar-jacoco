@@ -28,7 +28,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.utils.log.LogTesterJUnit5;
 import org.sonar.api.utils.log.LoggerLevel;
 
@@ -49,19 +48,21 @@ class JacocoAggregateSensorTest {
   @BeforeEach
   void setup() {
     context = SensorContextTester.create(basedir);
+    context.settings().clear();
+    context.settings().setProperty("sonar.projectBaseDir", basedir.toString());
   }
 
   @Test
   void description_name_is_as_expected() {
     SensorDescriptor descriptor = mock(SensorDescriptor.class);
-    var sensor = new JacocoAggregateSensor();
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.describe(descriptor);
     verify(descriptor).name("JaCoCo Aggregate XML Report Importer");
   }
 
   @Test
   void log_missing_report_and_return_early_when_missing_analysis_parameter() {
-    var sensor = new JacocoAggregateSensor();
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
 
     assertThat(logTester.logs(LoggerLevel.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
@@ -69,11 +70,10 @@ class JacocoAggregateSensorTest {
 
   @Test
   void log_missing_report_and_return_early_when_analysis_parameter_points_to_report_that_does_not_exist() {
-    MapSettings settings = new MapSettings();
-    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, "non-existing-report.xml");
-    context.setSettings(settings);
+    context.settings()
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, "non-existing-report.xml");
 
-    var sensor = new JacocoAggregateSensor();
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
 
     assertThat(logTester.logs(LoggerLevel.ERROR)).
@@ -87,11 +87,10 @@ class JacocoAggregateSensorTest {
     Path reportPath = basedir.resolve("my-aggregate-report.xml");
     Files.copy(Path.of("src", "test", "resources", "jacoco.xml"), reportPath);
 
-    MapSettings settings = new MapSettings();
-    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, reportPath.toAbsolutePath().toString());
-    context.setSettings(settings);
+    context.settings()
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, reportPath.toAbsolutePath().toString());
 
-    var sensor = new JacocoAggregateSensor();
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
     assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
     assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(

@@ -11,6 +11,8 @@
 
     <modules>
         <module>library</module>
+        <module>library-clash</module>
+        <module>nested</module>
         <module>library-test</module>
         <module>report</module>
         <module>self-covered</module>

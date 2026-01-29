@@ -19,37 +19,102 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 import org.sonar.api.batch.fs.InputFile;
 
 public class FileLocator {
   private final ReversePathTree tree = new ReversePathTree();
   private final KotlinFileLocator kotlinFileLocator;
+  private ProjectCoverageContext projectCoverageContext;
 
   public FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
-    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator,null);
+  }
+
+  public FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, ProjectCoverageContext projectCoverageContext) {
+    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator, projectCoverageContext);
   }
 
   public FileLocator(List<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
+    this(inputFiles, kotlinFileLocator, null);
+  }
+
+  public FileLocator(List<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, @Nullable ProjectCoverageContext projectCoverageContext) {
     this.kotlinFileLocator = kotlinFileLocator;
     for (InputFile inputFile : inputFiles) {
       String[] path = inputFile.relativePath().split("/");
       tree.index(inputFile, path);
     }
+    this.projectCoverageContext = projectCoverageContext;
   }
 
   @CheckForNull
+  /* Visible for testing */
   public InputFile getInputFile(String packagePath, String fileName) {
-    String filePath = packagePath.isEmpty() ? fileName : (packagePath + "/" + fileName);
+    return getInputFile(null, packagePath, fileName);
+  }
+
+  @CheckForNull
+  public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
+    String filePath = packagePath.isEmpty()
+            ? fileName
+            : (packagePath + '/' + fileName);
     String[] path = filePath.split("/");
-    InputFile fileWithSuffix = tree.getFileWithSuffix(path);
+
+    InputFile fileWithSuffix = groupName == null
+            ? tree.getFileWithSuffix(path)
+            : getInputFileForProject(groupName, filePath);
+
     if (fileWithSuffix == null && fileName.endsWith(".kt")) {
       fileWithSuffix = kotlinFileLocator.getInputFile(packagePath, fileName);
     }
 
     return fileWithSuffix;
+  }
+
+  @CheckForNull
+  private InputFile getInputFileForProject(String groupName, String filePath) {
+    // First, try to look up the file in the tree using the computed path
+    String[] pathSegments = filePath.split("/");
+    InputFile file = tree.getFileWithSuffix(groupName, pathSegments);
+    if (file != null) {
+      return file;
+    }
+    // If the file cannot be found by looking up the tree, due for instance to ambiguities between sub-projects with similar structures,
+    // then we must rebuild the path by identifying the correct sub-project, and building the path from its known sources
+    return projectCoverageContext.getModuleContexts()
+            .stream()
+            .filter(mcc -> groupName.equals(mcc.name))
+            .findFirst()
+            .map(mcc -> getInputFileForModule(mcc, filePath)).orElse(null);
+  }
+
+  @CheckForNull
+  private InputFile getInputFileForModule(ModuleCoverageContext moduleCoverageContext, String filePath) {
+    for (Path source : moduleCoverageContext.sources) {
+      if (Files.isDirectory(source)) {
+        Path relativePath = projectCoverageContext.getProjectBaseDir().relativize(source.resolve(Paths.get(filePath)));
+        String[] segments = relativePath.toString().split("/");
+        InputFile file = tree.getFileWithSuffix(segments);
+        if (file != null) {
+          return file;
+        }
+      } else if (source.endsWith(filePath)) {
+        Path relativePah = projectCoverageContext.getProjectBaseDir().relativize(source);
+        String[] segments = relativePah.toString().split("/");
+        InputFile file = tree.getFileWithSuffix(segments);
+        if (file != null) {
+          return file;
+        }
+      }
+    }
+    return null;
   }
 }
