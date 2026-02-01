@@ -23,17 +23,17 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
 import static org.sonar.plugins.jacoco.SensorUtils.importReports;
 
 public class JacocoSensor implements Sensor {
-  private static final Logger LOG = Loggers.get(JacocoSensor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JacocoSensor.class);
 
   private final ProjectCoverageContext projectCoverageContext;
 
@@ -65,6 +65,6 @@ public class JacocoSensor implements Sensor {
   private void recordModuleCoverageContext(SensorContext sensorContext) {
     var moduleCoverageContext = ModuleCoverageContext.from(sensorContext);
     this.projectCoverageContext.add(moduleCoverageContext);
-    LOG.debug(String.format("Recorded module coverage context for aggregation: %s", moduleCoverageContext));
+    LOG.debug("Recorded module coverage context for aggregation: {}", moduleCoverageContext);
   }
 }

@@ -21,12 +21,12 @@ package org.sonar.plugins.jacoco;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.sonar.api.utils.log.LogTesterJUnit5;
-import org.sonar.api.utils.log.LoggerLevel;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.slf4j.event.Level;
+import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.sonar.plugins.jacoco.WildcardPatternFileScanner.indexOfMatcherSpecialChar;
@@ -101,7 +101,7 @@ class WildcardPatternFileScannerTest {
     Path root = ABSOLUTE_BASE_FOLDER.getRoot();
     assertThat(scan(root, "*.xml")).isEmpty();
     assertThat(logTester.logs()).hasSize(1);
-    assertThat(logTester.logs(LoggerLevel.ERROR)).containsExactly(
+    assertThat(logTester.logs(Level.ERROR)).containsExactly(
       "Failed to get Jacoco report paths: Scanning '" + root + "'" +
         " with pattern '*.xml' threw a IOException: For performance reason, wildcard pattern search is not possible from filesystem root");
   }

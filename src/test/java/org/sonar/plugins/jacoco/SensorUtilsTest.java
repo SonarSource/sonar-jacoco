@@ -25,20 +25,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.event.Level;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.utils.log.LogTesterJUnit5;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.LoggerLevel;
-import org.sonar.api.utils.log.Loggers;
+import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SensorUtilsTest {
 
-  private static final Logger LOG = Loggers.get(SensorUtilsTest.class);
+  private static final Logger LOG = LoggerFactory.getLogger(SensorUtilsTest.class);
 
   @RegisterExtension
   public LogTesterJUnit5 logTester = new LogTesterJUnit5();
@@ -78,9 +81,9 @@ class SensorUtilsTest {
             "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
             invalidFile);
 
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
+    assertThat(logTester.logs(Level.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
-    assertThat(logTester.logs(LoggerLevel.ERROR)).contains(expectedErrorMessage);
+    assertThat(logTester.logs(Level.ERROR)).contains(expectedErrorMessage);
 
     verify(importer, times(1)).importCoverage(any(), eq(inputFile));
   }
@@ -95,6 +98,6 @@ class SensorUtilsTest {
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
     SensorUtils.importReport(parser, locator, importer, LOG);
 
-    assertThat(logTester.logs(LoggerLevel.WARN)).anySatisfy(logMessage -> assertThat(logMessage).contains("File 'null' not found in project sources"));
+    assertThat(logTester.logs(Level.WARN)).anySatisfy(logMessage -> assertThat(logMessage).contains("File 'null' not found in project sources"));
   }
 }
