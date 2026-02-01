@@ -24,15 +24,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.scanner.sensor.ProjectSensor;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
 
 public class JacocoAggregateSensor implements ProjectSensor {
-  private static final Logger LOG = Loggers.get(JacocoAggregateSensor.class);
+  private static final Logger LOG = LoggerFactory.getLogger(JacocoAggregateSensor.class);
   private final ProjectCoverageContext projectCoverageContext;
 
   public JacocoAggregateSensor(ProjectCoverageContext projectCoverageContext) {

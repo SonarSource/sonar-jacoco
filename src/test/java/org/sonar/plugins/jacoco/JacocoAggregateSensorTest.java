@@ -26,10 +26,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.event.Level;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.utils.log.LogTesterJUnit5;
-import org.sonar.api.utils.log.LoggerLevel;
+import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -50,6 +50,7 @@ class JacocoAggregateSensorTest {
     context = SensorContextTester.create(basedir);
     context.settings().clear();
     context.settings().setProperty("sonar.projectBaseDir", basedir.toString());
+    logTester.setLevel(Level.DEBUG);
   }
 
   @Test
@@ -65,7 +66,7 @@ class JacocoAggregateSensorTest {
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
 
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(Level.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
   }
 
   @Test
@@ -76,10 +77,10 @@ class JacocoAggregateSensorTest {
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
 
-    assertThat(logTester.logs(LoggerLevel.ERROR)).
+    assertThat(logTester.logs(Level.ERROR)).
             containsExactly("The aggregate JaCoCo sensor will stop: Aggregate report non-existing-report.xml was not found");
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).isEmpty();
-    assertThat(logTester.logs(LoggerLevel.INFO)).isEmpty();
+    assertThat(logTester.logs(Level.DEBUG)).isEmpty();
+    assertThat(logTester.logs(Level.INFO)).isEmpty();
   }
 
   @Test
@@ -92,8 +93,8 @@ class JacocoAggregateSensorTest {
 
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
-    assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
+    assertThat(logTester.logs(Level.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(Level.INFO)).containsOnly(
             String.format("Importing aggregate report %s.", reportPath)
     );
   }

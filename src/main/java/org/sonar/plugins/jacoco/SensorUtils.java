@@ -20,8 +20,8 @@
 package org.sonar.plugins.jacoco;
 
 import java.util.List;
+import org.slf4j.Logger;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.utils.log.Logger;
 
 class SensorUtils {
   private SensorUtils() {
@@ -40,7 +40,7 @@ class SensorUtils {
       try {
         importer.importCoverage(sourceFile, inputFile);
       } catch (IllegalStateException e) {
-        logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}", inputFile, e);
+        logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}: {}", inputFile, e.getClass().getName(), e.getMessage());
       }
     }
   }
