@@ -24,10 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.event.Level;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.utils.log.LogTesterJUnit5;
-import org.sonar.api.utils.log.LoggerLevel;
+import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -48,7 +48,7 @@ class JacocoAggregateSensorTest {
     context = SensorContextTester.create(basedir);
     context.settings().clear();
     context.settings().setProperty("sonar.projectBaseDir", basedir.toString());
-    logTester.setLevel(LoggerLevel.DEBUG);
+    logTester.setLevel(Level.DEBUG);
   }
 
   @Test
@@ -64,7 +64,7 @@ class JacocoAggregateSensorTest {
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
 
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(Level.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
   }
 
   @Test
@@ -75,11 +75,11 @@ class JacocoAggregateSensorTest {
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
 
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).
+    assertThat(logTester.logs(Level.DEBUG)).
             containsExactly("No aggregate XML report found. No coverage coverage information will be added at project level.");
-    assertThat(logTester.logs(LoggerLevel.WARN))
+    assertThat(logTester.logs(Level.WARN))
             .contains("No coverage report found for pattern: 'non-existing-report.xml'");
-    assertThat(logTester.logs(LoggerLevel.INFO)).isEmpty();
+    assertThat(logTester.logs(Level.INFO)).isEmpty();
   }
 
   @Test
@@ -91,8 +91,8 @@ class JacocoAggregateSensorTest {
 
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
-    assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
+    assertThat(logTester.logs(Level.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(Level.INFO)).containsOnly(
             "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list."
     );
   }
@@ -106,12 +106,12 @@ class JacocoAggregateSensorTest {
 
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).contains("Reading report '" + singModuleReport.toAbsolutePath() + "'");
-    assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
+    assertThat(logTester.logs(Level.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(Level.DEBUG)).contains("Reading report '" + singModuleReport.toAbsolutePath() + "'");
+    assertThat(logTester.logs(Level.INFO)).containsOnly(
             "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list."
     );
-    assertThat(logTester.logs(LoggerLevel.ERROR)).isEmpty();
+    assertThat(logTester.logs(Level.ERROR)).isEmpty();
   }
 
 }

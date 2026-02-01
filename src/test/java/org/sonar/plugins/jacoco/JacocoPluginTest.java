@@ -24,7 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.sonar.api.Plugin;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.resources.Qualifiers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -54,7 +53,7 @@ class JacocoPluginTest {
     assertThat(multiValueReportPaths.category()).isEqualTo("JaCoCo");
     assertThat(multiValueReportPaths.description()).isEqualTo("Paths to JaCoCo XML coverage report files. Each path can be either absolute or relative" +
             " to the project base directory. Wildcard patterns are accepted (*, ** and ?).");
-    assertThat(multiValueReportPaths.qualifiers()).containsOnly(Qualifiers.PROJECT);
+    assertThat(multiValueReportPaths.configScopes()).containsOnly(PropertyDefinition.ConfigScope.PROJECT);
 
     assertThat(arg.getAllValues().get(3)).isEqualTo(JacocoAggregateSensor.class);
     PropertyDefinition aggregateReportPaths = (PropertyDefinition) arg.getAllValues().get(4);
@@ -64,6 +63,6 @@ class JacocoPluginTest {
     assertThat(aggregateReportPaths.category()).isEqualTo("JaCoCo");
     assertThat(aggregateReportPaths.description()).isEqualTo("Paths to JaCoCo XML aggregate coverage report files. Each path can be either absolute or relative" +
             " to the project base directory. Wildcard patterns are accepted (*, ** and ?).");
-    assertThat(aggregateReportPaths.qualifiers()).containsOnly(Qualifiers.PROJECT);
+    assertThat(aggregateReportPaths.configScopes()).containsOnly(PropertyDefinition.ConfigScope.PROJECT);
   }
 }

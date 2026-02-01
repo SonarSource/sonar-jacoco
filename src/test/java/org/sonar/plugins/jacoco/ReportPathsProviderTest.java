@@ -29,10 +29,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.event.Level;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.utils.log.LogTesterJUnit5;
-import org.sonar.api.utils.log.LoggerLevel;
+import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -172,7 +172,7 @@ class ReportPathsProviderTest {
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/unknown.xml");
     assertThat(provider.getPaths()).isEmpty();
     assertThat(logTester.logs()).hasSize(1);
-    assertThat(logTester.logs(LoggerLevel.WARN)).contains("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='target/**/unknown.xml'." +
+    assertThat(logTester.logs(Level.WARN)).contains("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='target/**/unknown.xml'." +
       " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 
@@ -204,7 +204,7 @@ class ReportPathsProviderTest {
 
     assertThat(paths).isEmpty();
     assertThat(logTester.logs()).hasSize(1);
-    assertThat(logTester.logs(LoggerLevel.WARN)).containsExactly("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1'." +
+    assertThat(logTester.logs(Level.WARN)).containsExactly("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1'." +
       " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 
@@ -216,8 +216,8 @@ class ReportPathsProviderTest {
 
     assertThat(paths).isEmpty();
     assertThat(logTester.logs()).hasSize(3);
-    assertThat(logTester.logs(LoggerLevel.WARN)).containsExactly("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1,mypath2'. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
-    assertThat(logTester.logs(LoggerLevel.INFO)).containsExactly(
+    assertThat(logTester.logs(Level.WARN)).containsExactly("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1,mypath2'. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
+    assertThat(logTester.logs(Level.INFO)).containsExactly(
       "Coverage report doesn't exist for pattern: 'mypath1'",
       "Coverage report doesn't exist for pattern: 'mypath2'");
   }
@@ -230,7 +230,7 @@ class ReportPathsProviderTest {
     Collection<Path> paths = provider.getPaths();
     assertThat(paths).containsOnly(baseDir.resolve(mavenPath1), baseDir.resolve(mavenPath2));
     assertThat(logTester.logs()).hasSize(1);
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("'sonar.coverage.jacoco.xmlReportPaths' is not defined." +
+    assertThat(logTester.logs(Level.INFO)).contains("'sonar.coverage.jacoco.xmlReportPaths' is not defined." +
       " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }
 
@@ -239,7 +239,7 @@ class ReportPathsProviderTest {
     Collection<Path> paths = provider.getPaths();
     assertThat(paths).isEmpty();
     assertThat(logTester.logs()).hasSize(1);
-    assertThat(logTester.logs(LoggerLevel.INFO))
+    assertThat(logTester.logs(Level.INFO))
       .containsExactly("'sonar.coverage.jacoco.xmlReportPaths' is not defined." +
         " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
   }

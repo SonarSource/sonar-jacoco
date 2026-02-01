@@ -22,8 +22,8 @@ package org.sonar.plugins.jacoco;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import org.slf4j.Logger;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.utils.log.Logger;
 
 class SensorUtils {
   private SensorUtils() {
@@ -38,7 +38,7 @@ class SensorUtils {
       try {
         SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, logger);
       } catch (Exception e) {
-        logger.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
+        logger.error("Coverage report '{}' could not be read/imported. Error: {}: {}", reportPath, e.getClass().getName(), e.getMessage());
       }
     }
   }
@@ -56,7 +56,7 @@ class SensorUtils {
       try {
         importer.importCoverage(sourceFile, inputFile);
       } catch (IllegalStateException e) {
-        logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}", inputFile, e);
+        logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}: {}", inputFile, e.getClass().getName(), e.getMessage());
       }
     }
   }
