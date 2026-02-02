@@ -93,7 +93,7 @@ class JacocoSensorTest {
 
   @Test
   void do_nothing_if_report_parse_failure() {
-    FileLocator locator = mock(FileLocator.class);
+    ModuleFileLocator locator = mock(ModuleFileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
 
     sensor.importReports(Collections.singletonList(Paths.get("invalid.xml")), locator, importer);
@@ -108,7 +108,7 @@ class JacocoSensorTest {
 
   @Test
   void parse_failure_do_not_fail_analysis() {
-    FileLocator locator = mock(FileLocator.class);
+    ModuleFileLocator locator = mock(ModuleFileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
     InputFile inputFile = mock(InputFile.class);
     Path baseDir = Paths.get("src", "test", "resources");
@@ -179,6 +179,23 @@ class JacocoSensorTest {
       inputFile,
       inputFile);
     assertThat(logTester.logs(LoggerLevel.ERROR)).contains(expectedLogError);
+  }
+
+  @Test
+  void sensor_should_not_fail_when_processing_an_aggregate_report() {
+    var moduleBaseDir = temp.getRoot().toPath().resolve("library").toAbsolutePath().toString();
+    Path aggregateReportPath = Path.of("src", "test", "resources", "jacoco-aggregate.xml");
+    MapSettings settings = new MapSettings()
+            .setProperty("sonar.modules", "library")
+            .setProperty("sonar.moduleKey", "library")
+            .setProperty("sonar.projectBaseDir", moduleBaseDir) // Must be the base dir of the module
+            .setProperty("sonar.coverage.jacoco.xmlReportPaths", aggregateReportPath.toAbsolutePath().toString());
+
+    SensorContextTester context = SensorContextTester.create(temp.getRoot());
+    context.setSettings(settings);
+
+    sensor.execute(context);
+    assertThat(logTester.getLogs(LoggerLevel.ERROR)).isNull();
   }
 
   private Path load(String name) throws URISyntaxException {

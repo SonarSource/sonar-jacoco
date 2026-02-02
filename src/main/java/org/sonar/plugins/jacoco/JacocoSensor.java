@@ -54,13 +54,13 @@ public class JacocoSensor implements Sensor {
     }
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
     Stream<InputFile> kotlinInputFileStream = StreamSupport.stream(inputFiles.spliterator(), false).filter(f -> "kotlin".equals(f.language()));
-    FileLocator locator = new FileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
+    ModuleFileLocator locator = new ModuleFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
     importReports(reportPaths, locator, importer);
   }
 
-  void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer) {
+  void importReports(Collection<Path> reportPaths, ModuleFileLocator locator, ReportImporter importer) {
     LOG.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
 
     for (Path reportPath : reportPaths) {
