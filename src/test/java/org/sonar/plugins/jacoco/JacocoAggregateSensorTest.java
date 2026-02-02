@@ -19,8 +19,6 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +48,7 @@ class JacocoAggregateSensorTest {
     context = SensorContextTester.create(basedir);
     context.settings().clear();
     context.settings().setProperty("sonar.projectBaseDir", basedir.toString());
+    logTester.setLevel(LoggerLevel.DEBUG);
   }
 
   @Test
@@ -83,19 +82,34 @@ class JacocoAggregateSensorTest {
   }
 
   @Test
-  void executes_as_expected() throws IOException {
-    Path reportPath = basedir.resolve("my-aggregate-report.xml");
-    Files.copy(Path.of("src", "test", "resources", "jacoco.xml"), reportPath);
+  void executes_as_expected() {
+    Path aggregateReport = Path.of("src", "test", "resources", "jacoco-aggregate.xml");
 
     context.settings()
-            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, reportPath.toAbsolutePath().toString());
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, aggregateReport.toAbsolutePath().toString());
 
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
     assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
     assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
-            String.format("Importing aggregate report %s.", reportPath)
+            String.format("Importing aggregate report %s.", aggregateReport.toAbsolutePath())
     );
+  }
+
+  @Test
+  void should_not_fail_when_processing_a_single_module_report() {
+    Path singModuleReport = Path.of("src", "test", "resources", "jacoco.xml");
+
+    context.settings()
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, singModuleReport.toAbsolutePath().toString());
+
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
+    sensor.execute(context);
+    assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
+            String.format("Importing aggregate report %s.", singModuleReport.toAbsolutePath())
+    );
+    assertThat(logTester.logs(LoggerLevel.ERROR)).isEmpty();
   }
 
 }

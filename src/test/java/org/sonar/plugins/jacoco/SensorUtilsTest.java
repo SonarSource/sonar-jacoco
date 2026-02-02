@@ -32,7 +32,7 @@ class SensorUtilsTest {
 
   @Test
   void import_coverage() {
-    FileLocator locator = mock(FileLocator.class);
+    ModuleFileLocator locator = mock(ModuleFileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
     XmlReportParser parser = mock(XmlReportParser.class);
     InputFile inputFile = mock(InputFile.class);
@@ -50,7 +50,7 @@ class SensorUtilsTest {
 
   @Test
   void do_nothing_if_file_not_found() {
-    FileLocator locator = mock(FileLocator.class);
+    ModuleFileLocator locator = mock(ModuleFileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
     XmlReportParser parser = mock(XmlReportParser.class);
     XmlReportParser.SourceFile sourceFile = mock(XmlReportParser.SourceFile.class);

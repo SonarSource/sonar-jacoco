@@ -43,21 +43,21 @@ class FileLocatorTest {
   @Test
   void should_match_suffix() {
     InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
-    FileLocator locator = new FileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile);
   }
 
   @Test
   void should_match_default_package() {
     InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/File.java").build();
-    FileLocator locator = new FileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
     assertThat(locator.getInputFile("", "File.java")).isEqualTo(inputFile);
   }
 
   @Test
   void should_not_match() {
     InputFile inputFile = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
-    FileLocator locator = new FileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File2.java")).isNull();
     assertThat(locator.getInputFile("org/sonar/test2", "File.java")).isNull();
   }
@@ -67,7 +67,7 @@ class FileLocatorTest {
     InputFile inputFile1 = new TestInputFileBuilder("module1", "src/main/java/org/sonar/test/File.java").build();
     InputFile inputFile2 = new TestInputFileBuilder("module1", "src/test/java/org/sonar/test/File.java").build();
 
-    FileLocator locator = new FileLocator(Arrays.asList(inputFile1, inputFile2), kotlinFileLocator);
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(inputFile1, inputFile2), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile1);
   }
 
@@ -79,7 +79,7 @@ class FileLocatorTest {
 
     when(kotlinFileLocatorMock.getInputFile("org/sonar/test", "File.kt")).thenReturn(inputFile);
 
-    FileLocator locator = new FileLocator(Arrays.asList(inputFile), kotlinFileLocatorMock);
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(inputFile), kotlinFileLocatorMock);
 
     assertThat(locator.getInputFile("org/sonar/test", "File.kt")).isEqualTo(inputFile);
   }
@@ -91,7 +91,7 @@ class FileLocatorTest {
     KotlinFileLocator kotlinFileLocatorMock = mock(KotlinFileLocator.class);
     when(kotlinFileLocatorMock.getInputFile(any(), any())).thenReturn(inputFile);
 
-    FileLocator locator = new FileLocator(Arrays.asList(inputFile), kotlinFileLocatorMock);
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(inputFile), kotlinFileLocatorMock);
 
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isNull();
     verify(kotlinFileLocatorMock, never()).getInputFile(any(), any());
@@ -177,12 +177,12 @@ class FileLocatorTest {
     pcc.add(
             new ModuleCoverageContext(
                     "app-utils",
-                    utilsModuleBaseDir,
+                    nestedUtilsModuleBaseDir,
                     List.of(nestedUtilsModulePomXml, nestedUtilsModuleJavaSources)
             )
     );
 
-    FileLocator locator = new FileLocator(filesToIndex, null, pcc);
+    ProjectFileLocator locator = new ProjectFileLocator(filesToIndex, null, pcc);
 
     // Test existing files
     assertThat(locator.getInputFile("app", "", "File.java")).isEqualTo(appFile);
@@ -192,6 +192,26 @@ class FileLocatorTest {
 
     // Test non-existing files
     assertThat(locator.getInputFile("app", "org/example", "Main.java")).isNull();
+  }
+
+  @Test
+  void module_file_locator_should_not_fail_when_locating_a_file_with_a_group_but_missing_project_coverage_context() {
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.emptyList(), null);
+    // Should return null and not blow up with an NPE
+    assertThat(locator.getInputFile("group", "org/package", "NotRelevant.java")).isNull();
+  }
+
+  @Test
+  void project_file_locator_should_not_fail_when_locating_a_file_with_a_null_group(@TempDir Path tmp) {
+    var projectCoverageContext = new ProjectCoverageContext();
+    projectCoverageContext.add(new ModuleCoverageContext(
+            "utils",
+            tmp.getRoot().resolve("utils"),
+            List.of(Path.of("src", "main", "java"))
+    ));
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(), null, projectCoverageContext);
+    // Should return null and not blow up with an NPE
+    assertThat(locator.getInputFile(null, "", "DoesNotExist.java")).isNull();
   }
 
 }
