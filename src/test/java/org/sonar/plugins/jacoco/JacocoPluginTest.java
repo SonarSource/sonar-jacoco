@@ -24,7 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.sonar.api.Plugin;
 import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
-import org.sonar.api.resources.Qualifiers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -51,7 +50,7 @@ class JacocoPluginTest {
     assertThat(multiValueReportPaths.key()).isEqualTo("sonar.coverage.jacoco.xmlReportPaths");
     assertThat(multiValueReportPaths.multiValues()).isTrue();
     assertThat(multiValueReportPaths.category()).isEqualTo("JaCoCo");
-    assertThat(multiValueReportPaths.qualifiers()).containsOnly(Qualifiers.PROJECT);
+    assertThat(multiValueReportPaths.configScopes()).containsOnly(PropertyDefinition.ConfigScope.PROJECT);
 
     assertThat(arg.getAllValues().get(3)).isEqualTo(JacocoAggregateSensor.class);
     PropertyDefinition aggregateReportPath = (PropertyDefinition) arg.getAllValues().get(4);
@@ -59,6 +58,6 @@ class JacocoPluginTest {
     assertThat(aggregateReportPath.type()).isEqualTo(PropertyType.STRING);
     assertThat(aggregateReportPath.multiValues()).isFalse();
     assertThat(aggregateReportPath.category()).isEqualTo("JaCoCo");
-    assertThat(aggregateReportPath.qualifiers()).containsOnly(Qualifiers.PROJECT);
+    assertThat(aggregateReportPath.configScopes()).containsOnly(PropertyDefinition.ConfigScope.PROJECT);
   }
 }

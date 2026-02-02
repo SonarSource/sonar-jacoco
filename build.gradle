@@ -52,15 +52,21 @@ jacocoTestReport {
 test.finalizedBy jacocoTestReport
 
 dependencies {
+    compileOnly('com.google.code.findbugs:jsr305:3.0.2')
+    compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:13.2.0.3137')
+
+    implementation('org.slf4j:slf4j-api:2.0.17')
+
     testImplementation(platform('org.junit:junit-bom:5.6.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testImplementation('org.junit.jupiter:junit-jupiter-migrationsupport')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+
+    testImplementation('ch.qos.logback:logback-classic:1.5.27')
     testImplementation('org.mockito:mockito-core:4.9.0')
     testImplementation('org.assertj:assertj-core:3.10.0')
-    compileOnly('com.google.code.findbugs:jsr305:3.0.2')
-    compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:9.17.0.587')
-    testImplementation('org.sonarsource.sonarqube:sonar-plugin-api-impl:9.7.1.62043')
+    testImplementation('org.sonarsource.api.plugin:sonar-plugin-api-test-fixtures:13.2.0.3137')
+    testImplementation('org.sonarsource.sonarqube:sonar-plugin-api-impl:26.1.0.118079')
 }
 
 test {

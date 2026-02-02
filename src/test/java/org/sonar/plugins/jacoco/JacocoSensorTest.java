@@ -31,14 +31,14 @@ import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.rules.TemporaryFolder;
+import org.slf4j.event.Level;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.fs.internal.DefaultFileSystem;
 import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.utils.log.LogTesterJUnit5;
-import org.sonar.api.utils.log.LoggerLevel;
+import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -82,7 +82,7 @@ class JacocoSensorTest {
     // indexing all files in the filesystem is time consuming and should not be done if there no jacoco reports to import
     // one way to assert this is to ensure there's no calls on fileSystem.inputFiles(...)
     verify(spiedFileSystem, never()).inputFiles(any());
-    var infoLevelLogs = logTester.getLogs(LoggerLevel.INFO)
+    var infoLevelLogs = logTester.getLogs(Level.INFO)
             .stream()
             .map(laa -> laa.getFormattedMsg())
             .toList();
@@ -98,10 +98,10 @@ class JacocoSensorTest {
 
     sensor.importReports(Collections.singletonList(Paths.get("invalid.xml")), locator, importer);
 
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
+    assertThat(logTester.logs(Level.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
-    assertThat(logTester.logs(LoggerLevel.ERROR)).hasSize(1);
-    assertThat(logTester.logs(LoggerLevel.ERROR)).allMatch(s -> s.startsWith("Coverage report 'invalid.xml' could not be read/imported"));
+    assertThat(logTester.logs(Level.ERROR)).hasSize(1);
+    assertThat(logTester.logs(Level.ERROR)).allMatch(s -> s.startsWith("Coverage report 'invalid.xml' could not be read/imported"));
 
     verifyNoInteractions(locator, importer);
   }
@@ -123,9 +123,9 @@ class JacocoSensorTest {
       "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
       invalidFile.toString());
 
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
+    assertThat(logTester.logs(Level.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
-    assertThat(logTester.logs(LoggerLevel.ERROR)).contains(expectedErrorMessage);
+    assertThat(logTester.logs(Level.ERROR)).contains(expectedErrorMessage);
 
     verify(importer, times(1)).importCoverage(any(), eq(inputFile));
   }
@@ -151,7 +151,7 @@ class JacocoSensorTest {
     assertThat(tester.conditions(inputFile.key(), 110)).isEqualTo(2);
     assertThat(tester.coveredConditions(inputFile.key(), 110)).isEqualTo(1);
 
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
+    assertThat(logTester.logs(Level.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
   }
 
   @Test
@@ -172,13 +172,13 @@ class JacocoSensorTest {
 
     sensor.execute(tester);
 
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
+    assertThat(logTester.logs(Level.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
     String expectedLogError = String.format(
       "Cannot import coverage information for file '%s', coverage data is invalid. Error: java.lang.IllegalStateException: Line 1001 is out of range in the file %s (lines: 1000)",
       inputFile,
       inputFile);
-    assertThat(logTester.logs(LoggerLevel.ERROR)).contains(expectedLogError);
+    assertThat(logTester.logs(Level.ERROR)).contains(expectedLogError);
   }
 
   private Path load(String name) throws URISyntaxException {
