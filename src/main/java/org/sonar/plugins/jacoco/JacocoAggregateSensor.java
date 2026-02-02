@@ -50,8 +50,14 @@ public class JacocoAggregateSensor implements ProjectSensor {
     Path reportPath = null;
     try {
       reportPath = new ReportPathsProvider(context).getAggregateReportPath();
+      if (reportPath == null) {
+        context.addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "false");
+      } else{
+        context.addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
+      }
     } catch (FileNotFoundException e) {
       LOG.error(String.format("The aggregate JaCoCo sensor will stop: %s", e.getMessage()));
+      context.addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "false");
       return;
     }
     if (reportPath == null) {
