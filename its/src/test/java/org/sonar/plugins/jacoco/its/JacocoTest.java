@@ -209,7 +209,7 @@ class JacocoTest {
             .setPom(rootPom.toFile())
             .addGoal("clean verify")
             .addSonarGoal()
-            .setProperty("sonar.coverage.jacoco.aggregateXmlReportPath", reportLocation.toAbsolutePath().toString());
+            .setProperty("sonar.coverage.jacoco.aggregateXmlReportPaths", reportLocation.toAbsolutePath().toString());
 
     orchestrator.executeBuild(build, true);
 

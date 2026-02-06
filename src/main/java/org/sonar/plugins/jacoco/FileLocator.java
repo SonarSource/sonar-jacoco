@@ -41,7 +41,8 @@ public abstract class FileLocator {
   protected FileLocator(List<InputFile> inputFiles, @Nullable KotlinFileLocator kotlinFileLocator) {
     this.kotlinFileLocator = kotlinFileLocator;
     for (InputFile inputFile : inputFiles) {
-      String[] path = inputFile.relativePath().split(SEPARATOR_REGEX);
+      // InputFile.relativePath() always uses '/' as separator
+      String[] path = inputFile.relativePath().split("/");
       tree.index(inputFile, path);
     }
   }
@@ -50,7 +51,7 @@ public abstract class FileLocator {
   public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
     String filePath = packagePath.isEmpty()
             ? fileName
-            : (packagePath + '/' + fileName);
+            : normalizePath(packagePath + "/" + fileName);
 
     InputFile file = lookup(groupName, filePath);
 
@@ -62,4 +63,9 @@ public abstract class FileLocator {
 
   @CheckForNull
   protected abstract InputFile lookup(@Nullable String groupName, String filePath);
+
+  private static String normalizePath(String path) {
+    return path.replace("/", File.separator);
+  }
+
 }

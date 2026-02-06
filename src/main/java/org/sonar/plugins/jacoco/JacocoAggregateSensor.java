@@ -22,6 +22,7 @@ package org.sonar.plugins.jacoco;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.sonar.api.batch.fs.InputFile;
@@ -30,6 +31,8 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.scanner.sensor.ProjectSensor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
+
+import static org.sonar.plugins.jacoco.SensorUtils.importReports;
 
 public class JacocoAggregateSensor implements ProjectSensor {
   private static final Logger LOG = Loggers.get(JacocoAggregateSensor.class);
@@ -47,14 +50,8 @@ public class JacocoAggregateSensor implements ProjectSensor {
   @Override
   public void execute(SensorContext context) {
     this.projectCoverageContext.setProjectBaseDir(Paths.get(context.config().get("sonar.projectBaseDir").get()));
-    Path reportPath = null;
-    try {
-      reportPath = new ReportPathsProvider(context).getAggregateReportPath();
-    } catch (FileNotFoundException e) {
-      LOG.error(String.format("The aggregate JaCoCo sensor will stop: %s", e.getMessage()));
-      return;
-    }
-    if (reportPath == null) {
+    Set<Path> reportPaths = new ReportPathsProvider(context).getAggregateReportPaths();
+    if (reportPaths.isEmpty()) {
       LOG.debug("No aggregate XML report found. No coverage coverage information will be added at project level.");
       return;
     }
@@ -63,7 +60,6 @@ public class JacocoAggregateSensor implements ProjectSensor {
     FileLocator locator = new ProjectFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream), projectCoverageContext);
     ReportImporter importer = new ReportImporter(context);
 
-    LOG.info("Importing aggregate report {}.", reportPath);
-    SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, LOG);
+    importReports(reportPaths, locator, importer, LOG);
   }
 }

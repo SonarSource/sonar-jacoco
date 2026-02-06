@@ -70,14 +70,15 @@ class JacocoAggregateSensorTest {
   @Test
   void log_missing_report_and_return_early_when_analysis_parameter_points_to_report_that_does_not_exist() {
     context.settings()
-            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, "non-existing-report.xml");
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, "non-existing-report.xml");
 
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
 
-    assertThat(logTester.logs(LoggerLevel.ERROR)).
-            containsExactly("The aggregate JaCoCo sensor will stop: Aggregate report non-existing-report.xml was not found");
-    assertThat(logTester.logs(LoggerLevel.DEBUG)).isEmpty();
+    assertThat(logTester.logs(LoggerLevel.DEBUG)).
+            containsExactly("No aggregate XML report found. No coverage coverage information will be added at project level.");
+    assertThat(logTester.logs(LoggerLevel.WARN))
+            .contains("No coverage report found for pattern: 'non-existing-report.xml'");
     assertThat(logTester.logs(LoggerLevel.INFO)).isEmpty();
   }
 
@@ -86,13 +87,13 @@ class JacocoAggregateSensorTest {
     Path aggregateReport = Path.of("src", "test", "resources", "jacoco-aggregate.xml");
 
     context.settings()
-            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, aggregateReport.toAbsolutePath().toString());
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, aggregateReport.toAbsolutePath().toString());
 
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
     assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
     assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
-            String.format("Importing aggregate report %s.", aggregateReport.toAbsolutePath())
+            "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list."
     );
   }
 
@@ -101,13 +102,14 @@ class JacocoAggregateSensorTest {
     Path singModuleReport = Path.of("src", "test", "resources", "jacoco.xml");
 
     context.settings()
-            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, singModuleReport.toAbsolutePath().toString());
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, singModuleReport.toAbsolutePath().toString());
 
     var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
     sensor.execute(context);
     assertThat(logTester.logs(LoggerLevel.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
+    assertThat(logTester.logs(LoggerLevel.DEBUG)).contains("Reading report '" + singModuleReport.toAbsolutePath() + "'");
     assertThat(logTester.logs(LoggerLevel.INFO)).containsOnly(
-            String.format("Importing aggregate report %s.", singModuleReport.toAbsolutePath())
+            "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list."
     );
     assertThat(logTester.logs(LoggerLevel.ERROR)).isEmpty();
   }

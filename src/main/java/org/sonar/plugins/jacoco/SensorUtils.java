@@ -19,6 +19,8 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.utils.log.Logger;
@@ -26,6 +28,19 @@ import org.sonar.api.utils.log.Logger;
 class SensorUtils {
   private SensorUtils() {
     /* This class should not be instantiated */
+  }
+
+  static void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer, Logger logger) {
+    logger.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
+
+    for (Path reportPath : reportPaths) {
+      logger.debug("Reading report '{}'", reportPath);
+      try {
+        SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, logger);
+      } catch (Exception e) {
+        logger.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
+      }
+    }
   }
 
   static void importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer, Logger logger) {
