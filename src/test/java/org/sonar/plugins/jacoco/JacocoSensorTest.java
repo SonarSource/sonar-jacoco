@@ -93,41 +93,18 @@ class JacocoSensorTest {
 
   @Test
   void do_nothing_if_report_parse_failure() {
-    ModuleFileLocator locator = mock(ModuleFileLocator.class);
-    ReportImporter importer = mock(ReportImporter.class);
+    SensorContextTester tester = SensorContextTester.create(temp.getRoot());
+    MapSettings settings = new MapSettings()
+            .setProperty("sonar.moduleKey", "module")
+            .setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
+    settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "invalid.xml");
+    tester.setSettings(settings);
+    sensor.execute(tester);
 
-    sensor.importReports(Collections.singletonList(Paths.get("invalid.xml")), locator, importer);
+    assertThat(logTester.logs(LoggerLevel.INFO)).contains("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
 
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
-
-    assertThat(logTester.logs(LoggerLevel.ERROR)).hasSize(1);
+    assertThat(logTester.logs(LoggerLevel.WARN)).hasSize(1);
     assertThat(logTester.logs(LoggerLevel.ERROR)).allMatch(s -> s.startsWith("Coverage report 'invalid.xml' could not be read/imported"));
-
-    verifyNoInteractions(locator, importer);
-  }
-
-  @Test
-  void parse_failure_do_not_fail_analysis() {
-    ModuleFileLocator locator = mock(ModuleFileLocator.class);
-    ReportImporter importer = mock(ReportImporter.class);
-    InputFile inputFile = mock(InputFile.class);
-    Path baseDir = Paths.get("src", "test", "resources");
-    Path invalidFile = baseDir.resolve("invalid_ci_in_line.xml");
-    Path validFile = baseDir.resolve("jacoco.xml");
-
-    when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
-
-    sensor.importReports(Arrays.asList(invalidFile, validFile), locator, importer);
-
-    String expectedErrorMessage = String.format(
-      "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
-      invalidFile.toString());
-
-    assertThat(logTester.logs(LoggerLevel.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
-
-    assertThat(logTester.logs(LoggerLevel.ERROR)).contains(expectedErrorMessage);
-
-    verify(importer, times(1)).importCoverage(any(), eq(inputFile));
   }
 
   @Test

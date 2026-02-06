@@ -26,11 +26,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.annotation.CheckForNull;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
@@ -38,9 +36,12 @@ import org.sonar.api.utils.log.Loggers;
 class ReportPathsProvider {
   private static final Logger LOG = Loggers.get(ReportPathsProvider.class);
 
-  private static final String[] DEFAULT_PATHS = {"target/site/jacoco/jacoco.xml", "target/site/jacoco-it/jacoco.xml", "build/reports/jacoco/test/jacocoTestReport.xml"};
+  private static final String[] DEFAULT_PATHS = {
+    "target/site/jacoco/jacoco.xml",
+    "target/site/jacoco-it/jacoco.xml",
+    "build/reports/jacoco/test/jacocoTestReport.xml"};
 
-  static final String AGGREGATE_REPORT_PATH_PROPERTY_KEY = "sonar.coverage.jacoco.aggregateXmlReportPath";
+  static final String AGGREGATE_REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.aggregateXmlReportPaths";
   static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
 
   private final SensorContext context;
@@ -84,22 +85,23 @@ class ReportPathsProvider {
   }
 
   /**
-   * Checks if the aggregate report path property is set, finds the first path matching and returns it.
+   * Checks if the aggregate report path property is set, finds the paths matching and returns them.
    *
-   * @return Path to the existing aggregate report if the property is set. Null if none specified.
-   * @throws FileNotFoundException If a path is set but does not match with an existing file.
+   * @return A Set of Path to the existing aggregate report files if the property is set. An empty set if none specified.
    */
-  @CheckForNull
-  Path getAggregateReportPath() throws FileNotFoundException {
-    Optional<String> property = context.config().get(AGGREGATE_REPORT_PATH_PROPERTY_KEY);
-    if (!property.isPresent()) {
-      return null;
+  Set<Path> getAggregateReportPaths() {
+    Set<Path> reportPaths = new HashSet<>();
+    String[] reportPathsParam = context.config().getStringArray(AGGREGATE_REPORT_PATHS_PROPERTY_KEY);
+    for (String reportPathPattern : reportPathsParam) {
+      List<Path> scanned = WildcardPatternFileScanner.scan(context.fileSystem().baseDir().toPath(), reportPathPattern);
+      if (scanned.isEmpty()) {
+        LOG.warn(String.format("No coverage report found for pattern: '%s'", reportPathPattern));
+      } else {
+        reportPaths.addAll(scanned);
+      }
     }
-    List<Path> scanned = WildcardPatternFileScanner.scan(context.fileSystem().baseDir().toPath(), property.get());
-    if (scanned.isEmpty()) {
-      throw new FileNotFoundException(String.format("Aggregate report %s was not found", property.get()));
-    }
-    return scanned.get(0);
+
+    return reportPaths;
   }
 
 

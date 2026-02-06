@@ -30,6 +30,8 @@ import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
+import static org.sonar.plugins.jacoco.SensorUtils.importReports;
+
 public class JacocoSensor implements Sensor {
   private static final Logger LOG = Loggers.get(JacocoSensor.class);
 
@@ -57,20 +59,7 @@ public class JacocoSensor implements Sensor {
     ModuleFileLocator locator = new ModuleFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer);
-  }
-
-  void importReports(Collection<Path> reportPaths, ModuleFileLocator locator, ReportImporter importer) {
-    LOG.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
-
-    for (Path reportPath : reportPaths) {
-      LOG.debug("Reading report '{}'", reportPath);
-      try {
-        SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, LOG);
-      } catch (Exception e) {
-        LOG.error("Coverage report '{}' could not be read/imported. Error: {}", reportPath, e);
-      }
-    }
+    importReports(reportPaths, locator, importer, LOG);
   }
 
   private void recordModuleCoverageContext(SensorContext sensorContext) {

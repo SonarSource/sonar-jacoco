@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -35,7 +36,6 @@ import org.sonar.api.utils.log.LogTesterJUnit5;
 import org.sonar.api.utils.log.LoggerLevel;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ReportPathsProviderTest {
   @TempDir
@@ -68,17 +68,49 @@ class ReportPathsProviderTest {
   }
 
   @Test
+  void should_return_no_duplicate_paths() throws IOException {
+    Path report = temp.resolve("aggregate-report.xml");
+    Files.createDirectories(report.getParent());
+    Files.createFile(report);
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, report + "," + report);
+    assertThat(provider.getAggregateReportPaths())
+      .withFailMessage("We expect no duplicates")
+      .isEqualTo(Set.of(report));
+  }
+
+  @Test
+  void should_return_multiple_paths_when_aggregate_paths_property_is_provided() throws IOException {
+    Path report = temp.resolve("aggregate-report.xml");
+    Path report2 = temp.resolve("aggregate-report2.xml");
+    Files.createDirectories(report.getParent());
+    Files.createFile(report);
+    Files.createFile(report2);
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, report + "," + report2);
+    assertThat(provider.getAggregateReportPaths()).isEqualTo(Set.of(report, report2));
+  }
+
+  @Test
   void should_return_null_if_the_aggregate_report_property_is_not_defined() throws FileNotFoundException {
-    assertThat(provider.getAggregateReportPath()).isNull();
+    assertThat(provider.getAggregateReportPaths()).isEmpty();
   }
 
   @Test
   void should_throw_an_exception_if_the_aggregate_report_property_points_to_a_file_that_should_not_exist() {
     Path reportThatDoesNotExist = temp.resolve("report-that-does-not-exist.xml");
-    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, reportThatDoesNotExist.toString());
-    assertThatThrownBy(() -> assertThat(provider.getAggregateReportPath()).isNull())
-            .isInstanceOf(FileNotFoundException.class)
-            .hasMessage(String.format("Aggregate report %s was not found", reportThatDoesNotExist));
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, reportThatDoesNotExist.toString());
+    assertThat(provider.getAggregateReportPaths()).isEmpty();
+  }
+
+  @Test
+  void should_return_all_the_expected_report_paths_without_duplicates() throws IOException {
+    Path report = temp.resolve("aggregate-report.xml");
+    Path report2 = temp.resolve("submodule").resolve("aggregate-report.xml");
+    Files.createDirectories(report.getParent());
+    Files.createDirectories(report2.getParent());
+    Files.createFile(report);
+    Files.createFile(report2);
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, report + "," + report + "," + report2);
+    assertThat(provider.getAggregateReportPaths()).isEqualTo(Set.of(report, report2));
   }
 
   @Test
@@ -86,8 +118,8 @@ class ReportPathsProviderTest {
     Path report = temp.resolve("aggregate-report.xml");
     Files.createDirectories(report.getParent());
     Files.createFile(report);
-    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATH_PROPERTY_KEY, report.toString());
-    assertThat(provider.getAggregateReportPath()).isEqualTo(report);
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, report.toString());
+    assertThat(provider.getAggregateReportPaths()).isEqualTo(Set.of(report));
   }
 
   @Test
