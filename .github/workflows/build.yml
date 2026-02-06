@@ -54,12 +54,20 @@ jobs:
           version: 2025.7.12
       - name: Select Java 17
         run: mise use java@17
+      - name: Get GitHub Token for QA Licenses
+        id: secrets
+        uses: SonarSource/vault-action-wrapper@v3
+        with:
+          secrets: |
+            development/github/token/licenses-ro token | GITHUB_TOKEN;
+      - name: Configure Gradle
+        uses: SonarSource/ci-github-actions/config-gradle@v1
+        with:
+          artifactory-reader-role: private-reader
       - name: Build
-        run: |
-          ./gradlew -D"sonar.runtimeVersion"="LATEST_RELEASE[2025.4]" \
-          -DbuildNumber=$BUILD_NUMBER \
-          --no-daemon --console plain --info --stacktrace \
-          build test -PintegrationTests=true
+        env:
+          GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+        run: ./gradlew -D"sonar.runtimeVersion"="LATEST_RELEASE[2025.4]" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
 
   qa:
     needs: [build]
