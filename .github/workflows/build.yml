@@ -38,6 +38,29 @@ jobs:
           artifactory-reader-role: private-reader
           artifactory-deployer-role: qa-deployer
 
+  build-qa-windows:
+    name: Build and QA Windows
+    needs: build
+    runs-on: github-windows-latest-m
+    permissions:
+      id-token: write  # Required for Vault OIDC authentication
+      contents: write  # Required for repository access and tagging
+    env:
+      BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
+    steps:
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+        with:
+          version: 2025.7.12
+      - name: Select Java 17
+        run: mise use java@17
+      - name: Build
+        run: |
+          ./gradlew -D"sonar.runtimeVersion"="LATEST_RELEASE[2025.4]" \
+          -DbuildNumber=$BUILD_NUMBER \
+          --no-daemon --console plain --info --stacktrace \
+          build test -PintegrationTests=true
+
   qa:
     needs: [build]
     if: ${{ needs.build.outputs.deployed }}
@@ -87,7 +110,7 @@ jobs:
           build test
 
   promote:
-    needs: [build, qa]
+    needs: [build, build-qa-windows, qa]
     if: ${{ needs.build.outputs.deployed }}
     runs-on: github-ubuntu-latest-s
     name: Promote
