@@ -40,8 +40,7 @@ public class JacocoPlugin implements Plugin {
     context.addExtension(JacocoAggregateSensor.class);
     context.addExtension(PropertyDefinition.builder(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY)
       .onQualifiers(Qualifiers.PROJECT)
-      .type(PropertyType.STRING)
-      .multiValues(false)
+      .multiValues(true)
       .category("JaCoCo")
       .description("Paths to JaCoCo XML aggregate coverage report files. Each path can be either absolute or relative" +
               " to the project base directory. Wildcard patterns are accepted (*, ** and ?).")

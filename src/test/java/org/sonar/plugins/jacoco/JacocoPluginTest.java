@@ -50,6 +50,7 @@ class JacocoPluginTest {
     PropertyDefinition multiValueReportPaths = (PropertyDefinition) arg.getAllValues().get(2);
     assertThat(multiValueReportPaths.key()).isEqualTo("sonar.coverage.jacoco.xmlReportPaths");
     assertThat(multiValueReportPaths.multiValues()).isTrue();
+    assertThat(multiValueReportPaths.type()).isEqualTo(PropertyType.STRING);
     assertThat(multiValueReportPaths.category()).isEqualTo("JaCoCo");
     assertThat(multiValueReportPaths.description()).isEqualTo("Paths to JaCoCo XML coverage report files. Each path can be either absolute or relative" +
             " to the project base directory. Wildcard patterns are accepted (*, ** and ?).");
@@ -59,7 +60,7 @@ class JacocoPluginTest {
     PropertyDefinition aggregateReportPath = (PropertyDefinition) arg.getAllValues().get(4);
     assertThat(aggregateReportPath.key()).isEqualTo("sonar.coverage.jacoco.aggregateXmlReportPaths");
     assertThat(aggregateReportPath.type()).isEqualTo(PropertyType.STRING);
-    assertThat(aggregateReportPath.multiValues()).isFalse();
+    assertThat(aggregateReportPath.multiValues()).isTrue();
     assertThat(aggregateReportPath.category()).isEqualTo("JaCoCo");
     assertThat(aggregateReportPath.description()).isEqualTo("Paths to JaCoCo XML aggregate coverage report files. Each path can be either absolute or relative" +
             " to the project base directory. Wildcard patterns are accepted (*, ** and ?).");
