@@ -57,13 +57,13 @@ class JacocoPluginTest {
     assertThat(multiValueReportPaths.qualifiers()).containsOnly(Qualifiers.PROJECT);
 
     assertThat(arg.getAllValues().get(3)).isEqualTo(JacocoAggregateSensor.class);
-    PropertyDefinition aggregateReportPath = (PropertyDefinition) arg.getAllValues().get(4);
-    assertThat(aggregateReportPath.key()).isEqualTo("sonar.coverage.jacoco.aggregateXmlReportPaths");
-    assertThat(aggregateReportPath.type()).isEqualTo(PropertyType.STRING);
-    assertThat(aggregateReportPath.multiValues()).isTrue();
-    assertThat(aggregateReportPath.category()).isEqualTo("JaCoCo");
-    assertThat(aggregateReportPath.description()).isEqualTo("Paths to JaCoCo XML aggregate coverage report files. Each path can be either absolute or relative" +
+    PropertyDefinition aggregateReportPaths = (PropertyDefinition) arg.getAllValues().get(4);
+    assertThat(aggregateReportPaths.key()).isEqualTo("sonar.coverage.jacoco.aggregateXmlReportPaths");
+    assertThat(aggregateReportPaths.type()).isEqualTo(PropertyType.STRING);
+    assertThat(aggregateReportPaths.multiValues()).isTrue();
+    assertThat(aggregateReportPaths.category()).isEqualTo("JaCoCo");
+    assertThat(aggregateReportPaths.description()).isEqualTo("Paths to JaCoCo XML aggregate coverage report files. Each path can be either absolute or relative" +
             " to the project base directory. Wildcard patterns are accepted (*, ** and ?).");
-    assertThat(aggregateReportPath.qualifiers()).containsOnly(Qualifiers.PROJECT);
+    assertThat(aggregateReportPaths.qualifiers()).containsOnly(Qualifiers.PROJECT);
   }
 }
