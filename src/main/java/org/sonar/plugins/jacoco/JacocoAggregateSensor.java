@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.io.FileNotFoundException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
