@@ -49,6 +49,7 @@ class SensorUtils {
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
       InputFile inputFile = locator.getInputFile(sourceFile.groupName(), sourceFile.packageName(), sourceFile.name());
       if (inputFile == null) {
+        logger.warn("File '{}' not found in project sources", sourceFile.name());
         continue;
       }
 

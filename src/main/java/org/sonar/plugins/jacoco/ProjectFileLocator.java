@@ -24,9 +24,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
+
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 import org.sonar.api.batch.fs.InputFile;
 
 public class ProjectFileLocator extends FileLocator {
+
+  private static final Logger LOG = Loggers.get(ProjectFileLocator.class);
+
   private ProjectCoverageContext projectCoverageContext;
 
   public ProjectFileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, ProjectCoverageContext projectCoverageContext) {
@@ -81,6 +87,7 @@ public class ProjectFileLocator extends FileLocator {
         }
       }
     }
+    LOG.debug("File '{}' not found in module '{}'", filePath, moduleCoverageContext.name);
     return null;
   }
 }

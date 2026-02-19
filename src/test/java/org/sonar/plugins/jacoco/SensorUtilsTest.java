@@ -93,8 +93,8 @@ class SensorUtilsTest {
     XmlReportParser.SourceFile sourceFile = mock(XmlReportParser.SourceFile.class);
 
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
-    SensorUtils.importReport(parser, locator, importer, null);
+    SensorUtils.importReport(parser, locator, importer, LOG);
 
-    verifyNoInteractions(importer);
+    assertThat(logTester.logs(LoggerLevel.WARN)).anySatisfy(logMessage -> assertThat(logMessage).contains("File 'null' not found in project sources"));
   }
 }
