@@ -95,6 +95,6 @@ class SensorUtilsTest {
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
     SensorUtils.importReport(parser, locator, importer, LOG);
 
-    assertThat(logTester.logs()).anySatisfy(logMessage -> assertThat(logMessage).contains("File 'null' not found in project sources"));
+    assertThat(logTester.logs(LoggerLevel.WARN)).anySatisfy(logMessage -> assertThat(logMessage).contains("File 'null' not found in project sources"));
   }
 }
