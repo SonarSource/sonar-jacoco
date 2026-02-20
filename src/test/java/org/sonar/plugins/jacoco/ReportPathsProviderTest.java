@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,7 +89,7 @@ class ReportPathsProviderTest {
   }
 
   @Test
-  void should_return_null_if_the_aggregate_report_property_is_not_defined() throws FileNotFoundException {
+  void should_return_null_if_the_aggregate_report_property_is_not_defined() {
     assertThat(provider.getAggregateReportPaths()).isEmpty();
   }
 
@@ -198,7 +197,7 @@ class ReportPathsProviderTest {
   }
 
   @Test
-  void should_return_empty_if_provided_and_default_does_not_exist() throws IOException {
+  void should_return_empty_if_provided_and_default_does_not_exist() {
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1");
 
     Collection<Path> paths = provider.getPaths();
@@ -210,7 +209,7 @@ class ReportPathsProviderTest {
   }
 
   @Test
-  void should_return_empty_with_log_details_if_several_provided_paths_does_not_exist() throws IOException {
+  void should_return_empty_with_log_details_if_several_provided_paths_does_not_exist() {
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "mypath1,mypath2,");
 
     Collection<Path> paths = provider.getPaths();
@@ -236,7 +235,7 @@ class ReportPathsProviderTest {
   }
 
   @Test
-  void should_return_empty_if_nothing_specified_and_default_doesnt_exist() throws IOException {
+  void should_return_empty_if_nothing_specified_and_default_doesnt_exist() {
     Collection<Path> paths = provider.getPaths();
     assertThat(paths).isEmpty();
     assertThat(logTester.logs()).hasSize(1);

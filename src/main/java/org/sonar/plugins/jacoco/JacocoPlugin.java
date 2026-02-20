@@ -20,7 +20,6 @@
 package org.sonar.plugins.jacoco;
 
 import org.sonar.api.Plugin;
-import org.sonar.api.PropertyType;
 import org.sonar.api.config.PropertyDefinition;
 import org.sonar.api.resources.Qualifiers;
 
