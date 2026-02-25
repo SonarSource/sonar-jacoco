@@ -59,7 +59,7 @@ dependencies {
     testImplementation('org.mockito:mockito-core:4.9.0')
     testImplementation('org.assertj:assertj-core:3.10.0')
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
-    compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:9.17.0.587')
+    compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:13.5.0.4319')
     testImplementation('org.sonarsource.sonarqube:sonar-plugin-api-impl:9.7.1.62043')
 }
 
