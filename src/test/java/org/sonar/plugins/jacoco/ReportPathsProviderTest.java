@@ -35,6 +35,9 @@ import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 class ReportPathsProviderTest {
   @TempDir
@@ -55,7 +58,7 @@ class ReportPathsProviderTest {
     baseDir = temp.resolve("baseDir");
     Files.createDirectory(baseDir);
     settings = new MapSettings();
-    tester = SensorContextTester.create(baseDir);
+    tester = spy(SensorContextTester.create(baseDir));
     tester.setSettings(settings);
     provider = new ReportPathsProvider(tester);
   }
@@ -75,6 +78,8 @@ class ReportPathsProviderTest {
     assertThat(provider.getAggregateReportPaths())
       .withFailMessage("We expect no duplicates")
       .isEqualTo(Set.of(report));
+
+    verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
   @Test
@@ -86,18 +91,29 @@ class ReportPathsProviderTest {
     Files.createFile(report2);
     settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, report + "," + report2);
     assertThat(provider.getAggregateReportPaths()).isEqualTo(Set.of(report, report2));
+
+    verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
   @Test
-  void should_return_null_if_the_aggregate_report_property_is_not_defined() {
+  void should_return_an_empty_list_if_the_aggregate_report_property_is_not_defined() {
     assertThat(provider.getAggregateReportPaths()).isEmpty();
+    verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "false");
   }
 
   @Test
-  void should_throw_an_exception_if_the_aggregate_report_property_points_to_a_file_that_should_not_exist() {
+  void should_return_an_empty_set_when_the_aggregate_report_property_is_set_but_empty() {
+    settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, "");
+    assertThat(provider.getAggregateReportPaths()).isEmpty();
+    verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
+  }
+
+  @Test
+  void should_return_an_empty_set_when_the_aggregate_report_property_points_to_a_file_that_does_not_exist() {
     Path reportThatDoesNotExist = temp.resolve("report-that-does-not-exist.xml");
     settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, reportThatDoesNotExist.toString());
     assertThat(provider.getAggregateReportPaths()).isEmpty();
+    verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
   @Test
@@ -110,6 +126,7 @@ class ReportPathsProviderTest {
     Files.createFile(report2);
     settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, report + "," + report + "," + report2);
     assertThat(provider.getAggregateReportPaths()).isEqualTo(Set.of(report, report2));
+    verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
   @Test
@@ -119,6 +136,7 @@ class ReportPathsProviderTest {
     Files.createFile(report);
     settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, report.toString());
     assertThat(provider.getAggregateReportPaths()).isEqualTo(Set.of(report));
+    verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
   @Test
