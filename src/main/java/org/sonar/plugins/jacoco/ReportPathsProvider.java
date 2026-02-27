@@ -91,6 +91,10 @@ class ReportPathsProvider {
   Set<Path> getAggregateReportPaths() {
     Set<Path> reportPaths = new HashSet<>();
     String[] reportPathsParam = context.config().getStringArray(AGGREGATE_REPORT_PATHS_PROPERTY_KEY);
+    context.addTelemetryProperty(
+            TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET,
+            context.config().hasKey(AGGREGATE_REPORT_PATHS_PROPERTY_KEY) ? "true" : "false"
+    );
     for (String reportPathPattern : reportPathsParam) {
       List<Path> scanned = WildcardPatternFileScanner.scan(context.fileSystem().baseDir().toPath(), reportPathPattern);
       if (scanned.isEmpty()) {
