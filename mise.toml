@@ -1,6 +1,6 @@
 [tools]
 java = ["21", "17"]
-gradle = "9.2"
+gradle = "9.3.1"
 
 [alias.java.versions]
 "21" = "corretto-21"
