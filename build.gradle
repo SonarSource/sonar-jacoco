@@ -10,7 +10,7 @@ plugins {
 }
 
 licenseGenerationConfig {
-    projectLicenseFile.set(file("../LICENSE.txt"))
+    projectLicenseFile.set(file("LICENSE.txt"))
 }
 
 apply plugin: 'com.jfrog.artifactory'
