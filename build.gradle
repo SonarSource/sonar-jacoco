@@ -6,6 +6,11 @@ plugins {
     id 'maven-publish'
     id 'com.github.hierynomus.license' version '0.16.1'
     id 'signing'
+    id "org.sonarsource.cloud-native.license-file-generator"
+}
+
+licenseGenerationConfig {
+    projectLicenseFile.set(file("../LICENSE.txt"))
 }
 
 apply plugin: 'com.jfrog.artifactory'
