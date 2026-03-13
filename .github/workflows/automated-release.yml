@@ -64,5 +64,5 @@ jobs:
       is-draft-release: ${{ github.event.inputs.dry-run == 'true' }}
       bump-version: ${{ github.event.inputs.bump-version == 'true' }}
       bump-version-normalize: true
+      bump-version-exclusions: "./its/"
       issue-categories: "Feature,False Positive,False Negative,Bug,Security,Maintenance"
-
