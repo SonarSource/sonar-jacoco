@@ -101,7 +101,7 @@ jobs:
         exclude:
           # DEV is tested only in nightly to reduce Repox usage
           - sq-version: "DEV"
-            is_nightly: true
+            is_nightly: false
     name: "QA Tests - SQ : ${{ matrix.sq-version }}"
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
