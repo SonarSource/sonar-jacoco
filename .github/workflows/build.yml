@@ -49,6 +49,7 @@ jobs:
       contents: write  # Required for repository access and tagging
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
+      SQ_VERSION: 'LATEST_RELEASE[2025.4]'
     steps:
       - name: Config Git
         run: git config --global core.autocrlf input
@@ -70,10 +71,16 @@ jobs:
         uses: SonarSource/ci-github-actions/config-gradle@v1
         with:
           artifactory-reader-role: private-reader
+      - name: Orchestrator Cache
+        uses: ./.github/actions/orchestrator-cache
+        with:
+          sq-version: ${{ env.SQ_VERSION }}
       - name: Build
         env:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
-        run: ./gradlew -D"sonar.runtimeVersion"="LATEST_RELEASE[2025.4]" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
+        shell: bash
+        run: |
+          ./gradlew "-Dsonar.runtimeVersion=$SQ_VERSION" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
 
   qa:
     needs: [build]
@@ -85,11 +92,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        item:
-        - { sq-version: "LATEST_RELEASE[2025.1]" }
-        - { sq-version: "LATEST_RELEASE[2025.4]" }
-        - { sq-version: "DEV" }
-    name: "QA Tests - SQ : ${{ matrix.item.sq-version }}"
+        sq-version:
+          - "LATEST_RELEASE[2025.1]"
+          - "LATEST_RELEASE[2025.4]"
+          - "DEV"
+        is_nightly:
+          - ${{ github.event_name == 'schedule' }}
+        exclude:
+          # DEV is tested only in nightly to reduce Repox usage
+          - sq-version: "DEV"
+            is_nightly: false
+    name: "QA Tests - SQ : ${{ matrix.sq-version }}"
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
     steps:
@@ -112,10 +125,14 @@ jobs:
         uses: SonarSource/ci-github-actions/config-gradle@v1
         with:
           artifactory-reader-role: private-reader
+      - name: Orchestrator Cache
+        uses: ./.github/actions/orchestrator-cache
+        with:
+          sq-version: ${{ matrix.sq-version }}
       - name: Run QA Tests
         shell: bash
         env:
-          SQ_VERSION: ${{ matrix.item.sq-version }}
+          SQ_VERSION: ${{ matrix.sq-version }}
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         run: >-
           ./gradlew -DbuildNumber=$BUILD_NUMBER
