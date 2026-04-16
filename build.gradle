@@ -58,6 +58,7 @@ test.finalizedBy jacocoTestReport
 
 dependencies {
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
+    compileOnly('org.slf4j:slf4j-api:2.0.17')
     compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:13.2.0.3137')
 
     testImplementation(platform('org.junit:junit-bom:5.6.2'))
