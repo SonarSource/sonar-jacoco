@@ -60,8 +60,6 @@ dependencies {
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
     compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:13.2.0.3137')
 
-    implementation('org.slf4j:slf4j-api:2.0.17')
-
     testImplementation(platform('org.junit:junit-bom:5.6.2'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testImplementation('org.junit.jupiter:junit-jupiter-migrationsupport')
