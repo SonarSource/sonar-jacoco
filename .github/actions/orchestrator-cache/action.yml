@@ -19,7 +19,7 @@ runs:
 
     - name: Cache Orchestrator
       if: inputs.sq-version != 'DEV'
-      uses: SonarSource/gh-action_cache@v1
+      uses: SonarSource/gh-action_cache@v1.4.4
       with:
         path: ${{ env.ORCHESTRATOR_HOME }}
         key: orchestrator-${{ inputs.sq-version }}-${{ env.ORCHESTRATOR_CACHE_KEY }}-${{ github.run_id }}

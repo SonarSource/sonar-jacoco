@@ -33,7 +33,7 @@ jobs:
           version: 2025.7.12
       - name: Select Java 21
         run: mise use java@21
-      - uses: SonarSource/ci-github-actions/build-gradle@v1
+      - uses: SonarSource/ci-github-actions/build-gradle@1.3.34
         id: build-step
         with:
           deploy-pull-request: true
@@ -63,12 +63,12 @@ jobs:
         run: mise use java@21
       - name: Get GitHub Token for QA Licenses
         id: secrets
-        uses: SonarSource/vault-action-wrapper@v3
+        uses: SonarSource/vault-action-wrapper@3.4.0
         with:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
       - name: Configure Gradle
-        uses: SonarSource/ci-github-actions/config-gradle@v1
+        uses: SonarSource/ci-github-actions/config-gradle@1.3.34
         with:
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
@@ -117,12 +117,12 @@ jobs:
         run: mise use java@21
       - name: Get GitHub Token for QA Licenses
         id: secrets
-        uses: SonarSource/vault-action-wrapper@v3
+        uses: SonarSource/vault-action-wrapper@3.4.0
         with:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
       - name: Configure Gradle
-        uses: SonarSource/ci-github-actions/config-gradle@v1
+        uses: SonarSource/ci-github-actions/config-gradle@1.3.34
         with:
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
@@ -153,6 +153,6 @@ jobs:
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
     steps:
-      - uses: SonarSource/ci-github-actions/promote@v1
+      - uses: SonarSource/ci-github-actions/promote@1.3.34
         with:
           promote-pull-request: true
