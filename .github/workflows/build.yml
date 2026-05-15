@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: github-ubuntu-latest-s
+    runs-on: warp-custom-ubuntu-24-04
     name: Build
     permissions:
       id-token: write  # Required for Vault OIDC authentication
@@ -85,7 +85,7 @@ jobs:
   qa:
     needs: [build]
     if: ${{ needs.build.outputs.deployed }}
-    runs-on: github-ubuntu-latest-m
+    runs-on: warp-custom-ubuntu-24-04
     permissions:
       id-token: write
       contents: read
@@ -145,7 +145,7 @@ jobs:
   promote:
     needs: [build, build-qa-windows, qa]
     if: ${{ needs.build.outputs.deployed }}
-    runs-on: github-ubuntu-latest-s
+    runs-on: warp-custom-ubuntu-24-04
     name: Promote
     permissions:
       id-token: write
