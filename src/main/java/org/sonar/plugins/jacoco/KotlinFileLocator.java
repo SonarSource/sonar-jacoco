@@ -44,8 +44,8 @@ public class KotlinFileLocator {
   private static final String PACKAGE_DECLARATION_REGEX = "package" + HIDDEN + "(?<packageName>" + IDENTIFIER + "("
                                                           + HIDDEN + "\\." + HIDDEN + IDENTIFIER + ")*+)";
   private static final Pattern PACKAGE_REGEX = Pattern.compile(PRE_PACKAGE + PACKAGE_DECLARATION_REGEX);
-  private static final Pattern FIRST_IDENTIFIER_REGEX = Pattern.compile(HIDDEN + "(?<firstIdentifier>" + IDENTIFIER + ")");
-  private static final Pattern NEXT_IDENTIFIER_REGEX = Pattern.compile(HIDDEN + "\\." + HIDDEN + "(?<nextIdentifier>" + IDENTIFIER + ")");
+  private static final Pattern FIRST_IDENTIFIER_REGEX = Pattern.compile("^" + HIDDEN + "(?<firstIdentifier>" + IDENTIFIER + ")");
+  private static final Pattern NEXT_IDENTIFIER_REGEX = Pattern.compile("^" + HIDDEN + "\\." + HIDDEN + "(?<nextIdentifier>" + IDENTIFIER + ")");
 
   private final Map<String, InputFile> fqnToInputFile = new HashMap<>();
   private boolean populated = false;
@@ -92,9 +92,11 @@ public class KotlinFileLocator {
       firstIdentifierMatcher.find();
       resolvedPackage.append(removeBackticks(firstIdentifierMatcher.group("firstIdentifier")));
       Matcher nextIdentifierMatcher = NEXT_IDENTIFIER_REGEX.matcher(packageName);
+      nextIdentifierMatcher.region(firstIdentifierMatcher.end(), packageName.length());
       while (nextIdentifierMatcher.find()) {
         resolvedPackage.append(".");
         resolvedPackage.append(removeBackticks(nextIdentifierMatcher.group("nextIdentifier")));
+        nextIdentifierMatcher.region(nextIdentifierMatcher.end(), packageName.length());
       }
 
       return resolvedPackage.toString();
