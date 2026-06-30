@@ -58,7 +58,7 @@ jobs:
       sqs-integration: ${{ github.event.inputs.sqs-integration == 'true' }}
       branch: ${{ github.event.inputs.branch }}
       pm-email: "jean.jimbo@sonarsource.com"
-      slack-channel: "squad-jvm-releases"
+      slack-channel: "squad-corelang-releases"
       verbose: ${{ github.event.inputs.verbose == 'true' }}
       use-jira-sandbox: ${{ github.event.inputs.dry-run == 'true' }}
       is-draft-release: ${{ github.event.inputs.dry-run == 'true' }}
