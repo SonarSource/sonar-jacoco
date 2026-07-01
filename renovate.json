@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>SonarSource/core-languages-tooling-public:sonar-jacoco"
+    "local>SonarSource/core-languages-tooling-public:renovate-config"
   ],
   "enabledManagers": [
     "gradle",
