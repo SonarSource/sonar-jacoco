@@ -1,18 +1,31 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>SonarSource/renovate-config:languages-team"
+    "local>SonarSource/core-languages-tooling-public:renovate-config"
+  ],
+  "addLabels": [
+    "dependencies"
   ],
   "schedule": [
     "before 4am on Monday"
   ],
   "rebaseWhen": "conflicted",
+  "minimumReleaseAgeBehaviour": "timestamp-required",
   "enabledManagers": [
     "gradle",
     "gradle-wrapper",
     "github-actions"
   ],
   "packageRules": [
+    {
+      "description": "Group Gradle updates",
+      "matchManagers": [
+        "gradle",
+        "gradle-wrapper"
+      ],
+      "groupName": "Gradle dependencies",
+      "groupSlug": "gradle-dependencies"
+    },
     {
       "matchManagers": [
         "github-actions"
