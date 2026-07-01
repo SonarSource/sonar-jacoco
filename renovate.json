@@ -1,31 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "local>SonarSource/core-languages-tooling-public:renovate-config"
+    "local>SonarSource/core-languages-tooling-public:sonar-jacoco"
   ],
-  "addLabels": [
-    "dependencies"
-  ],
-  "schedule": [
-    "before 4am on Monday"
-  ],
-  "rebaseWhen": "conflicted",
-  "minimumReleaseAgeBehaviour": "timestamp-required",
   "enabledManagers": [
     "gradle",
     "gradle-wrapper",
     "github-actions"
   ],
   "packageRules": [
-    {
-      "description": "Group Gradle updates",
-      "matchManagers": [
-        "gradle",
-        "gradle-wrapper"
-      ],
-      "groupName": "Gradle dependencies",
-      "groupSlug": "gradle-dependencies"
-    },
     {
       "matchManagers": [
         "github-actions"
@@ -73,8 +56,5 @@
       "groupSlug": "sonar-plugin-api",
       "prHeader": "**Before updating the plugin-api version, make sure to check the [compatibility matrix](https://github.com/SonarSource/sonar-plugin-api?tab=readme-ov-file#compatibility) and stick to the lowest denominator.**"
     }
-  ],
-  "reviewers": [
-    "team:quality-jvm-squad"
   ]
 }
