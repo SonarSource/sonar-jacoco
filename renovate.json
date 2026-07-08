@@ -3,10 +3,8 @@
   "extends": [
     "local>SonarSource/core-languages-tooling-public:renovate-config"
   ],
-  "enabledManagers": [
-    "gradle",
-    "gradle-wrapper",
-    "github-actions"
+  "ignorePaths": [
+    "its/src/test/resources/**"
   ],
   "packageRules": [
     {
