@@ -1,5 +1,5 @@
 [tools]
-java = "21"
+java = "25.0.3+9.0.LTS"
 gradle = "9.3.1"
 
 [alias.java.versions]
