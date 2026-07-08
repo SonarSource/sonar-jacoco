@@ -14,17 +14,6 @@
         "github-actions"
       ],
       "matchPackageNames": [
-        "SonarSource/*"
-      ],
-      "pinDigests": false,
-      "groupName": "all Sonar GitHub Actions",
-      "groupSlug": "all-sonar-github-actions"
-    },
-    {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchPackageNames": [
         "!SonarSource/*"
       ],
       "pinDigests": true,
