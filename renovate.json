@@ -9,17 +9,6 @@
   "packageRules": [
     {
       "matchManagers": [
-        "github-actions"
-      ],
-      "matchPackageNames": [
-        "!SonarSource/*"
-      ],
-      "pinDigests": true,
-      "groupName": "all third-party GitHub Actions",
-      "groupSlug": "all-3rd-party-github-actions"
-    },
-    {
-      "matchManagers": [
         "gradle"
       ],
       "matchPackageNames": [
