@@ -3,34 +3,10 @@
   "extends": [
     "local>SonarSource/core-languages-tooling-public:renovate-config"
   ],
-  "enabledManagers": [
-    "gradle",
-    "gradle-wrapper",
-    "github-actions"
+  "ignorePaths": [
+    "its/src/test/resources/**"
   ],
   "packageRules": [
-    {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchPackageNames": [
-        "SonarSource/*"
-      ],
-      "pinDigests": false,
-      "groupName": "all Sonar GitHub Actions",
-      "groupSlug": "all-sonar-github-actions"
-    },
-    {
-      "matchManagers": [
-        "github-actions"
-      ],
-      "matchPackageNames": [
-        "!SonarSource/*"
-      ],
-      "pinDigests": true,
-      "groupName": "all third-party GitHub Actions",
-      "groupSlug": "all-3rd-party-github-actions"
-    },
     {
       "matchManagers": [
         "gradle"
