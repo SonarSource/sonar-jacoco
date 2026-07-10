@@ -52,9 +52,13 @@ public class ProjectFileLocator extends FileLocator {
   }
 
   @CheckForNull
-  private InputFile getInputFileForProject(String groupName, String filePath) {
-    // First, try to look up the file in the tree using the computed path
+  private InputFile getInputFileForProject(@Nullable String groupName, String filePath) {
     String[] pathSegments = filePath.split(FileLocator.SEPARATOR_REGEX);
+    // Without a group name we cannot disambiguate between sub-projects, so fall back to a group-agnostic lookup (same behavior as ModuleFileLocator).
+    if (groupName == null) {
+      return tree.getFileWithSuffix(pathSegments);
+    }
+    // First, try to look up the file in the tree using the computed path
     InputFile file = tree.getFileWithSuffix(groupName, pathSegments);
     if (file != null) {
       return file;

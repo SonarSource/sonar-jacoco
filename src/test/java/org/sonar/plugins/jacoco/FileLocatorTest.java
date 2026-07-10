@@ -214,4 +214,15 @@ class FileLocatorTest {
     assertThat(locator.getInputFile(null, "", "DoesNotExist.java")).isNull();
   }
 
+  @Test
+  void project_file_locator_should_not_fail_with_a_null_group_and_ambiguous_files() {
+    InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/java/File.java").build();
+    InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/java/File.java").build();
+
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(appFile, utilsFile), null, new ProjectCoverageContext());
+
+    // Should fall back to a group-agnostic lookup and return the first match, not blow up with an NPE
+    assertThat(locator.getInputFile(null, "", "File.java")).isEqualTo(appFile);
+  }
+
 }
