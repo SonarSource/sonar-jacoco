@@ -37,10 +37,12 @@ import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.notifications.AnalysisWarnings;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -55,7 +57,8 @@ class JacocoSensorTest {
   @RegisterExtension
   public LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
-  private JacocoSensor sensor = new JacocoSensor(new ProjectCoverageContext());
+  private AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+  private JacocoSensor sensor = new JacocoSensor(new ProjectCoverageContext(), analysisWarnings);
 
   @Test
   void describe_sensor() {
@@ -103,6 +106,8 @@ class JacocoSensorTest {
     assertThat(warningLogs)
             .hasSize(1);
     assertThat(warningLogs.get(0)).startsWith("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='invalid.xml'.");
+    verify(analysisWarnings).addUnique(argThat(message ->
+            message.startsWith("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='invalid.xml'.")));
   }
 
   @Test

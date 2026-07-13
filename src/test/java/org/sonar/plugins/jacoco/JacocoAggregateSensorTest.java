@@ -27,6 +27,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.event.Level;
 import org.sonar.api.batch.sensor.SensorDescriptor;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
+import org.sonar.api.notifications.AnalysisWarnings;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,9 +45,11 @@ class JacocoAggregateSensorTest {
   public LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
   private SensorContextTester context;
+  private AnalysisWarnings analysisWarnings;
 
   @BeforeEach
   void setup() {
+    analysisWarnings = mock(AnalysisWarnings.class);
     context = spy(SensorContextTester.create(basedir));
     context.settings().clear();
     context.settings().setProperty("sonar.projectBaseDir", basedir.toString());
@@ -56,14 +59,14 @@ class JacocoAggregateSensorTest {
   @Test
   void description_name_is_as_expected() {
     SensorDescriptor descriptor = mock(SensorDescriptor.class);
-    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext(), analysisWarnings);
     sensor.describe(descriptor);
     verify(descriptor).name("JaCoCo Aggregate XML Report Importer");
   }
 
   @Test
   void log_missing_report_and_return_early_when_missing_analysis_parameter() {
-    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext(), analysisWarnings);
     sensor.execute(context);
 
     assertThat(logTester.logs(Level.DEBUG)).containsOnly(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
@@ -74,7 +77,7 @@ class JacocoAggregateSensorTest {
     context.settings()
             .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, "non-existing-report.xml");
 
-    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext(), analysisWarnings);
     sensor.execute(context);
 
     assertThat(logTester.logs(Level.DEBUG)).
@@ -82,6 +85,7 @@ class JacocoAggregateSensorTest {
     assertThat(logTester.logs(Level.WARN))
             .contains("No coverage report found for pattern: 'non-existing-report.xml'");
     assertThat(logTester.logs(Level.INFO)).isEmpty();
+    verify(analysisWarnings).addUnique("No coverage report found for pattern: 'non-existing-report.xml'");
     verify(context, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
@@ -92,7 +96,7 @@ class JacocoAggregateSensorTest {
     context.settings()
             .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, aggregateReport.toAbsolutePath().toString());
 
-    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext(), analysisWarnings);
     sensor.execute(context);
     assertThat(logTester.logs(Level.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
     assertThat(logTester.logs(Level.INFO)).containsOnly(
@@ -107,7 +111,7 @@ class JacocoAggregateSensorTest {
     context.settings()
             .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, singModuleReport.toAbsolutePath().toString());
 
-    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext());
+    var sensor = new JacocoAggregateSensor(new ProjectCoverageContext(), analysisWarnings);
     sensor.execute(context);
     assertThat(logTester.logs(Level.DEBUG)).doesNotContain(NO_REPORT_TO_IMPORT_LOG_MESSAGE);
     assertThat(logTester.logs(Level.DEBUG)).contains("Reading report '" + singModuleReport.toAbsolutePath() + "'");

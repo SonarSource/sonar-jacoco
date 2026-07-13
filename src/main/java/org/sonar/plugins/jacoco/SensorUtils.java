@@ -24,13 +24,14 @@ import java.util.Collection;
 import java.util.List;
 import org.slf4j.Logger;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.notifications.AnalysisWarnings;
 
 class SensorUtils {
   private SensorUtils() {
     /* This class should not be instantiated */
   }
 
-  static void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer, Logger logger) {
+  static void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer, Logger logger, AnalysisWarnings analysisWarnings) {
     logger.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
 
     for (Path reportPath : reportPaths) {
@@ -38,7 +39,9 @@ class SensorUtils {
       try {
         SensorUtils.importReport(new XmlReportParser(reportPath), locator, importer, logger);
       } catch (Exception e) {
-        logger.error("Coverage report '{}' could not be read/imported. Error: {}: {}", reportPath, e.getClass().getName(), e.getMessage());
+        String message = String.format("Coverage report '%s' could not be read/imported. Error: %s: %s", reportPath, e.getClass().getName(), e.getMessage());
+        logger.error(message);
+        analysisWarnings.addUnique(message);
       }
     }
   }

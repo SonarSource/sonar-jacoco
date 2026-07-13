@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 import org.sonar.api.batch.fs.InputFile;
+import org.sonar.api.notifications.AnalysisWarnings;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,7 +76,8 @@ class SensorUtilsTest {
 
     when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
 
-    SensorUtils.importReports(Arrays.asList(invalidFile, validFile), locator, importer, LOG);
+    AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+    SensorUtils.importReports(Arrays.asList(invalidFile, validFile), locator, importer, LOG, analysisWarnings);
 
     String expectedErrorMessage = String.format(
             "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
@@ -84,6 +86,7 @@ class SensorUtilsTest {
     assertThat(logTester.logs(Level.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
     assertThat(logTester.logs(Level.ERROR)).contains(expectedErrorMessage);
+    verify(analysisWarnings).addUnique(expectedErrorMessage);
 
     verify(importer, times(1)).importCoverage(any(), eq(inputFile));
   }

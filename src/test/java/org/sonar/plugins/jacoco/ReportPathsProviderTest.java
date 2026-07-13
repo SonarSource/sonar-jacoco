@@ -32,9 +32,11 @@ import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.event.Level;
 import org.sonar.api.batch.sensor.internal.SensorContextTester;
 import org.sonar.api.config.internal.MapSettings;
+import org.sonar.api.notifications.AnalysisWarnings;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +50,7 @@ class ReportPathsProviderTest {
 
   private MapSettings settings;
   private SensorContextTester tester;
+  private AnalysisWarnings analysisWarnings;
   private ReportPathsProvider provider;
   private Path mavenPath1 = Paths.get("target", "site", "jacoco", "jacoco.xml");
   private Path mavenPath2 = Paths.get("target", "site", "jacoco-it", "jacoco.xml");
@@ -60,7 +63,8 @@ class ReportPathsProviderTest {
     settings = new MapSettings();
     tester = spy(SensorContextTester.create(baseDir));
     tester.setSettings(settings);
-    provider = new ReportPathsProvider(tester);
+    analysisWarnings = mock(AnalysisWarnings.class);
+    provider = new ReportPathsProvider(tester, analysisWarnings);
   }
 
   private void createMavenReport(Path relativePath) throws IOException {
@@ -113,6 +117,7 @@ class ReportPathsProviderTest {
     Path reportThatDoesNotExist = temp.resolve("report-that-does-not-exist.xml");
     settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, reportThatDoesNotExist.toString());
     assertThat(provider.getAggregateReportPaths()).isEmpty();
+    verify(analysisWarnings).addUnique(String.format("No coverage report found for pattern: '%s'", reportThatDoesNotExist));
     verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
@@ -190,8 +195,10 @@ class ReportPathsProviderTest {
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "target/**/unknown.xml");
     assertThat(provider.getPaths()).isEmpty();
     assertThat(logTester.logs()).hasSize(1);
-    assertThat(logTester.logs(Level.WARN)).contains("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='target/**/unknown.xml'." +
-      " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
+    String expectedWarning = "No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='target/**/unknown.xml'." +
+      " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml";
+    assertThat(logTester.logs(Level.WARN)).contains(expectedWarning);
+    verify(analysisWarnings).addUnique(expectedWarning);
   }
 
   @Test
@@ -222,8 +229,10 @@ class ReportPathsProviderTest {
 
     assertThat(paths).isEmpty();
     assertThat(logTester.logs()).hasSize(1);
-    assertThat(logTester.logs(Level.WARN)).containsExactly("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1'." +
-      " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
+    String expectedWarning = "No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1'." +
+      " Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml";
+    assertThat(logTester.logs(Level.WARN)).containsExactly(expectedWarning);
+    verify(analysisWarnings).addUnique(expectedWarning);
   }
 
   @Test
@@ -234,7 +243,9 @@ class ReportPathsProviderTest {
 
     assertThat(paths).isEmpty();
     assertThat(logTester.logs()).hasSize(3);
-    assertThat(logTester.logs(Level.WARN)).containsExactly("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1,mypath2'. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml");
+    String expectedWarning = "No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='mypath1,mypath2'. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml";
+    assertThat(logTester.logs(Level.WARN)).containsExactly(expectedWarning);
+    verify(analysisWarnings).addUnique(expectedWarning);
     assertThat(logTester.logs(Level.INFO)).containsExactly(
       "Coverage report doesn't exist for pattern: 'mypath1'",
       "Coverage report doesn't exist for pattern: 'mypath2'");
