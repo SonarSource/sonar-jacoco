@@ -19,9 +19,9 @@
  */
 package org.sonar.plugins.jacoco;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import org.junit.jupiter.api.Test;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 

@@ -19,6 +19,9 @@
  */
 package org.sonar.plugins.jacoco;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
+import com.sonarsource.scanner.engine.sensor.test.fixtures.TestFileSystem;
+import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -32,13 +35,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.rules.TemporaryFolder;
 import org.slf4j.event.Level;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.DefaultFileSystem;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 import org.sonar.api.batch.sensor.SensorDescriptor;
-import org.sonar.api.batch.sensor.internal.SensorContextTester;
-import org.sonar.api.config.internal.MapSettings;
 import org.sonar.api.notifications.AnalysisWarnings;
 import org.sonar.api.testfixtures.log.LogTesterJUnit5;
+import org.sonar.scanner.plugin.api.impl.config.MapSettings;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -75,7 +75,7 @@ class JacocoSensorTest {
       .setProperty("sonar.moduleKey", "module")
       .setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
     spiedContext.setSettings(settings);
-    DefaultFileSystem spiedFileSystem = spy(spiedContext.fileSystem());
+    TestFileSystem spiedFileSystem = spy(spiedContext.fileSystem());
     when(spiedContext.fileSystem()).thenReturn(spiedFileSystem);
     sensor.execute(spiedContext);
     // indexing all files in the filesystem is time consuming and should not be done if there no jacoco reports to import
