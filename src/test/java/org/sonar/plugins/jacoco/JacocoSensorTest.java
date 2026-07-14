@@ -29,10 +29,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.event.Level;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorDescriptor;
@@ -49,10 +48,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport
 class JacocoSensorTest {
-  @Rule
-  public TemporaryFolder temp = new TemporaryFolder();
+  @TempDir
+  Path temp;
 
   @RegisterExtension
   public LogTesterJUnit5 logTester = new LogTesterJUnit5();
@@ -69,11 +67,11 @@ class JacocoSensorTest {
 
   @Test
   void do_not_index_files_when_no_report_was_found() throws IOException {
-    File emptyFolderWithoutReport = temp.newFolder();
+    File emptyFolderWithoutReport = Files.createDirectory(temp.resolve("empty")).toFile();
     SensorContextTester spiedContext = spy(SensorContextTester.create(emptyFolderWithoutReport));
     MapSettings settings = new MapSettings()
       .setProperty("sonar.moduleKey", "module")
-      .setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
+      .setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString());
     spiedContext.setSettings(settings);
     TestFileSystem spiedFileSystem = spy(spiedContext.fileSystem());
     when(spiedContext.fileSystem()).thenReturn(spiedFileSystem);
@@ -92,10 +90,10 @@ class JacocoSensorTest {
 
   @Test
   void do_nothing_if_report_parse_failure() {
-    SensorContextTester tester = SensorContextTester.create(temp.getRoot());
+    SensorContextTester tester = SensorContextTester.create(temp);
     MapSettings settings = new MapSettings()
             .setProperty("sonar.moduleKey", "module")
-            .setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
+            .setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString());
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "invalid.xml");
     tester.setSettings(settings);
     sensor.execute(tester);
@@ -115,8 +113,8 @@ class JacocoSensorTest {
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "jacoco.xml");
     settings.setProperty("sonar.moduleKey", "module");
-    settings.setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
-    SensorContextTester tester = SensorContextTester.create(temp.getRoot());
+    settings.setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString());
+    SensorContextTester tester = SensorContextTester.create(temp);
     tester.setSettings(settings);
     InputFile inputFile = TestInputFileBuilder
       .create("module", "org/sonarlint/cli/Main.java")
@@ -124,7 +122,7 @@ class JacocoSensorTest {
       .build();
     tester.fileSystem().add(inputFile);
     Path sample = load("jacoco.xml");
-    Files.copy(sample, temp.getRoot().toPath().resolve("jacoco.xml"));
+    Files.copy(sample, temp.resolve("jacoco.xml"));
 
     sensor.execute(tester);
     assertThat(tester.lineHits(inputFile.key(), 110)).isEqualTo(1);
@@ -139,8 +137,8 @@ class JacocoSensorTest {
     MapSettings settings = new MapSettings();
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "invalid_line_number.xml");
     settings.setProperty("sonar.moduleKey", "module");
-    settings.setProperty("sonar.projectBaseDir", temp.getRoot().getAbsolutePath());
-    SensorContextTester tester = SensorContextTester.create(temp.getRoot());
+    settings.setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString());
+    SensorContextTester tester = SensorContextTester.create(temp);
     tester.setSettings(settings);
     InputFile inputFile = TestInputFileBuilder
       .create("module", "org/sonarlint/cli/File.java")
@@ -148,7 +146,7 @@ class JacocoSensorTest {
       .build();
     tester.fileSystem().add(inputFile);
     Path sample = load("invalid_line_number.xml");
-    Files.copy(sample, temp.getRoot().toPath().resolve("invalid_line_number.xml"));
+    Files.copy(sample, temp.resolve("invalid_line_number.xml"));
 
     sensor.execute(tester);
 
@@ -163,7 +161,7 @@ class JacocoSensorTest {
 
   @Test
   void sensor_should_not_fail_when_processing_an_aggregate_report() {
-    var moduleBaseDir = temp.getRoot().toPath().resolve("library").toAbsolutePath().toString();
+    var moduleBaseDir = temp.resolve("library").toAbsolutePath().toString();
     Path aggregateReportPath = Path.of("src", "test", "resources", "jacoco-aggregate.xml");
     MapSettings settings = new MapSettings()
             .setProperty("sonar.modules", "library")
@@ -171,7 +169,7 @@ class JacocoSensorTest {
             .setProperty("sonar.projectBaseDir", moduleBaseDir) // Must be the base dir of the module
             .setProperty("sonar.coverage.jacoco.xmlReportPaths", aggregateReportPath.toAbsolutePath().toString());
 
-    SensorContextTester context = SensorContextTester.create(temp.getRoot());
+    SensorContextTester context = SensorContextTester.create(temp);
     context.setSettings(settings);
 
     sensor.execute(context);
