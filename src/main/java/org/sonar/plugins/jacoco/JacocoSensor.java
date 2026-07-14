@@ -29,6 +29,7 @@ import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.Sensor;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.notifications.AnalysisWarnings;
 
 import static org.sonar.plugins.jacoco.SensorUtils.importReports;
 
@@ -36,9 +37,11 @@ public class JacocoSensor implements Sensor {
   private static final Logger LOG = LoggerFactory.getLogger(JacocoSensor.class);
 
   private final ProjectCoverageContext projectCoverageContext;
+  private final AnalysisWarnings analysisWarnings;
 
-  public JacocoSensor(ProjectCoverageContext projectCoverageContext) {
+  public JacocoSensor(ProjectCoverageContext projectCoverageContext, AnalysisWarnings analysisWarnings) {
     this.projectCoverageContext = projectCoverageContext;
+    this.analysisWarnings = analysisWarnings;
   }
 
   @Override
@@ -49,7 +52,7 @@ public class JacocoSensor implements Sensor {
   @Override
   public void execute(SensorContext context) {
     recordModuleCoverageContext(context);
-    Collection<Path> reportPaths = new ReportPathsProvider(context).getPaths();
+    Collection<Path> reportPaths = new ReportPathsProvider(context, analysisWarnings).getPaths();
     if (reportPaths.isEmpty()) {
       LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
       return;
@@ -59,7 +62,7 @@ public class JacocoSensor implements Sensor {
     ModuleFileLocator locator = new ModuleFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer, LOG);
+    importReports(reportPaths, locator, importer, LOG, analysisWarnings);
   }
 
   private void recordModuleCoverageContext(SensorContext sensorContext) {

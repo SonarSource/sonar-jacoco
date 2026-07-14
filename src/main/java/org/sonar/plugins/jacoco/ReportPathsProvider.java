@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.sonar.api.batch.sensor.SensorContext;
+import org.sonar.api.notifications.AnalysisWarnings;
 import org.sonar.api.utils.log.Logger;
 import org.sonar.api.utils.log.Loggers;
 
@@ -44,9 +45,11 @@ class ReportPathsProvider {
   static final String REPORT_PATHS_PROPERTY_KEY = "sonar.coverage.jacoco.xmlReportPaths";
 
   private final SensorContext context;
+  private final AnalysisWarnings analysisWarnings;
 
-  ReportPathsProvider(SensorContext context) {
+  ReportPathsProvider(SensorContext context, AnalysisWarnings analysisWarnings) {
     this.context = context;
+    this.analysisWarnings = analysisWarnings;
   }
 
   Collection<Path> getPaths() {
@@ -71,8 +74,10 @@ class ReportPathsProvider {
       return reportPaths;
     } else {
       if (!patternPathList.isEmpty()) {
-        LOG.warn("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='{}'. Using default locations: {}",
+        String message = String.format("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='%s'. Using default locations: %s",
           String.join(",", patternPathList), String.join(",", DEFAULT_PATHS));
+        LOG.warn(message);
+        analysisWarnings.addUnique(message);
       } else {
         LOG.info("'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: {}", String.join(",", DEFAULT_PATHS));
       }
@@ -98,7 +103,9 @@ class ReportPathsProvider {
     for (String reportPathPattern : reportPathsParam) {
       List<Path> scanned = WildcardPatternFileScanner.scan(context.fileSystem().baseDir().toPath(), reportPathPattern);
       if (scanned.isEmpty()) {
-        LOG.warn(String.format("No coverage report found for pattern: '%s'", reportPathPattern));
+        String message = String.format("No coverage report found for pattern: '%s'", reportPathPattern);
+        LOG.warn(message);
+        analysisWarnings.addUnique(message);
       } else {
         reportPaths.addAll(scanned);
       }

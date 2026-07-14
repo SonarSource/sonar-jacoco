@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 import org.sonar.api.batch.sensor.SensorContext;
 import org.sonar.api.batch.sensor.SensorDescriptor;
+import org.sonar.api.notifications.AnalysisWarnings;
 import org.sonar.api.scanner.sensor.ProjectSensor;
 
 import static org.sonar.plugins.jacoco.SensorUtils.importReports;
@@ -36,9 +37,11 @@ import static org.sonar.plugins.jacoco.SensorUtils.importReports;
 public class JacocoAggregateSensor implements ProjectSensor {
   private static final Logger LOG = LoggerFactory.getLogger(JacocoAggregateSensor.class);
   private final ProjectCoverageContext projectCoverageContext;
+  private final AnalysisWarnings analysisWarnings;
 
-  public JacocoAggregateSensor(ProjectCoverageContext projectCoverageContext) {
+  public JacocoAggregateSensor(ProjectCoverageContext projectCoverageContext, AnalysisWarnings analysisWarnings) {
     this.projectCoverageContext = projectCoverageContext;
+    this.analysisWarnings = analysisWarnings;
   }
 
   @Override
@@ -49,7 +52,7 @@ public class JacocoAggregateSensor implements ProjectSensor {
   @Override
   public void execute(SensorContext context) {
     this.projectCoverageContext.setProjectBaseDir(Paths.get(context.config().get("sonar.projectBaseDir").get()));
-    Set<Path> reportPaths = new ReportPathsProvider(context).getAggregateReportPaths();
+    Set<Path> reportPaths = new ReportPathsProvider(context, analysisWarnings).getAggregateReportPaths();
     if (reportPaths.isEmpty()) {
       LOG.debug("No aggregate XML report found. No coverage coverage information will be added at project level.");
       return;
@@ -59,6 +62,6 @@ public class JacocoAggregateSensor implements ProjectSensor {
     FileLocator locator = new ProjectFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream), projectCoverageContext);
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer, LOG);
+    importReports(reportPaths, locator, importer, LOG, analysisWarnings);
   }
 }
