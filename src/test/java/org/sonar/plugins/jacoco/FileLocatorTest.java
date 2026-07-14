@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,7 +29,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.sonar.api.batch.fs.InputFile;
-import org.sonar.api.batch.fs.internal.TestInputFileBuilder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
