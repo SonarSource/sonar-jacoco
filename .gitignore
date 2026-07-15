@@ -2,6 +2,7 @@
 build
 bin
 .gradle
+**/target
 
 # ---- IntelliJ IDEA
 *.iws
