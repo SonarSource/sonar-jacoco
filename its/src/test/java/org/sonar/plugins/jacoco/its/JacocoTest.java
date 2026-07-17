@@ -16,11 +16,11 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.sonarqube.ws.WsMeasures;
+import org.sonarqube.ws.Measures;
 import org.sonarqube.ws.client.HttpConnector;
 import org.sonarqube.ws.client.WsClient;
 import org.sonarqube.ws.client.WsClientFactories;
-import org.sonarqube.ws.client.measure.ComponentWsRequest;
+import org.sonarqube.ws.client.measures.ComponentRequest;
 
 import java.io.File;
 import java.io.IOException;
@@ -310,12 +310,12 @@ class JacocoTest {
       "uncovered_lines", "branch_coverage",
       "conditions_to_cover", "uncovered_conditions", "coverage");
 
-    return getWsClient().measures().component(new ComponentWsRequest()
+    return getWsClient().measures().component(new ComponentRequest()
       .setComponent(fileKey)
       .setMetricKeys(metricKeys))
       .getComponent().getMeasuresList()
       .stream()
-      .collect(Collectors.toMap(WsMeasures.Measure::getMetric, m -> Double.parseDouble(m.getValue())));
+      .collect(Collectors.toMap(Measures.Measure::getMetric, m -> Double.parseDouble(m.getValue())));
   }
 
   private WsClient getWsClient() {
