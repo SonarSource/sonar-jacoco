@@ -2,19 +2,5 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "github>SonarSource/renovate-config:quality-corelang-squad"
-  ],
-  "ignorePaths": [
-    "its/src/test/resources/**"
-  ],
-  "packageRules": [
-    {
-      "matchManagers": [
-        "gradle"
-      ],
-      "matchPackageNames": [
-        "org.sonarsource.api.plugin:sonar-plugin-api*"
-      ],
-      "prHeader": "**Before updating the plugin-api version, make sure to check the [compatibility matrix](https://github.com/SonarSource/sonar-plugin-api?tab=readme-ov-file#compatibility) and stick to the lowest denominator.**"
-    }
   ]
 }
