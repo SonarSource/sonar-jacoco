@@ -11,7 +11,7 @@ dependencies {
   testRuntimeOnly('org.junit.platform:junit-platform-launcher')
   testImplementation('org.mockito:mockito-core:5.23.0')
   testImplementation('org.assertj:assertj-core:3.27.7')
-  testImplementation('org.sonarsource.orchestrator:sonar-orchestrator-junit4:6.3.1.4538')
+  testImplementation('org.sonarsource.orchestrator:sonar-orchestrator-junit4:6.4.0.4572')
   testImplementation('org.sonarsource.sonarqube:sonar-ws:26.7.0.124771')
   testImplementation('com.google.code.findbugs:jsr305:3.0.2')
 }
