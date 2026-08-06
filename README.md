@@ -1,5 +1,9 @@
 # SonarQube JaCoCo Plugin
 
+<!-- hy-mt2-i18n:start -->
+**English** · [中文](./README_zh-CN.md) · [日本語](./README_ja.md) · [Español](./README_es.md)
+<!-- hy-mt2-i18n:end -->
+
 [![Build](https://github.com/SonarSource/sonar-jacoco/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/SonarSource/sonar-jacoco/actions/workflows/build.yml)
 [![Quality gate](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.jacoco%3Asonar-jacoco&metric=alert_status)](https://next.sonarqube.com/sonarqube/dashboard?id=org.sonarsource.jacoco%3Asonar-jacoco)
 [![Coverage](https://next.sonarqube.com/sonarqube/api/project_badges/measure?project=org.sonarsource.jacoco%3Asonar-jacoco&metric=coverage)](https://next.sonarqube.com/sonarqube/component_measures?id=org.sonarsource.jacoco%3Asonar-jacoco&metric=coverage) 
