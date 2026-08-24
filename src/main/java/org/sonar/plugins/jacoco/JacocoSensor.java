@@ -51,7 +51,7 @@ public class JacocoSensor implements Sensor {
 
   @Override
   public void execute(SensorContext context) {
-    recordModuleCoverageContext(context);
+    ModuleCoverageContext moduleCoverageContext = recordModuleCoverageContext(context);
     Collection<Path> reportPaths = new ReportPathsProvider(context, analysisWarnings).getPaths();
     if (reportPaths.isEmpty()) {
       LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
@@ -62,12 +62,13 @@ public class JacocoSensor implements Sensor {
     ModuleFileLocator locator = new ModuleFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer, LOG, analysisWarnings);
+    importReports(reportPaths, locator, importer, LOG, analysisWarnings, moduleCoverageContext.name);
   }
 
-  private void recordModuleCoverageContext(SensorContext sensorContext) {
+  private ModuleCoverageContext recordModuleCoverageContext(SensorContext sensorContext) {
     var moduleCoverageContext = ModuleCoverageContext.from(sensorContext);
     this.projectCoverageContext.add(moduleCoverageContext);
     LOG.debug("Recorded module coverage context for aggregation: {}", moduleCoverageContext);
+    return moduleCoverageContext;
   }
 }
