@@ -20,8 +20,6 @@
 package org.sonar.plugins.jacoco;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -58,7 +56,7 @@ public abstract class FileLocator {
   }
 
   private static boolean isCoverableByJacoco(InputFile inputFile) {
-    return inputFile.type() == InputFile.Type.MAIN && COVERED_LANGUAGES.contains(inputFile.language());
+    return inputFile.type() == InputFile.Type.MAIN && inputFile.language() != null && COVERED_LANGUAGES.contains(inputFile.language());
   }
 
   public boolean hasFilesCoverableByJacoco() {
