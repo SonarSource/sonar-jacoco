@@ -25,13 +25,13 @@ import java.nio.file.Paths;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.Loggers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonar.api.batch.fs.InputFile;
 
 public class ProjectFileLocator extends FileLocator {
 
-  private static final Logger LOG = Loggers.get(ProjectFileLocator.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ProjectFileLocator.class);
 
   private ProjectCoverageContext projectCoverageContext;
 

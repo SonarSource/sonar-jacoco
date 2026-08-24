@@ -54,7 +54,7 @@ public class JacocoAggregateSensor implements ProjectSensor {
     this.projectCoverageContext.setProjectBaseDir(Paths.get(context.config().get("sonar.projectBaseDir").get()));
     Set<Path> reportPaths = new ReportPathsProvider(context, analysisWarnings).getAggregateReportPaths();
     if (reportPaths.isEmpty()) {
-      LOG.debug("No aggregate XML report found. No coverage coverage information will be added at project level.");
+      LOG.debug("No aggregate XML report found. No coverage information will be added at project level.");
       return;
     }
     Iterable<InputFile> inputFiles = context.fileSystem().inputFiles(context.fileSystem().predicates().all());
@@ -62,6 +62,6 @@ public class JacocoAggregateSensor implements ProjectSensor {
     FileLocator locator = new ProjectFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream), projectCoverageContext);
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer, LOG, analysisWarnings);
+    importReports(reportPaths, locator, importer, LOG, analysisWarnings, context.project().key());
   }
 }

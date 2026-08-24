@@ -20,7 +20,10 @@
 package org.sonar.plugins.jacoco;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -30,9 +33,11 @@ import org.sonar.api.batch.fs.InputFile;
 
 public abstract class FileLocator {
   public static final String SEPARATOR_REGEX = Pattern.quote(File.separator);
+  private static final Set<String> COVERED_LANGUAGES = Set.of("java", "kotlin");
 
   protected final ReversePathTree tree = new ReversePathTree();
   protected final KotlinFileLocator kotlinFileLocator;
+  private final int coverableFileCount;
 
   protected FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
     this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
@@ -40,11 +45,24 @@ public abstract class FileLocator {
 
   protected FileLocator(List<InputFile> inputFiles, @Nullable KotlinFileLocator kotlinFileLocator) {
     this.kotlinFileLocator = kotlinFileLocator;
+    int coverable = 0;
     for (InputFile inputFile : inputFiles) {
       // InputFile.relativePath() always uses '/' as separator
       String[] path = inputFile.relativePath().split("/");
       tree.index(inputFile, path);
+      if (isCoverableByJacoco(inputFile)) {
+        coverable++;
+      }
     }
+    this.coverableFileCount = coverable;
+  }
+
+  private static boolean isCoverableByJacoco(InputFile inputFile) {
+    return inputFile.type() == InputFile.Type.MAIN && COVERED_LANGUAGES.contains(inputFile.language());
+  }
+
+  public boolean hasFilesCoverableByJacoco() {
+    return coverableFileCount > 0;
   }
 
   @CheckForNull

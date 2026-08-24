@@ -37,7 +37,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 class JacocoAggregateSensorTest {
-  private static final String NO_REPORT_TO_IMPORT_LOG_MESSAGE = "No aggregate XML report found. No coverage coverage information will be added at project level.";
+  private static final String NO_REPORT_TO_IMPORT_LOG_MESSAGE = "No aggregate XML report found. No coverage information will be added at project level.";
   @TempDir
   Path basedir;
 
@@ -81,7 +81,7 @@ class JacocoAggregateSensorTest {
     sensor.execute(context);
 
     assertThat(logTester.logs(Level.DEBUG)).
-            containsExactly("No aggregate XML report found. No coverage coverage information will be added at project level.");
+            containsExactly("No aggregate XML report found. No coverage information will be added at project level.");
     assertThat(logTester.logs(Level.WARN))
             .contains("No coverage report found for pattern: 'non-existing-report.xml'");
     assertThat(logTester.logs(Level.INFO)).isEmpty();

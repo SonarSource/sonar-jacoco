@@ -41,6 +41,8 @@ class JacocoTest {
   private static final String FILE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/Calc.java";
   private static final String KOTLIN_FILE_KEY = "org.sonarsource.it.projects:kotlin-jacoco-project:src/main/kotlin/CoverMe.kt";
   private static final String FILE_WITHOUT_COVERAGE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/CalcNoCoverage.java";
+  /** Modules of the aggregate-and-module-based-mixed-coverage fixture, root included. */
+  private static final int MODULE_COUNT = 8;
 
   private static OrchestratorRule orchestrator;
 
@@ -140,7 +142,8 @@ class JacocoTest {
       .setProperty("sonar.java.binaries", ".")
       .setProjectDir(prepareProject("simple-project-jacoco"));
     BuildResult result = orchestrator.executeBuild(build);
-    result.getLogs().contains("Report doesn't exist: ");
+    assertThat(result.getLogs())
+      .contains("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='invalid_file.xml'. Using default locations: ");
   }
 
   @Test
@@ -246,6 +249,49 @@ class JacocoTest {
             .containsEntry("lines_to_cover", 2.0)
             .containsEntry("uncovered_lines", 0.0)
             .containsEntry("coverage", 100.0);
+  }
+
+  /**
+   * Reproduces USER-2307: a single aggregated report handed to every module through sonar.coverage.jacoco.xmlReportPaths, which is what SonarScanner for Gradle does when the
+   * property is set at the root. Every module then fails to resolve the files of all its siblings, so an unconditional per-file warning grows as files x modules.
+   * Default-verbosity logs must stay flat: one summary line per report per module, and no per-file line.
+   */
+  @Test
+  void aggregated_report_imported_by_every_module_does_not_log_one_line_per_unresolved_file() {
+    Path project = Path.of("src", "test", "resources", "aggregate-and-module-based-mixed-coverage");
+    Path reportLocation = project.resolve("report")
+            .resolve("target")
+            .resolve("site")
+            .resolve("jacoco-aggregate")
+            .resolve("jacoco.xml");
+    MavenBuild build = MavenBuild.create()
+            .setPom(project.resolve("pom.xml").toFile())
+            .addGoal("clean verify")
+            .addSonarGoal()
+            // Set at the root, so it is inherited by every module: each of them imports the same aggregated report.
+            .setProperty("sonar.coverage.jacoco.xmlReportPaths", reportLocation.toAbsolutePath().toString());
+
+    BuildResult result = orchestrator.executeBuild(build, true);
+
+    // The message removed by this fix. It used to be emitted once per unresolved file per module.
+    assertThat(result.getLogs()).doesNotContain("not found in project sources");
+
+    // Its replacement is debug-only, so at default verbosity not a single per-file line may appear: this is the fix.
+    List<String> perFileLines = Arrays.stream(result.getLogs().split("\\R"))
+            .filter(line -> line.matches(".*File '[^']*'.*not found in the analysed sources.*"))
+            .collect(Collectors.toList());
+    assertThat(perFileLines).isEmpty();
+
+    // What is left is at most one summary line per module per report, so the volume is bounded by the number of modules instead of growing with files x modules.
+    List<String> summaryLines = Arrays.stream(result.getLogs().split("\\R"))
+            .filter(line -> line.contains("the analysed sources of "))
+            .collect(Collectors.toList());
+    assertThat(summaryLines).hasSizeLessThanOrEqualTo(MODULE_COUNT);
+
+    // Coverage is still imported. The exact per-file values are asserted by the aggregate test above; here we only guard against the fix silently importing nothing at all.
+    Map<String, Double> measuresForLibrary = getCoverageMeasures("org.example:aggregate-and-module-based-mixed-coverage:library/src/main/java/org/example/Library.java");
+    assertThat(measuresForLibrary).containsKey("coverage");
+    assertThat(measuresForLibrary.get("lines_to_cover")).isPositive();
   }
 
   @Test
