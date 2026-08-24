@@ -225,4 +225,58 @@ class FileLocatorTest {
     assertThat(locator.getInputFile(null, "", "File.java")).isEqualTo(appFile);
   }
 
+  @Test
+  void should_have_files_coverable_by_jacoco_for_main_java_files() {
+    InputFile inputFile = inputFile("src/main/java/File.java", "java", InputFile.Type.MAIN);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isTrue();
+  }
+
+  @Test
+  void should_have_files_coverable_by_jacoco_for_main_kotlin_files() {
+    InputFile inputFile = inputFile("src/main/kotlin/File.kt", "kotlin", InputFile.Type.MAIN);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isTrue();
+  }
+
+  @Test
+  void should_have_files_coverable_by_jacoco_when_only_some_indexed_files_are_coverable() {
+    // A module usually indexes more than its main sources: a single coverable file is enough.
+    InputFile mainFile = inputFile("src/main/java/File.java", "java", InputFile.Type.MAIN);
+    InputFile pomFile = inputFile("pom.xml", "xml", InputFile.Type.MAIN);
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(pomFile, mainFile), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isTrue();
+  }
+
+  @Test
+  void should_not_have_files_coverable_by_jacoco_for_test_files() {
+    InputFile inputFile = inputFile("src/test/java/FileTest.java", "java", InputFile.Type.TEST);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isFalse();
+  }
+
+  @Test
+  void should_not_have_files_coverable_by_jacoco_for_languages_not_covered_by_jacoco() {
+    InputFile inputFile = inputFile("pom.xml", "xml", InputFile.Type.MAIN);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isFalse();
+  }
+
+  @Test
+  void should_not_have_files_coverable_by_jacoco_for_files_without_language() {
+    InputFile inputFile = inputFile("src/main/resources/data.txt", null, InputFile.Type.MAIN);
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.singleton(inputFile), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isFalse();
+  }
+
+  @Test
+  void should_not_have_files_coverable_by_jacoco_when_no_file_is_indexed() {
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.emptyList(), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isFalse();
+  }
+
+  private static InputFile inputFile(String relativePath, String language, InputFile.Type type) {
+    return new TestInputFileBuilder("module1", relativePath).setLanguage(language).setType(type).build();
+  }
+
 }
