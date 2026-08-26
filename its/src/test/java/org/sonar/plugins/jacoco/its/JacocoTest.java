@@ -68,7 +68,8 @@ class JacocoTest {
     }
     builder.addPlugin(pluginLocation);
     try {
-      // The versions of these 2 plugins were chosen because they have shipped with SQS 2025.1 and greater
+      // These 2 plugins are pinned to keep the coverage assertions below stable. They are compatible with every SonarQube version of the QA matrix, which starts at SQS 2026.1
+      // because this plugin is compiled for Java 21 and older servers provision a Java 17 JRE to the scanner.
       builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-java-plugin/sonar-java-plugin-8.9.3.40136.jar")));
       builder.addPlugin(URLLocation.create(new URL("https://binaries.sonarsource.com/Distribution/sonar-kotlin-plugin/sonar-kotlin-plugin-2.22.1.6674.jar")));
     } catch (MalformedURLException e) {
