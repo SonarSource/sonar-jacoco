@@ -27,8 +27,8 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
 }
 
 compileJava {
-    // Setting the compatibility to Java 11 (https://docs.gradle.org/7.6.3/userguide/building_java_projects.html#sec:java_cross_compilation)
-    options.release = 11
+    // Setting the compatibility to Java 21 (https://docs.gradle.org/7.6.3/userguide/building_java_projects.html#sec:java_cross_compilation)
+    options.release = 21
 }
 
 tasks.withType(Javadoc) {
@@ -101,6 +101,7 @@ jar {
         attributes(
                 'Build-Time': buildDate,
                 'Implementation-Build': 'git rev-parse HEAD'.execute().text.trim(),
+                'Jre-Min-Version': '21',
                 'Plugin-BuildDate': buildDate,
                 'Plugin-ChildFirstClassLoader': 'false',
                 'Plugin-Class': 'org.sonar.plugins.jacoco.JacocoPlugin',
