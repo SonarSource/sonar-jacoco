@@ -38,7 +38,7 @@ public abstract class FileLocator {
   private final int coverableFileCount;
 
   protected FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
-    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+    this(StreamSupport.stream(inputFiles.spliterator(), false).toList(), kotlinFileLocator);
   }
 
   protected FileLocator(List<InputFile> inputFiles, @Nullable KotlinFileLocator kotlinFileLocator) {

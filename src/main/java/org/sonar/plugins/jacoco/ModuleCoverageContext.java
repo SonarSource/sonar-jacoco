@@ -50,7 +50,7 @@ public class ModuleCoverageContext {
             .stream()
             .map(Path::of)
             .map(dir -> dir.isAbsolute() ? dir : baseDir.resolve(dir))
-            .collect(Collectors.toList());
+            .toList();
     return new ModuleCoverageContext(moduleKey, baseDir, sourceDirectories);
   }
 

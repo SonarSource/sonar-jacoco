@@ -27,7 +27,7 @@ import org.sonar.api.batch.fs.InputFile;
 public class ModuleFileLocator extends FileLocator {
 
   public ModuleFileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
-    super(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+    super(StreamSupport.stream(inputFiles.spliterator(), false).toList(), kotlinFileLocator);
   }
 
   /**
