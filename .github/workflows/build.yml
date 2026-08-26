@@ -49,7 +49,7 @@ jobs:
       contents: write  # Required for repository access and tagging
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
-      SQ_VERSION: 'LATEST_RELEASE[2025.4]'
+      SQ_VERSION: 'LATEST_RELEASE[2026.1]'
     steps:
       - name: Config Git
         run: git config --global core.autocrlf input
@@ -93,8 +93,10 @@ jobs:
       fail-fast: false
       matrix:
         sq-version:
-          - "LATEST_RELEASE[2025.1]"
-          - "LATEST_RELEASE[2025.4]"
+          # The plugin is compiled for Java 21, so it can only run on SonarQube versions that provision a Java 21 JRE to the scanner. 2026.1 is the oldest one, 2025.x provisions
+          # Java 17.
+          - "LATEST_RELEASE[2026.1]"
+          - "LATEST_RELEASE"
           - "DEV"
         is_nightly:
           - ${{ github.event_name == 'schedule' }}
