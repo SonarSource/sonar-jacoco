@@ -82,13 +82,12 @@ class SensorUtils {
         notFound++;
         String group = sourceFile.groupName() == null ? "" : (" (group '" + sourceFile.groupName() + "')");
         logger.debug("File '{}/{}'{} not found in the analysed sources", sourceFile.packageName(), sourceFile.name(), group);
-        continue;
-      }
-
-      try {
-        importer.importCoverage(sourceFile, inputFile);
-      } catch (IllegalStateException e) {
-        logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}: {}", inputFile, e.getClass().getName(), e.getMessage());
+      } else {
+        try {
+          importer.importCoverage(sourceFile, inputFile);
+        } catch (IllegalStateException e) {
+          logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}: {}", inputFile, e.getClass().getName(), e.getMessage());
+        }
       }
     }
 
