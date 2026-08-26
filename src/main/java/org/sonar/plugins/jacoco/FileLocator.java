@@ -23,7 +23,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -38,7 +37,7 @@ public abstract class FileLocator {
   private final int coverableFileCount;
 
   protected FileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
-    this(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+    this(StreamSupport.stream(inputFiles.spliterator(), false).toList(), kotlinFileLocator);
   }
 
   protected FileLocator(List<InputFile> inputFiles, @Nullable KotlinFileLocator kotlinFileLocator) {

@@ -19,7 +19,6 @@
  */
 package org.sonar.plugins.jacoco;
 
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import org.sonar.api.batch.fs.InputFile;
@@ -27,7 +26,7 @@ import org.sonar.api.batch.fs.InputFile;
 public class ModuleFileLocator extends FileLocator {
 
   public ModuleFileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator) {
-    super(StreamSupport.stream(inputFiles.spliterator(), false).collect(Collectors.toList()), kotlinFileLocator);
+    super(StreamSupport.stream(inputFiles.spliterator(), false).toList(), kotlinFileLocator);
   }
 
   /**
