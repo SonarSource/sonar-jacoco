@@ -27,7 +27,7 @@ if (version.endsWith('-SNAPSHOT') && ext.buildNumber != null) {
 }
 
 compileJava {
-    // Setting the compatibility to Java 21 (https://docs.gradle.org/7.6.3/userguide/building_java_projects.html#sec:java_cross_compilation)
+    // Setting the compatibility to Java 21 (https://docs.gradle.org/9.7.1/userguide/building_java_projects.html#sec:java_cross_compilation)
     options.release = 21
 }
 
