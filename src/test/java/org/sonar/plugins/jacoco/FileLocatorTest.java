@@ -205,6 +205,13 @@ class FileLocatorTest {
   }
 
   @Test
+  void module_file_locator_should_not_fail_when_kotlin_file_locator_is_null() {
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.emptyList(), null);
+
+    assertThat(locator.getInputFiles(null, "org/example", "Missing.kt")).isEmpty();
+  }
+
+  @Test
   void project_file_locator_should_not_fail_when_locating_a_file_with_a_null_group(@TempDir Path tmp) {
     var projectCoverageContext = new ProjectCoverageContext();
     projectCoverageContext.add(new ModuleCoverageContext(
@@ -244,6 +251,16 @@ class FileLocatorTest {
   }
 
   @Test
+  void project_file_locator_should_return_kotlin_suffix_match_when_kotlin_file_locator_is_null() {
+    InputFile inputFile = new TestInputFileBuilder("my-project", "app/src/main/kotlin/org/example/File.kt")
+            .setLanguage("kotlin")
+            .build();
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(inputFile), null, new ProjectCoverageContext());
+
+    assertThat(locator.getInputFiles(null, "org/example", "File.kt")).containsExactly(inputFile);
+  }
+
+  @Test
   void project_file_locator_should_return_all_main_kotlin_files_found_by_package_declaration() {
     InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/kotlin/org/example/File.kt")
             .setLanguage("kotlin")
@@ -262,8 +279,8 @@ class FileLocatorTest {
             .setCharset(Charset.defaultCharset())
             .build();
     List<InputFile> inputFiles = List.of(appFile, appTestFile, utilsFile);
-    KotlinFileLocator kotlinFileLocator = new KotlinFileLocator(inputFiles.stream());
-    ProjectFileLocator locator = new ProjectFileLocator(inputFiles, kotlinFileLocator, new ProjectCoverageContext());
+    KotlinFileLocator projectKotlinFileLocator = new KotlinFileLocator(inputFiles.stream());
+    ProjectFileLocator locator = new ProjectFileLocator(inputFiles, projectKotlinFileLocator, new ProjectCoverageContext());
 
     assertThat(locator.getInputFiles(null, "org/example", "File.kt")).containsExactly(appFile, utilsFile);
   }

@@ -67,14 +67,15 @@ public class ProjectFileLocator extends FileLocator {
   }
 
   @Override
-  protected List<InputFile> lookupKotlinFiles(@Nullable String groupName, String packagePath, String fileName, List<InputFile> files) {
-    if (groupName == null) {
+  public List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
+    List<InputFile> files = super.getInputFiles(groupName, packagePath, fileName);
+    if (groupName == null && fileName.endsWith(".kt") && kotlinFileLocator != null) {
       return Stream.concat(files.stream(), kotlinFileLocator.getInputFiles(packagePath, fileName).stream())
               .filter(file -> file.type() == InputFile.Type.MAIN)
               .distinct()
               .toList();
     }
-    return super.lookupKotlinFiles(groupName, packagePath, fileName, files);
+    return files;
   }
 
   @CheckForNull
