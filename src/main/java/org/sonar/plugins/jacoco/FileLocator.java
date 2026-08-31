@@ -64,16 +64,29 @@ public abstract class FileLocator {
 
   @CheckForNull
   public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
+    List<InputFile> files = getInputFiles(groupName, packagePath, fileName);
+    return files.isEmpty() ? null : files.get(0);
+  }
+
+  public List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
     String filePath = packagePath.isEmpty()
             ? fileName
             : normalizePath(packagePath + "/" + fileName);
 
-    InputFile file = lookup(groupName, filePath);
+    List<InputFile> files = lookupAll(groupName, filePath);
 
-    if (file == null && fileName.endsWith(".kt")) {
-      file = kotlinFileLocator.getInputFile(packagePath, fileName);
+    if (files.isEmpty() && fileName.endsWith(".kt")) {
+      InputFile kotlinFile = kotlinFileLocator.getInputFile(packagePath, fileName);
+      if (kotlinFile != null) {
+        return List.of(kotlinFile);
+      }
     }
-    return file;
+    return files;
+  }
+
+  protected List<InputFile> lookupAll(@Nullable String groupName, String filePath) {
+    InputFile file = lookup(groupName, filePath);
+    return file == null ? List.of() : List.of(file);
   }
 
   @CheckForNull

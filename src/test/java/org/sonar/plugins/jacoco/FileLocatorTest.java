@@ -69,6 +69,7 @@ class FileLocatorTest {
 
     ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(inputFile1, inputFile2), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile1);
+    assertThat(locator.getInputFiles(null, "org/sonar/test", "File.java")).containsExactly(inputFile1);
   }
 
   @Test
@@ -186,6 +187,7 @@ class FileLocatorTest {
 
     // Test existing files
     assertThat(locator.getInputFile("app", "", "File.java")).isEqualTo(appFile);
+    assertThat(locator.getInputFiles("app", "", "File.java")).containsExactly(appFile);
     assertThat(locator.getInputFile("utils", "", "File.java")).isEqualTo(utilsFile);
     assertThat(locator.getInputFile("app-utils", "", "File.java")).isEqualTo(nestedUtilsFile);
     assertThat(locator.getInputFile("app-utils", "", "pom.xml")).isEqualTo(nestUtilsPomXmlFile);
@@ -221,8 +223,10 @@ class FileLocatorTest {
 
     ProjectFileLocator locator = new ProjectFileLocator(List.of(appFile, utilsFile), null, new ProjectCoverageContext());
 
-    // Should fall back to a group-agnostic lookup and return the first match, not blow up with an NPE
+    // The compatibility method still returns the first match.
     assertThat(locator.getInputFile(null, "", "File.java")).isEqualTo(appFile);
+    // A group-less project-level report has no module identity, so every matching physical source receives its coverage.
+    assertThat(locator.getInputFiles(null, "", "File.java")).containsExactly(appFile, utilsFile);
   }
 
   @Test

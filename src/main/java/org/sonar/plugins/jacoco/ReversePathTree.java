@@ -19,7 +19,9 @@
  */
 package org.sonar.plugins.jacoco;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.sonar.api.batch.fs.InputFile;
 
@@ -44,6 +46,21 @@ public class ReversePathTree {
       }
     }
     return getFirstLeaf(currentNode);
+  }
+
+  public List<InputFile> getFilesWithSuffix(String[] path) {
+    Node currentNode = root;
+
+    for (int i = path.length - 1; i >= 0; i--) {
+      currentNode = currentNode.children.get(path[i]);
+      if (currentNode == null) {
+        return List.of();
+      }
+    }
+
+    List<InputFile> files = new ArrayList<>();
+    collectFiles(currentNode, files);
+    return files;
   }
 
   public InputFile getFileWithSuffix(String module, String[] path) {
@@ -75,6 +92,13 @@ public class ReversePathTree {
       node = node.children.values().iterator().next();
     }
     return node.file;
+  }
+
+  private static void collectFiles(Node node, List<InputFile> files) {
+    if (node.file != null) {
+      files.add(node.file);
+    }
+    node.children.values().forEach(child -> collectFiles(child, files));
   }
 
   static class Node {

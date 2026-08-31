@@ -23,9 +23,22 @@ import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import org.junit.jupiter.api.Test;
 import org.sonar.api.batch.fs.InputFile;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ReversePathTreeTest {
+  @Test
+  void group_agnostic_resolution_returns_all_files_with_the_same_suffix() {
+    InputFile first = TestInputFileBuilder.create("", "first/src/main/java/org/example/App.java").build();
+    InputFile second = TestInputFileBuilder.create("", "second/src/main/java/org/example/App.java").build();
+
+    var reversePathTree = new ReversePathTree();
+    reversePathTree.index(first, first.relativePath().split("/"));
+    reversePathTree.index(second, second.relativePath().split("/"));
+
+    assertThat(reversePathTree.getFilesWithSuffix(new String[]{"org", "example", "App.java"}))
+      .containsExactly(first, second);
+  }
+
   @Test
   void module_aware_resolution_of_input_file_with_name_clashes_across_modules_works_as_expected() {
     String module = "module";

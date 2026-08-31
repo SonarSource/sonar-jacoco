@@ -22,6 +22,7 @@ package org.sonar.plugins.jacoco;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
@@ -49,6 +50,14 @@ public class ProjectFileLocator extends FileLocator {
   @Override
   public InputFile lookup(@Nullable String groupName, String filePath) {
     return getInputFileForProject(groupName, filePath);
+  }
+
+  @Override
+  protected List<InputFile> lookupAll(@Nullable String groupName, String filePath) {
+    if (groupName == null) {
+      return tree.getFilesWithSuffix(filePath.split(FileLocator.SEPARATOR_REGEX));
+    }
+    return super.lookupAll(groupName, filePath);
   }
 
   @CheckForNull
