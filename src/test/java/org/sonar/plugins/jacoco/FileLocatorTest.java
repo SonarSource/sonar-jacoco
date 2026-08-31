@@ -217,15 +217,18 @@ class FileLocatorTest {
   }
 
   @Test
-  void project_file_locator_should_not_fail_with_a_null_group_and_ambiguous_files() {
+  void project_file_locator_should_return_all_ambiguous_main_files_for_a_null_group() {
     InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/java/File.java").build();
+    InputFile appTestFile = new TestInputFileBuilder("my-project", "app/src/test/java/File.java")
+            .setType(InputFile.Type.TEST)
+            .build();
     InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/java/File.java").build();
 
-    ProjectFileLocator locator = new ProjectFileLocator(List.of(appFile, utilsFile), null, new ProjectCoverageContext());
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(appFile, appTestFile, utilsFile), null, new ProjectCoverageContext());
 
     // The compatibility method still returns the first match.
     assertThat(locator.getInputFile(null, "", "File.java")).isEqualTo(appFile);
-    // A group-less project-level report has no module identity, so every matching physical source receives its coverage.
+    // A group-less project-level report has no module identity, so every matching main source receives its coverage.
     assertThat(locator.getInputFiles(null, "", "File.java")).containsExactly(appFile, utilsFile);
   }
 

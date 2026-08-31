@@ -55,7 +55,10 @@ public class ProjectFileLocator extends FileLocator {
   @Override
   protected List<InputFile> lookupAll(@Nullable String groupName, String filePath) {
     if (groupName == null) {
-      return tree.getFilesWithSuffix(filePath.split(FileLocator.SEPARATOR_REGEX));
+      return tree.getFilesWithSuffix(filePath.split(FileLocator.SEPARATOR_REGEX))
+              .stream()
+              .filter(file -> file.type() == InputFile.Type.MAIN)
+              .toList();
     }
     return super.lookupAll(groupName, filePath);
   }
