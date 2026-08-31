@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
@@ -63,6 +64,17 @@ public class ProjectFileLocator extends FileLocator {
               .toList();
     }
     return super.lookupAll(groupName, filePath);
+  }
+
+  @Override
+  protected List<InputFile> lookupKotlinFiles(@Nullable String groupName, String packagePath, String fileName, List<InputFile> files) {
+    if (groupName == null) {
+      return Stream.concat(files.stream(), kotlinFileLocator.getInputFiles(packagePath, fileName).stream())
+              .filter(file -> file.type() == InputFile.Type.MAIN)
+              .distinct()
+              .toList();
+    }
+    return super.lookupKotlinFiles(groupName, packagePath, fileName, files);
   }
 
   @CheckForNull

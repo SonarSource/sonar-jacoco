@@ -75,13 +75,18 @@ public abstract class FileLocator {
 
     List<InputFile> files = lookupAll(groupName, filePath);
 
-    if (files.isEmpty() && fileName.endsWith(".kt")) {
-      InputFile kotlinFile = kotlinFileLocator.getInputFile(packagePath, fileName);
-      if (kotlinFile != null) {
-        return List.of(kotlinFile);
-      }
+    if (fileName.endsWith(".kt")) {
+      return lookupKotlinFiles(groupName, packagePath, fileName, files);
     }
     return files;
+  }
+
+  protected List<InputFile> lookupKotlinFiles(@Nullable String groupName, String packagePath, String fileName, List<InputFile> files) {
+    if (!files.isEmpty()) {
+      return files;
+    }
+    InputFile file = kotlinFileLocator.getInputFile(packagePath, fileName);
+    return file == null ? List.of() : List.of(file);
   }
 
   protected List<InputFile> lookupAll(@Nullable String groupName, String filePath) {

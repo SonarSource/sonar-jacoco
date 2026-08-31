@@ -29,6 +29,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class KotlinFileLocatorTest {
   @Test
+  void should_return_all_input_files_with_the_same_fqn() {
+    InputFile first = new TestInputFileBuilder("module", "first/File.kt")
+            .setContents("package abc.def")
+            .setCharset(Charset.defaultCharset())
+            .build();
+    InputFile second = new TestInputFileBuilder("module", "second/File.kt")
+            .setContents("package abc.def")
+            .setCharset(Charset.defaultCharset())
+            .build();
+
+    KotlinFileLocator kotlinFileLocator = new KotlinFileLocator(Stream.of(first, second));
+
+    assertThat(kotlinFileLocator.getInputFiles("abc/def", "File.kt")).containsExactly(first, second);
+    assertThat(kotlinFileLocator.getInputFile("abc/def", "File.kt")).isEqualTo(second);
+  }
+
+  @Test
   void should_return_an_input_file_by_package_and_filename() {
     InputFile inputFile = new TestInputFileBuilder("module", "src/main/java/org/sonar/test/File.kt")
       .setContents("package abc.def.ghijkl")
@@ -277,5 +294,4 @@ class KotlinFileLocatorTest {
     assertThat(kotlinFileLocator.getInputFile("a/package/c", "File.kt")).isEqualTo(inputFile);
   }
 }
-
 

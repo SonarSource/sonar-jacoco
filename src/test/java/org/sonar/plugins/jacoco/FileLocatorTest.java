@@ -21,6 +21,7 @@ package org.sonar.plugins.jacoco;
 
 import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -240,6 +241,31 @@ class FileLocatorTest {
     ProjectFileLocator locator = new ProjectFileLocator(List.of(defaultPackageFile, packagedFile), null, new ProjectCoverageContext());
 
     assertThat(locator.getInputFiles(null, "", "File.java")).containsExactly(defaultPackageFile);
+  }
+
+  @Test
+  void project_file_locator_should_return_all_main_kotlin_files_found_by_package_declaration() {
+    InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/kotlin/org/example/File.kt")
+            .setLanguage("kotlin")
+            .setContents("package org.example")
+            .setCharset(Charset.defaultCharset())
+            .build();
+    InputFile appTestFile = new TestInputFileBuilder("my-project", "app/src/test/kotlin/org/example/File.kt")
+            .setLanguage("kotlin")
+            .setType(InputFile.Type.TEST)
+            .setContents("package org.example")
+            .setCharset(Charset.defaultCharset())
+            .build();
+    InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/kotlin/utils/File.kt")
+            .setLanguage("kotlin")
+            .setContents("package org.example")
+            .setCharset(Charset.defaultCharset())
+            .build();
+    List<InputFile> inputFiles = List.of(appFile, appTestFile, utilsFile);
+    KotlinFileLocator kotlinFileLocator = new KotlinFileLocator(inputFiles.stream());
+    ProjectFileLocator locator = new ProjectFileLocator(inputFiles, kotlinFileLocator, new ProjectCoverageContext());
+
+    assertThat(locator.getInputFiles(null, "org/example", "File.kt")).containsExactly(appFile, utilsFile);
   }
 
   @Test

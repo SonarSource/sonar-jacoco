@@ -20,7 +20,9 @@
 package org.sonar.plugins.jacoco;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,7 +49,7 @@ public class KotlinFileLocator {
   private static final Pattern FIRST_IDENTIFIER_REGEX = Pattern.compile("^" + HIDDEN + "(?<firstIdentifier>" + IDENTIFIER + ")");
   private static final Pattern NEXT_IDENTIFIER_REGEX = Pattern.compile("^" + HIDDEN + "\\." + HIDDEN + "(?<nextIdentifier>" + IDENTIFIER + ")");
 
-  private final Map<String, InputFile> fqnToInputFile = new HashMap<>();
+  private final Map<String, List<InputFile>> fqnToInputFiles = new LinkedHashMap<>();
   private boolean populated = false;
   private final Stream<InputFile> inputFileStream;
 
@@ -56,11 +58,16 @@ public class KotlinFileLocator {
   }
 
   public InputFile getInputFile(String packagePath, String fileName) {
+    List<InputFile> inputFiles = getInputFiles(packagePath, fileName);
+    return inputFiles.isEmpty() ? null : inputFiles.get(inputFiles.size() - 1);
+  }
+
+  public List<InputFile> getInputFiles(String packagePath, String fileName) {
     String fqn = packagePath.replace("/", ".") + "." + fileName;
     if (!populated) {
       populate();
     }
-    return fqnToInputFile.get(fqn);
+    return List.copyOf(fqnToInputFiles.getOrDefault(fqn, List.of()));
   }
 
   private void populate() {
@@ -69,7 +76,7 @@ public class KotlinFileLocator {
         String packageName = getPackage(f.contents());
         if (packageName != null) {
           String key = packageName + "." + f.filename();
-          fqnToInputFile.put(key, f);
+          fqnToInputFiles.computeIfAbsent(key, unused -> new ArrayList<>()).add(f);
         }
       } catch (IOException e) {
         LOGGER.error(e.getMessage());
