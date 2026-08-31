@@ -218,18 +218,28 @@ class FileLocatorTest {
 
   @Test
   void project_file_locator_should_return_all_ambiguous_main_files_for_a_null_group() {
-    InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/java/File.java").build();
-    InputFile appTestFile = new TestInputFileBuilder("my-project", "app/src/test/java/File.java")
+    InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/java/org/example/File.java").build();
+    InputFile appTestFile = new TestInputFileBuilder("my-project", "app/src/test/java/org/example/File.java")
             .setType(InputFile.Type.TEST)
             .build();
-    InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/java/File.java").build();
+    InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/java/org/example/File.java").build();
 
     ProjectFileLocator locator = new ProjectFileLocator(List.of(appFile, appTestFile, utilsFile), null, new ProjectCoverageContext());
 
     // The compatibility method still returns the first match.
-    assertThat(locator.getInputFile(null, "", "File.java")).isEqualTo(appFile);
+    assertThat(locator.getInputFile(null, "org/example", "File.java")).isEqualTo(appFile);
     // A group-less project-level report has no module identity, so every matching main source receives its coverage.
-    assertThat(locator.getInputFiles(null, "", "File.java")).containsExactly(appFile, utilsFile);
+    assertThat(locator.getInputFiles(null, "org/example", "File.java")).containsExactly(appFile, utilsFile);
+  }
+
+  @Test
+  void project_file_locator_should_not_fan_out_a_default_package_file() {
+    InputFile defaultPackageFile = new TestInputFileBuilder("my-project", "app/src/main/java/File.java").build();
+    InputFile packagedFile = new TestInputFileBuilder("my-project", "utils/src/main/java/org/example/File.java").build();
+
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(defaultPackageFile, packagedFile), null, new ProjectCoverageContext());
+
+    assertThat(locator.getInputFiles(null, "", "File.java")).containsExactly(defaultPackageFile);
   }
 
   @Test

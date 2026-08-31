@@ -54,8 +54,10 @@ public class ProjectFileLocator extends FileLocator {
 
   @Override
   protected List<InputFile> lookupAll(@Nullable String groupName, String filePath) {
-    if (groupName == null) {
-      return tree.getFilesWithSuffix(filePath.split(FileLocator.SEPARATOR_REGEX))
+    String[] pathSegments = filePath.split(FileLocator.SEPARATOR_REGEX);
+    // A file name alone is too weak to fan out because it matches same-named files in every package.
+    if (groupName == null && pathSegments.length > 1) {
+      return tree.getFilesWithSuffix(pathSegments)
               .stream()
               .filter(file -> file.type() == InputFile.Type.MAIN)
               .toList();

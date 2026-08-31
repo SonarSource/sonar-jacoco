@@ -1,6 +1,6 @@
 # Gradle aggregate coverage reproducer
 
-This multi-module project generates one JaCoCo XML report with Gradle 9.6.1 and imports it through
+This multi-module project generates one JaCoCo XML report with the repository's Gradle wrapper and imports it through
 `sonar.coverage.jacoco.aggregateXmlReportPaths`.
 
 The normal `sonar.coverage.jacoco.xmlReportPaths` property is explicitly cleared so the test exercises only the
@@ -11,5 +11,5 @@ the project-level locator failed to resolve even unambiguous entries from a grou
 near-total coverage loss. The null-group fallback added with JACOCO-175 fixed that case.
 
 The `collision-a` and `collision-b` modules both contain `org/example/shared/Shared.java`, with different classes
-inside those files. Gradle merges their coverage into one `sourcefile` entry, and the current importer assigns it
-only to the first indexed module file.
+inside those files. Gradle merges their coverage into one `sourcefile` entry, and the importer assigns that entry
+to every matching main project file instead of only the first indexed one.

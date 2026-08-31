@@ -424,6 +424,7 @@ class JacocoTest {
     Path wrapperDirectory = targetDir.toPath().resolve("gradle/wrapper");
     Files.createDirectories(wrapperDirectory);
     FileUtils.copyFile(repositoryRoot.resolve("gradle/wrapper/gradle-wrapper.jar").toFile(), wrapperDirectory.resolve("gradle-wrapper.jar").toFile());
+    FileUtils.copyFile(repositoryRoot.resolve("gradle/wrapper/gradle-wrapper.properties").toFile(), wrapperDirectory.resolve("gradle-wrapper.properties").toFile());
     if (!new File(targetDir, "gradlew").setExecutable(true)) {
       throw new IOException("Could not make the copied Gradle wrapper executable");
     }
