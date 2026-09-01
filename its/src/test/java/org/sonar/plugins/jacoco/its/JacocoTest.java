@@ -268,7 +268,8 @@ class JacocoTest {
   void gradle_aggregate_report_without_groups_skips_ambiguous_files() throws IOException {
     BuildResult result = executeGradleAggregateAnalysis();
 
-    assertThat(result.getLogs()).contains("Coverage for 'org/example/shared/Shared.java' was not imported because the report entry matches 2 project source files.");
+    String ambiguousReportPath = Path.of("org", "example", "shared", "Shared.java").toString();
+    assertThat(result.getLogs()).contains("Coverage for '" + ambiguousReportPath + "' was not imported because the report entry matches 2 project source files.");
     assertThat(getCoverageMeasures("jacoco-gradle-aggregate-reproducer:collision-a/src/main/java/org/example/shared/Shared.java"))
             .containsEntry("line_coverage", 0.0);
     assertThat(getCoverageMeasures("jacoco-gradle-aggregate-reproducer:collision-b/src/main/java/org/example/shared/Shared.java"))
