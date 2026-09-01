@@ -149,6 +149,22 @@ class SensorUtilsTest {
   }
 
   @Test
+  void warn_once_after_all_ambiguous_report_entries_are_skipped() {
+    ProjectFileLocator locator = mock(ProjectFileLocator.class);
+    ReportImporter importer = mock(ReportImporter.class);
+    AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+    when(locator.skippedAmbiguousReportEntries()).thenReturn(0, 1, 1, 2);
+
+    SensorUtils.importReports(Arrays.asList(SINGLE_FILE_REPORT, SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
+
+    assertThat(logTester.logs(Level.WARN)).containsExactly(
+            "Coverage was not imported for 2 JaCoCo report source file(s) because each matched multiple project source files."
+                    + " Enable debug logs for the full list.");
+    assertThat(logTester.logs(Level.DEBUG)).noneMatch(message -> message.contains("not found in the analysed sources"));
+    verifyNoInteractions(analysisWarnings);
+  }
+
+  @Test
   void warn_once_when_no_file_of_a_report_is_found() {
     ModuleFileLocator locator = mock(ModuleFileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);

@@ -236,6 +236,7 @@ class FileLocatorTest {
 
     assertThat(locator.getInputFile(null, "org/example", "File.java")).isNull();
     assertThat(locator.getInputFiles(null, "org/example", "File.java")).isEmpty();
+    assertThat(locator.skippedAmbiguousReportEntries()).isEqualTo(2);
   }
 
   @Test

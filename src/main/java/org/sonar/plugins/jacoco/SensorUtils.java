@@ -36,17 +36,24 @@ class SensorUtils {
 
   static void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer, Logger logger, AnalysisWarnings analysisWarnings, String contextLabel) {
     logger.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
+    int skippedAmbiguousReportEntries = 0;
 
     for (Path reportPath : reportPaths) {
       logger.debug("Reading report '{}'", reportPath);
       try {
         ImportSummary summary = importReport(new XmlReportParser(reportPath), locator, importer, logger);
+        skippedAmbiguousReportEntries += summary.ambiguous;
         logImportSummary(summary, reportPath, locator, logger, analysisWarnings, contextLabel);
       } catch (Exception e) {
         String message = String.format("Coverage report '%s' could not be read/imported. Error: %s: %s", reportPath, e.getClass().getName(), e.getMessage());
         logger.error(message);
         analysisWarnings.addUnique(message);
       }
+    }
+
+    if (skippedAmbiguousReportEntries > 0) {
+      logger.warn("Coverage was not imported for {} JaCoCo report source file(s) because each matched multiple project source files."
+              + " Enable debug logs for the full list.", skippedAmbiguousReportEntries);
     }
   }
 
@@ -75,13 +82,19 @@ class SensorUtils {
   static ImportSummary importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer, Logger logger) {
     List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
     int notFound = 0;
+    int ambiguous = 0;
 
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
+      int ambiguousBeforeLookup = locator.skippedAmbiguousReportEntries();
       InputFile inputFile = locator.getInputFile(sourceFile.groupName(), sourceFile.packageName(), sourceFile.name());
       if (inputFile == null) {
-        notFound++;
-        String group = sourceFile.groupName() == null ? "" : (" (group '" + sourceFile.groupName() + "')");
-        logger.debug("File '{}/{}'{} not found in the analysed sources", sourceFile.packageName(), sourceFile.name(), group);
+        if (locator.skippedAmbiguousReportEntries() > ambiguousBeforeLookup) {
+          ambiguous++;
+        } else {
+          notFound++;
+          String group = sourceFile.groupName() == null ? "" : (" (group '" + sourceFile.groupName() + "')");
+          logger.debug("File '{}/{}'{} not found in the analysed sources", sourceFile.packageName(), sourceFile.name(), group);
+        }
       } else {
         try {
           importer.importCoverage(sourceFile, inputFile);
@@ -91,19 +104,21 @@ class SensorUtils {
       }
     }
 
-    return new ImportSummary(sourceFiles.size(), notFound);
+    return new ImportSummary(sourceFiles.size(), notFound, ambiguous);
   }
 
   /**
-   * How many source files a single report declared, and how many of them could not be matched to an analysed file.
+   * How many source files a single report declared, how many could not be matched, and how many matched ambiguously.
    */
   static class ImportSummary {
     final int total;
     final int notFound;
+    final int ambiguous;
 
-    ImportSummary(int total, int notFound) {
+    ImportSummary(int total, int notFound, int ambiguous) {
       this.total = total;
       this.notFound = notFound;
+      this.ambiguous = ambiguous;
     }
   }
 }

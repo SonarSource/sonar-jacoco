@@ -12,5 +12,5 @@ near-total coverage loss. The null-group fallback added with JACOCO-175 fixed th
 
 The `collision-a` and `collision-b` modules both contain `org/example/shared/Shared.java`, with different classes
 inside those files. Gradle merges their coverage into one `sourcefile` entry, so the importer cannot determine
-which physical source owns each line. It skips that ambiguous entry and logs a warning instead of assigning
-potentially incorrect coverage.
+which physical source owns each line. It skips ambiguous entries, emits one aggregate warning, and keeps the
+per-file details at debug level instead of assigning potentially incorrect coverage.

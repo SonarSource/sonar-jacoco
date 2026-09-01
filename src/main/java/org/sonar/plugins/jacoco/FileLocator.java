@@ -62,6 +62,10 @@ public abstract class FileLocator {
     return coverableFileCount > 0;
   }
 
+  int skippedAmbiguousReportEntries() {
+    return 0;
+  }
+
   @CheckForNull
   public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
     List<InputFile> files = getInputFiles(groupName, packagePath, fileName);

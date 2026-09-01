@@ -36,6 +36,7 @@ public class ProjectFileLocator extends FileLocator {
   private static final Logger LOG = LoggerFactory.getLogger(ProjectFileLocator.class);
 
   private ProjectCoverageContext projectCoverageContext;
+  private int skippedAmbiguousReportEntries;
 
   public ProjectFileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, ProjectCoverageContext projectCoverageContext) {
     super(inputFiles, kotlinFileLocator);
@@ -77,12 +78,17 @@ public class ProjectFileLocator extends FileLocator {
     }
     if (groupName == null && files.size() > 1) {
       String filePath = Path.of(packagePath, fileName).toString();
-      LOG.warn("Coverage for '{}' was not imported because the report entry matches {} project source files."
-              + " The JaCoCo XML report does not contain enough information to choose one.", filePath, files.size());
-      LOG.debug("Project source files matching '{}': {}", filePath, files.stream().map(InputFile::relativePath).toList());
+      skippedAmbiguousReportEntries++;
+      LOG.debug("Coverage for '{}' was not imported because the report entry matches {} project source files: {}",
+              filePath, files.size(), files.stream().map(InputFile::relativePath).toList());
       return List.of();
     }
     return files;
+  }
+
+  @Override
+  int skippedAmbiguousReportEntries() {
+    return skippedAmbiguousReportEntries;
   }
 
   @CheckForNull
