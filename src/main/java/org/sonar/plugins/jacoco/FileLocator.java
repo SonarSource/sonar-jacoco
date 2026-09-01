@@ -68,7 +68,7 @@ public abstract class FileLocator {
     return files.isEmpty() ? null : files.get(0);
   }
 
-  public List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
+  protected List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
     String filePath = packagePath.isEmpty()
             ? fileName
             : normalizePath(packagePath + "/" + fileName);

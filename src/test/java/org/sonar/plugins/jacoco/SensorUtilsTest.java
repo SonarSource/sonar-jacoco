@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -36,7 +35,6 @@ import org.sonar.api.testfixtures.log.LogTesterJUnit5;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -66,33 +64,11 @@ class SensorUtilsTest {
     sourceFile.lines().add(new XmlReportParser.Line(1, 0, 1, 0, 0));
 
     when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
-    when(locator.getInputFiles(null,"package", "File.java")).thenReturn(List.of(inputFile));
+    when(locator.getInputFile(null,"package", "File.java")).thenReturn(inputFile);
 
     SensorUtils.importReport(parser, locator, importer, LOG);
 
     verify(importer).importCoverage(sourceFile, inputFile);
-  }
-
-  @Test
-  void import_coverage_into_every_file_matching_a_group_less_report_entry_even_if_one_import_is_invalid() {
-    ProjectFileLocator locator = mock(ProjectFileLocator.class);
-    ReportImporter importer = mock(ReportImporter.class);
-    XmlReportParser parser = mock(XmlReportParser.class);
-    InputFile first = mock(InputFile.class);
-    InputFile second = mock(InputFile.class);
-
-    XmlReportParser.SourceFile sourceFile = new XmlReportParser.SourceFile("package", "File.java");
-    sourceFile.lines().add(new XmlReportParser.Line(1, 0, 1, 0, 0));
-
-    when(parser.parse()).thenReturn(List.of(sourceFile));
-    when(locator.getInputFiles(null, "package", "File.java")).thenReturn(List.of(first, second));
-    doThrow(new IllegalStateException("invalid coverage")).when(importer).importCoverage(sourceFile, first);
-
-    SensorUtils.ImportSummary summary = SensorUtils.importReport(parser, locator, importer, LOG);
-
-    verify(importer).importCoverage(sourceFile, first);
-    verify(importer).importCoverage(sourceFile, second);
-    assertThat(summary.notFound).isZero();
   }
 
   @Test
@@ -103,7 +79,7 @@ class SensorUtilsTest {
     Path invalidFile = RESOURCES_DIR.resolve("invalid_ci_in_line.xml");
     Path validFile = MANY_FILES_REPORT;
 
-    when(locator.getInputFiles(null, "org/sonarlint/cli", "Stats.java")).thenReturn(List.of(inputFile));
+    when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
 
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
     SensorUtils.importReports(Arrays.asList(invalidFile, validFile), locator, importer, LOG, analysisWarnings, "my-module");
@@ -143,7 +119,7 @@ class SensorUtilsTest {
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
     InputFile inputFile = mock(InputFile.class);
     when(locator.hasFilesCoverableByJacoco()).thenReturn(true);
-    when(locator.getInputFiles(null, "org/sonarlint/cli", "Stats.java")).thenReturn(List.of(inputFile));
+    when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
 
     SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
 
@@ -163,7 +139,7 @@ class SensorUtilsTest {
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
     InputFile inputFile = mock(InputFile.class);
     when(locator.hasFilesCoverableByJacoco()).thenReturn(true);
-    when(locator.getInputFiles(null, "org/sonarlint/cli", "File.java")).thenReturn(List.of(inputFile));
+    when(locator.getInputFile(null, "org/sonarlint/cli", "File.java")).thenReturn(inputFile);
 
     SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
 

@@ -67,13 +67,20 @@ public class ProjectFileLocator extends FileLocator {
   }
 
   @Override
-  public List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
+  protected List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
     List<InputFile> files = super.getInputFiles(groupName, packagePath, fileName);
     if (groupName == null && fileName.endsWith(".kt") && kotlinFileLocator != null) {
-      return Stream.concat(files.stream(), kotlinFileLocator.getInputFiles(packagePath, fileName).stream())
+      files = Stream.concat(files.stream(), kotlinFileLocator.getInputFiles(packagePath, fileName).stream())
               .filter(file -> file.type() == InputFile.Type.MAIN)
               .distinct()
               .toList();
+    }
+    if (groupName == null && files.size() > 1) {
+      String filePath = packagePath.isEmpty() ? fileName : packagePath + "/" + fileName;
+      LOG.warn("Coverage for '{}' was not imported because the report entry matches {} project source files."
+              + " The JaCoCo XML report does not contain enough information to choose one.", filePath, files.size());
+      LOG.debug("Project source files matching '{}': {}", filePath, files.stream().map(InputFile::relativePath).toList());
+      return List.of();
     }
     return files;
   }

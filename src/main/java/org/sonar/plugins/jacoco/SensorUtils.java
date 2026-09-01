@@ -77,18 +77,16 @@ class SensorUtils {
     int notFound = 0;
 
     for (XmlReportParser.SourceFile sourceFile : sourceFiles) {
-      List<InputFile> inputFiles = locator.getInputFiles(sourceFile.groupName(), sourceFile.packageName(), sourceFile.name());
-      if (inputFiles.isEmpty()) {
+      InputFile inputFile = locator.getInputFile(sourceFile.groupName(), sourceFile.packageName(), sourceFile.name());
+      if (inputFile == null) {
         notFound++;
         String group = sourceFile.groupName() == null ? "" : (" (group '" + sourceFile.groupName() + "')");
         logger.debug("File '{}/{}'{} not found in the analysed sources", sourceFile.packageName(), sourceFile.name(), group);
       } else {
-        for (InputFile inputFile : inputFiles) {
-          try {
-            importer.importCoverage(sourceFile, inputFile);
-          } catch (IllegalStateException e) {
-            logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}: {}", inputFile, e.getClass().getName(), e.getMessage());
-          }
+        try {
+          importer.importCoverage(sourceFile, inputFile);
+        } catch (IllegalStateException e) {
+          logger.error("Cannot import coverage information for file '{}', coverage data is invalid. Error: {}: {}", inputFile, e.getClass().getName(), e.getMessage());
         }
       }
     }

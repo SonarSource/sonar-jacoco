@@ -11,5 +11,6 @@ the project-level locator failed to resolve even unambiguous entries from a grou
 near-total coverage loss. The null-group fallback added with JACOCO-175 fixed that case.
 
 The `collision-a` and `collision-b` modules both contain `org/example/shared/Shared.java`, with different classes
-inside those files. Gradle merges their coverage into one `sourcefile` entry, and the importer assigns that entry
-to every matching main project file instead of only the first indexed one.
+inside those files. Gradle merges their coverage into one `sourcefile` entry, so the importer cannot determine
+which physical source owns each line. It skips that ambiguous entry and logs a warning instead of assigning
+potentially incorrect coverage.
