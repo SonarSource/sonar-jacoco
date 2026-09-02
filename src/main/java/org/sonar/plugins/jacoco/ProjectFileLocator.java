@@ -22,6 +22,8 @@ package org.sonar.plugins.jacoco;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 
@@ -34,6 +36,7 @@ public class ProjectFileLocator extends FileLocator {
   private static final Logger LOG = LoggerFactory.getLogger(ProjectFileLocator.class);
 
   private ProjectCoverageContext projectCoverageContext;
+  private int skippedAmbiguousReportEntries;
 
   public ProjectFileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, ProjectCoverageContext projectCoverageContext) {
     super(inputFiles, kotlinFileLocator);
@@ -49,6 +52,43 @@ public class ProjectFileLocator extends FileLocator {
   @Override
   public InputFile lookup(@Nullable String groupName, String filePath) {
     return getInputFileForProject(groupName, filePath);
+  }
+
+  @Override
+  protected List<InputFile> lookupAll(@Nullable String groupName, String filePath) {
+    String[] pathSegments = filePath.split(FileLocator.SEPARATOR_REGEX);
+    // A file name alone is too weak to fan out because it matches same-named files in every package.
+    if (groupName == null && pathSegments.length > 1) {
+      return tree.getFilesWithSuffix(pathSegments)
+              .stream()
+              .filter(file -> file.type() == InputFile.Type.MAIN)
+              .toList();
+    }
+    return super.lookupAll(groupName, filePath);
+  }
+
+  @Override
+  protected List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
+    List<InputFile> files = super.getInputFiles(groupName, packagePath, fileName);
+    if (groupName == null && fileName.endsWith(".kt") && kotlinFileLocator != null) {
+      files = Stream.concat(files.stream(), kotlinFileLocator.getInputFiles(packagePath, fileName).stream())
+              .filter(file -> file.type() == InputFile.Type.MAIN)
+              .distinct()
+              .toList();
+    }
+    if (groupName == null && files.size() > 1) {
+      String filePath = Path.of(packagePath, fileName).toString();
+      skippedAmbiguousReportEntries++;
+      LOG.debug("Coverage for '{}' was not imported because the report entry matches {} project source files: {}",
+              filePath, files.size(), files.stream().map(InputFile::relativePath).toList());
+      return List.of();
+    }
+    return files;
+  }
+
+  @Override
+  int skippedAmbiguousReportEntries() {
+    return skippedAmbiguousReportEntries;
   }
 
   @CheckForNull

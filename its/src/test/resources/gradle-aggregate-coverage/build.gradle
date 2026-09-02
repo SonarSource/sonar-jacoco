@@ -1,0 +1,53 @@
+plugins {
+  id 'org.sonarqube' version '7.3.1.8318'
+  id 'jacoco'
+}
+
+repositories {
+  mavenCentral()
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'jacoco'
+
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    testImplementation 'junit:junit:4.13.2'
+  }
+}
+
+tasks.register('codeCoverageReport', JacocoReport) {
+  dependsOn(subprojects.collect { it.tasks.named('test') })
+
+  executionData.setFrom(fileTree(rootDir) {
+    include '**/build/jacoco/test.exec'
+  })
+  sourceDirectories.setFrom(subprojects.collect { it.sourceSets.main.allSource.srcDirs })
+  classDirectories.setFrom(subprojects.collect { it.sourceSets.main.output })
+
+  reports {
+    xml.required = true
+    xml.outputLocation = layout.buildDirectory.file('reports/jacoco/codeCoverageReport/codeCoverageReport.xml')
+    html.required = false
+    csv.required = false
+  }
+}
+
+sonar {
+  properties {
+    property 'sonar.projectKey', 'jacoco-gradle-aggregate-reproducer'
+    property 'sonar.coverage.jacoco.aggregateXmlReportPaths',
+      layout.buildDirectory.file('reports/jacoco/codeCoverageReport/codeCoverageReport.xml').get().asFile.absolutePath
+    // SonarScanner for Gradle auto-detects codeCoverageReport as a normal JaCoCo report. Clear that property so this
+    // fixture exercises only the project-level aggregate importer.
+    property 'sonar.coverage.jacoco.xmlReportPaths', ''
+  }
+}
+
+tasks.named('sonar') {
+  dependsOn(tasks.named('codeCoverageReport'))
+}

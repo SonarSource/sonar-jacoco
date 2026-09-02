@@ -4,6 +4,7 @@ import com.sonar.orchestrator.container.Edition;
 import com.sonar.orchestrator.junit4.OrchestratorRule;
 import com.sonar.orchestrator.junit4.OrchestratorRuleBuilder;
 import com.sonar.orchestrator.build.BuildResult;
+import com.sonar.orchestrator.build.GradleBuild;
 import com.sonar.orchestrator.build.MavenBuild;
 import com.sonar.orchestrator.build.SonarScanner;
 import com.sonar.orchestrator.locator.FileLocation;
@@ -250,6 +251,31 @@ class JacocoTest {
             .containsEntry("coverage", 100.0);
   }
 
+  @Test
+  void gradle_aggregate_report_without_groups_imports_unique_files_from_every_module() throws IOException {
+    executeGradleAggregateAnalysis();
+
+    // In sonar-jacoco 1.5.1 a null group was sent to the group-aware lookup. Even unambiguous paths then returned
+    // null, reproducing the customer's near-total "not found" count and 0% coverage. This was fixed incidentally
+    // with JACOCO-175's null-group fallback.
+    assertThat(getCoverageMeasures("jacoco-gradle-aggregate-reproducer:alpha/src/main/java/org/example/alpha/Alpha.java").get("line_coverage"))
+            .isPositive();
+    assertThat(getCoverageMeasures("jacoco-gradle-aggregate-reproducer:beta/src/main/java/org/example/beta/Beta.java").get("line_coverage"))
+            .isPositive();
+  }
+
+  @Test
+  void gradle_aggregate_report_without_groups_skips_ambiguous_files() throws IOException {
+    BuildResult result = executeGradleAggregateAnalysis();
+
+    assertThat(result.getLogs()).contains("Coverage was not imported for 1 JaCoCo report source file(s) because each matched multiple project source files."
+            + " Enable debug logs for the full list.");
+    assertThat(getCoverageMeasures("jacoco-gradle-aggregate-reproducer:collision-a/src/main/java/org/example/shared/Shared.java"))
+            .containsEntry("line_coverage", 0.0);
+    assertThat(getCoverageMeasures("jacoco-gradle-aggregate-reproducer:collision-b/src/main/java/org/example/shared/Shared.java"))
+            .containsEntry("line_coverage", 0.0);
+  }
+
   /**
    * Reproduces USER-2307: a single aggregated report handed to every module through sonar.coverage.jacoco.xmlReportPaths, which is what SonarScanner for Gradle does when the
    * property is set at the root. Every module then fails to resolve the files of all its siblings, so an unconditional per-file warning grows as files x modules.
@@ -373,6 +399,36 @@ class JacocoTest {
     Path projectRoot = Paths.get("src/test/resources").resolve(name);
     File targetDir = temp.resolve(name).toFile();
     FileUtils.copyDirectory(projectRoot.toFile(), targetDir);
+    return targetDir;
+  }
+
+  private BuildResult executeGradleAggregateAnalysis() throws IOException {
+    File project = prepareGradleProject("gradle-aggregate-coverage");
+    GradleBuild build = GradleBuild.create(project)
+            .addTask("clean")
+            .addTask("codeCoverageReport")
+            .addTask("sonar");
+
+    BuildResult result = orchestrator.executeBuild(build, true);
+
+    Path report = project.toPath().resolve("build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml");
+    assertThat(report).exists();
+    assertThat(Files.readString(report)).doesNotContain("<group");
+    return result;
+  }
+
+  private File prepareGradleProject(String name) throws IOException {
+    File targetDir = prepareProject(name);
+    Path repositoryRoot = Path.of("..").toAbsolutePath().normalize();
+    FileUtils.copyFile(repositoryRoot.resolve("gradlew").toFile(), new File(targetDir, "gradlew"));
+    FileUtils.copyFile(repositoryRoot.resolve("gradlew.bat").toFile(), new File(targetDir, "gradlew.bat"));
+    Path wrapperDirectory = targetDir.toPath().resolve("gradle/wrapper");
+    Files.createDirectories(wrapperDirectory);
+    FileUtils.copyFile(repositoryRoot.resolve("gradle/wrapper/gradle-wrapper.jar").toFile(), wrapperDirectory.resolve("gradle-wrapper.jar").toFile());
+    FileUtils.copyFile(repositoryRoot.resolve("gradle/wrapper/gradle-wrapper.properties").toFile(), wrapperDirectory.resolve("gradle-wrapper.properties").toFile());
+    if (!new File(targetDir, "gradlew").setExecutable(true)) {
+      throw new IOException("Could not make the copied Gradle wrapper executable");
+    }
     return targetDir;
   }
 }

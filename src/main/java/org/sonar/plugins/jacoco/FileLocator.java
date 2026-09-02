@@ -62,18 +62,40 @@ public abstract class FileLocator {
     return coverableFileCount > 0;
   }
 
+  int skippedAmbiguousReportEntries() {
+    return 0;
+  }
+
   @CheckForNull
   public InputFile getInputFile(@Nullable String groupName, String packagePath, String fileName) {
+    List<InputFile> files = getInputFiles(groupName, packagePath, fileName);
+    return files.isEmpty() ? null : files.get(0);
+  }
+
+  protected List<InputFile> getInputFiles(@Nullable String groupName, String packagePath, String fileName) {
     String filePath = packagePath.isEmpty()
             ? fileName
             : normalizePath(packagePath + "/" + fileName);
 
-    InputFile file = lookup(groupName, filePath);
+    List<InputFile> files = lookupAll(groupName, filePath);
 
-    if (file == null && fileName.endsWith(".kt")) {
-      file = kotlinFileLocator.getInputFile(packagePath, fileName);
+    if (fileName.endsWith(".kt")) {
+      return lookupKotlinFiles(packagePath, fileName, files);
     }
-    return file;
+    return files;
+  }
+
+  protected List<InputFile> lookupKotlinFiles(String packagePath, String fileName, List<InputFile> files) {
+    if (!files.isEmpty() || kotlinFileLocator == null) {
+      return files;
+    }
+    InputFile file = kotlinFileLocator.getInputFile(packagePath, fileName);
+    return file == null ? List.of() : List.of(file);
+  }
+
+  protected List<InputFile> lookupAll(@Nullable String groupName, String filePath) {
+    InputFile file = lookup(groupName, filePath);
+    return file == null ? List.of() : List.of(file);
   }
 
   @CheckForNull

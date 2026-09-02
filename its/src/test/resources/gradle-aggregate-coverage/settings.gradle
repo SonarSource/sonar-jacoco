@@ -1,0 +1,10 @@
+pluginManagement {
+  repositories {
+    gradlePluginPortal()
+    mavenCentral()
+  }
+}
+
+rootProject.name = 'jacoco-gradle-aggregate-reproducer'
+
+include 'alpha', 'beta', 'collision-a', 'collision-b'

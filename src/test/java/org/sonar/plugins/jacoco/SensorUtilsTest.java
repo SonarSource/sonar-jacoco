@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -146,6 +147,66 @@ class SensorUtilsTest {
     assertThat(logTester.logs(Level.WARN)).isEmpty();
     assertThat(logTester.logs(Level.INFO)).containsExactly("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
     verifyNoInteractions(analysisWarnings);
+  }
+
+  @Test
+  void aggregate_log_warning_after_all_ambiguous_report_entries_are_skipped() {
+    ProjectFileLocator locator = mock(ProjectFileLocator.class);
+    ReportImporter importer = mock(ReportImporter.class);
+    AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+    AtomicInteger ambiguousEntries = new AtomicInteger();
+    when(locator.getInputFile(any(), any(), any())).thenAnswer(invocation -> {
+      ambiguousEntries.incrementAndGet();
+      return null;
+    });
+    when(locator.skippedAmbiguousReportEntries()).thenAnswer(invocation -> ambiguousEntries.get());
+
+    SensorUtils.importReports(Arrays.asList(SINGLE_FILE_REPORT, SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
+
+    assertThat(logTester.logs(Level.WARN)).containsExactly(
+            "Coverage was not imported for 2 JaCoCo report source file(s) because each matched multiple project source files."
+                    + " Enable debug logs for the full list.");
+    String ambiguitySummary = String.format(
+            "Coverage report '%s': coverage data was skipped for 1 of 1 files because their paths could not be resolved unambiguously in 'my-project'."
+                    + " Enable debug logs for the full list.", SINGLE_FILE_REPORT);
+    assertThat(logTester.logs(Level.INFO)).containsExactly(
+            "Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
+            ambiguitySummary,
+            ambiguitySummary);
+    assertThat(logTester.logs(Level.DEBUG)).noneMatch(message -> message.contains("not found in the analysed sources"));
+    verify(analysisWarnings, times(2)).addUnique(SensorUtils.AMBIGUOUS_MATCH_ANALYSIS_WARNING);
+  }
+
+  @Test
+  void warn_when_every_report_entry_is_unresolved_for_different_reasons() {
+    ProjectFileLocator locator = mock(ProjectFileLocator.class);
+    ReportImporter importer = mock(ReportImporter.class);
+    AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+    AtomicInteger ambiguousEntries = new AtomicInteger();
+    AtomicInteger lookups = new AtomicInteger();
+    when(locator.hasFilesCoverableByJacoco()).thenReturn(true);
+    when(locator.getInputFile(any(), any(), any())).thenAnswer(invocation -> {
+      if (lookups.getAndIncrement() == 0) {
+        ambiguousEntries.incrementAndGet();
+      }
+      return null;
+    });
+    when(locator.skippedAmbiguousReportEntries()).thenAnswer(invocation -> ambiguousEntries.get());
+
+    SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
+
+    assertThat(logTester.logs(Level.INFO)).containsExactly(
+            "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
+            String.format("Coverage report '%s': coverage data was skipped for 1 of 36 files because their paths could not be resolved unambiguously in 'my-project'."
+                    + " Enable debug logs for the full list.", MANY_FILES_REPORT));
+    assertThat(logTester.logs(Level.WARN)).containsExactly(
+            String.format("None of the 36 files in coverage report '%s' could be matched to the analysed sources of 'my-project'."
+                    + " No coverage was imported from this report.", MANY_FILES_REPORT),
+            "Coverage was not imported for 1 JaCoCo report source file(s) because each matched multiple project source files."
+                    + " Enable debug logs for the full list.");
+    verify(analysisWarnings).addUnique(SensorUtils.NOTHING_MATCHED_ANALYSIS_WARNING);
+    verify(analysisWarnings).addUnique(SensorUtils.AMBIGUOUS_MATCH_ANALYSIS_WARNING);
+    verifyNoInteractions(importer);
   }
 
   @Test

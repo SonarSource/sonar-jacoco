@@ -21,6 +21,7 @@ package org.sonar.plugins.jacoco;
 
 import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -69,6 +70,7 @@ class FileLocatorTest {
 
     ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(inputFile1, inputFile2), kotlinFileLocator);
     assertThat(locator.getInputFile("org/sonar/test", "File.java")).isEqualTo(inputFile1);
+    assertThat(locator.getInputFiles(null, "org/sonar/test", "File.java")).containsExactly(inputFile1);
   }
 
   @Test
@@ -186,6 +188,7 @@ class FileLocatorTest {
 
     // Test existing files
     assertThat(locator.getInputFile("app", "", "File.java")).isEqualTo(appFile);
+    assertThat(locator.getInputFiles("app", "", "File.java")).containsExactly(appFile);
     assertThat(locator.getInputFile("utils", "", "File.java")).isEqualTo(utilsFile);
     assertThat(locator.getInputFile("app-utils", "", "File.java")).isEqualTo(nestedUtilsFile);
     assertThat(locator.getInputFile("app-utils", "", "pom.xml")).isEqualTo(nestUtilsPomXmlFile);
@@ -202,6 +205,13 @@ class FileLocatorTest {
   }
 
   @Test
+  void module_file_locator_should_not_fail_when_kotlin_file_locator_is_null() {
+    ModuleFileLocator locator = new ModuleFileLocator(Collections.emptyList(), null);
+
+    assertThat(locator.getInputFiles(null, "org/example", "Missing.kt")).isEmpty();
+  }
+
+  @Test
   void project_file_locator_should_not_fail_when_locating_a_file_with_a_null_group(@TempDir Path tmp) {
     var projectCoverageContext = new ProjectCoverageContext();
     projectCoverageContext.add(new ModuleCoverageContext(
@@ -215,14 +225,63 @@ class FileLocatorTest {
   }
 
   @Test
-  void project_file_locator_should_not_fail_with_a_null_group_and_ambiguous_files() {
-    InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/java/File.java").build();
-    InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/java/File.java").build();
+  void project_file_locator_should_not_match_ambiguous_main_files_for_a_null_group() {
+    InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/java/org/example/File.java").build();
+    InputFile appTestFile = new TestInputFileBuilder("my-project", "app/src/test/java/org/example/File.java")
+            .setType(InputFile.Type.TEST)
+            .build();
+    InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/java/org/example/File.java").build();
 
-    ProjectFileLocator locator = new ProjectFileLocator(List.of(appFile, utilsFile), null, new ProjectCoverageContext());
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(appFile, appTestFile, utilsFile), null, new ProjectCoverageContext());
 
-    // Should fall back to a group-agnostic lookup and return the first match, not blow up with an NPE
-    assertThat(locator.getInputFile(null, "", "File.java")).isEqualTo(appFile);
+    assertThat(locator.getInputFile(null, "org/example", "File.java")).isNull();
+    assertThat(locator.getInputFiles(null, "org/example", "File.java")).isEmpty();
+    assertThat(locator.skippedAmbiguousReportEntries()).isEqualTo(2);
+  }
+
+  @Test
+  void project_file_locator_should_not_fan_out_a_default_package_file() {
+    InputFile defaultPackageFile = new TestInputFileBuilder("my-project", "app/src/main/java/File.java").build();
+    InputFile packagedFile = new TestInputFileBuilder("my-project", "utils/src/main/java/org/example/File.java").build();
+
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(defaultPackageFile, packagedFile), null, new ProjectCoverageContext());
+
+    assertThat(locator.getInputFiles(null, "", "File.java")).containsExactly(defaultPackageFile);
+  }
+
+  @Test
+  void project_file_locator_should_return_kotlin_suffix_match_when_kotlin_file_locator_is_null() {
+    InputFile inputFile = new TestInputFileBuilder("my-project", "app/src/main/kotlin/org/example/File.kt")
+            .setLanguage("kotlin")
+            .build();
+    ProjectFileLocator locator = new ProjectFileLocator(List.of(inputFile), null, new ProjectCoverageContext());
+
+    assertThat(locator.getInputFiles(null, "org/example", "File.kt")).containsExactly(inputFile);
+  }
+
+  @Test
+  void project_file_locator_should_not_match_ambiguous_main_kotlin_files_found_by_package_declaration() {
+    InputFile appFile = new TestInputFileBuilder("my-project", "app/src/main/kotlin/org/example/File.kt")
+            .setLanguage("kotlin")
+            .setContents("package org.example")
+            .setCharset(Charset.defaultCharset())
+            .build();
+    InputFile appTestFile = new TestInputFileBuilder("my-project", "app/src/test/kotlin/org/example/File.kt")
+            .setLanguage("kotlin")
+            .setType(InputFile.Type.TEST)
+            .setContents("package org.example")
+            .setCharset(Charset.defaultCharset())
+            .build();
+    InputFile utilsFile = new TestInputFileBuilder("my-project", "utils/src/main/kotlin/utils/File.kt")
+            .setLanguage("kotlin")
+            .setContents("package org.example")
+            .setCharset(Charset.defaultCharset())
+            .build();
+    List<InputFile> inputFiles = List.of(appFile, appTestFile, utilsFile);
+    KotlinFileLocator projectKotlinFileLocator = new KotlinFileLocator(inputFiles.stream());
+    ProjectFileLocator locator = new ProjectFileLocator(inputFiles, projectKotlinFileLocator, new ProjectCoverageContext());
+
+    assertThat(locator.getInputFiles(null, "org/example", "File.kt")).isEmpty();
   }
 
   @Test
