@@ -65,7 +65,7 @@ class SensorUtils {
     }
 
     if (summary.notFound > 0) {
-      if (summary.notFound < summary.total) {
+      if (summary.notFound + summary.ambiguous < summary.total) {
         logger.info("Coverage report '{}': {} of {} files were not found in the analysed sources of '{}'."
           + " This is expected when a single aggregated report is imported by several modules."
           + " Enable debug logs for the full list.", reportPath, summary.notFound, summary.total, contextLabel);
