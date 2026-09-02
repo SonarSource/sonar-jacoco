@@ -166,7 +166,13 @@ class SensorUtilsTest {
     assertThat(logTester.logs(Level.WARN)).containsExactly(
             "Coverage was not imported for 2 JaCoCo report source file(s) because each matched multiple project source files."
                     + " Enable debug logs for the full list.");
-    assertThat(logTester.logs(Level.INFO)).containsExactly("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
+    String ambiguitySummary = String.format(
+            "Coverage report '%s': coverage data was skipped for 1 of 1 files because their paths could not be resolved unambiguously in 'my-project'."
+                    + " Enable debug logs for the full list.", SINGLE_FILE_REPORT);
+    assertThat(logTester.logs(Level.INFO)).containsExactly(
+            "Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
+            ambiguitySummary,
+            ambiguitySummary);
     assertThat(logTester.logs(Level.DEBUG)).noneMatch(message -> message.contains("not found in the analysed sources"));
     verify(analysisWarnings, times(2)).addUnique(SensorUtils.AMBIGUOUS_MATCH_ANALYSIS_WARNING);
   }
@@ -189,7 +195,10 @@ class SensorUtilsTest {
 
     SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
 
-    assertThat(logTester.logs(Level.INFO)).containsExactly("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
+    assertThat(logTester.logs(Level.INFO)).containsExactly(
+            "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
+            String.format("Coverage report '%s': coverage data was skipped for 1 of 36 files because their paths could not be resolved unambiguously in 'my-project'."
+                    + " Enable debug logs for the full list.", MANY_FILES_REPORT));
     assertThat(logTester.logs(Level.WARN)).containsExactly(
             String.format("None of the 36 files in coverage report '%s' could be matched to the analysed sources of 'my-project'."
                     + " No coverage was imported from this report.", MANY_FILES_REPORT),

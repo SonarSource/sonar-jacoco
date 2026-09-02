@@ -84,7 +84,7 @@ class SensorUtils {
     }
 
     if (summary.ambiguous > 0) {
-      logger.info("Coverage report '{}': coverage data was skipped for {} files out of {} because their paths could not be resolved unambiguously '{}'."
+      logger.info("Coverage report '{}': coverage data was skipped for {} of {} files because their paths could not be resolved unambiguously in '{}'."
         + " Enable debug logs for the full list.", reportPath, summary.ambiguous, summary.total, contextLabel);
       analysisWarnings.addUnique(AMBIGUOUS_MATCH_ANALYSIS_WARNING);
     }
