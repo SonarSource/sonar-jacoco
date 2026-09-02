@@ -160,8 +160,9 @@ class SensorUtilsTest {
     assertThat(logTester.logs(Level.WARN)).containsExactly(
             "Coverage was not imported for 2 JaCoCo report source file(s) because each matched multiple project source files."
                     + " Enable debug logs for the full list.");
+    assertThat(logTester.logs(Level.INFO)).containsExactly("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
     assertThat(logTester.logs(Level.DEBUG)).noneMatch(message -> message.contains("not found in the analysed sources"));
-    verifyNoInteractions(analysisWarnings);
+    verify(analysisWarnings, times(2)).addUnique(SensorUtils.AMBIGUOUS_MATCH_ANALYSIS_WARNING);
   }
 
   @Test

@@ -29,6 +29,8 @@ import org.sonar.api.notifications.AnalysisWarnings;
 class SensorUtils {
   static final String NOTHING_MATCHED_ANALYSIS_WARNING = "Some JaCoCo coverage reports could not be matched to any analysed source file."
     + " No coverage was imported from them; see the analysis logs for details.";
+  static final String AMBIGUOUS_MATCH_ANALYSIS_WARNING = "Some JaCoCo coverage data could not be imported because the report entries could not be resolved"
+    + " to project source files unambiguously; see the analysis logs for details.";
 
   private SensorUtils() {
     /* This class should not be instantiated */
@@ -58,24 +60,31 @@ class SensorUtils {
   }
 
   private static void logImportSummary(ImportSummary summary, Path reportPath, FileLocator locator, Logger logger, AnalysisWarnings analysisWarnings, String contextLabel) {
-    if (summary.notFound == 0) {
+    if (summary.notFound == 0 && summary.ambiguous == 0) {
       return;
     }
-    if (summary.notFound < summary.total) {
-      logger.info("Coverage report '{}': {} of {} files were not found in the analysed sources of '{}'."
-        + " This is expected when a single aggregated report is imported by several modules."
-        + " Enable debug logs for the full list.", reportPath, summary.notFound, summary.total, contextLabel);
-    } else if (locator.hasFilesCoverableByJacoco()) {
-      logger.warn(
-        "None of the {} files in coverage report '{}' could be matched to the analysed sources of '{}'. No coverage was imported from this report.",
-        summary.total,
-        reportPath,
-        contextLabel
-      );
-      analysisWarnings.addUnique(NOTHING_MATCHED_ANALYSIS_WARNING);
-    } else {
-      // A context without any indexed file, such as an aggregator module, matches nothing by construction: that is not a failed import.
-      logger.debug("Coverage report '{}' was not imported into '{}', which has no source file to analyze.", reportPath, contextLabel);
+
+    if (summary.notFound > 0) {
+      if (summary.notFound < summary.total) {
+        logger.info("Coverage report '{}': {} of {} files were not found in the analysed sources of '{}'."
+          + " This is expected when a single aggregated report is imported by several modules."
+          + " Enable debug logs for the full list.", reportPath, summary.notFound, summary.total, contextLabel);
+      } else if (locator.hasFilesCoverableByJacoco()) {
+        logger.warn(
+          "None of the {} files in coverage report '{}' could be matched to the analysed sources of '{}'. No coverage was imported from this report.",
+          summary.total,
+          reportPath,
+          contextLabel
+        );
+        analysisWarnings.addUnique(NOTHING_MATCHED_ANALYSIS_WARNING);
+      } else {
+        // A context without any indexed file, such as an aggregator module, matches nothing by construction: that is not a failed import.
+        logger.debug("Coverage report '{}' was not imported into '{}', which has no source file to analyze.", reportPath, contextLabel);
+      }
+    }
+
+    if (summary.ambiguous > 0) {
+      analysisWarnings.addUnique(AMBIGUOUS_MATCH_ANALYSIS_WARNING);
     }
   }
 
