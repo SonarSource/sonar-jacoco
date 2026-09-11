@@ -1,5 +1,6 @@
 [tools]
 java = "21"
+maven = "3.9"
 gradle = "9.7.0"
 
 [alias.java.versions]
