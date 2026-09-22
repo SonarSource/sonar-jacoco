@@ -85,9 +85,8 @@ class SensorUtilsTest {
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
     SensorUtils.importReports(Arrays.asList(invalidFile, validFile), locator, importer, LOG, analysisWarnings, "my-module");
 
-    String expectedErrorMessage = String.format(
-            "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
-            invalidFile);
+    String expectedErrorMessage = "Coverage report '" + invalidFile
+            + "' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61";
 
     assertThat(logTester.logs(Level.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 

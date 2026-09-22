@@ -74,8 +74,8 @@ class ReportPathsProvider {
       return reportPaths;
     } else {
       if (!patternPathList.isEmpty()) {
-        String message = String.format("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='%s'. Using default locations: %s",
-          String.join(",", patternPathList), String.join(",", DEFAULT_PATHS));
+        String message = "No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths='" + String.join(",", patternPathList)
+          + "'. Using default locations: " + String.join(",", DEFAULT_PATHS);
         LOG.warn(message);
         analysisWarnings.addUnique(message);
       } else {
@@ -103,7 +103,7 @@ class ReportPathsProvider {
     for (String reportPathPattern : reportPathsParam) {
       List<Path> scanned = WildcardPatternFileScanner.scan(context.fileSystem().baseDir().toPath(), reportPathPattern);
       if (scanned.isEmpty()) {
-        String message = String.format("No coverage report found for pattern: '%s'", reportPathPattern);
+        String message = "No coverage report found for pattern: '" + reportPathPattern + "'";
         LOG.warn(message);
         analysisWarnings.addUnique(message);
       } else {

@@ -152,10 +152,8 @@ class JacocoSensorTest {
 
     assertThat(logTester.logs(Level.INFO)).contains("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
-    String expectedLogError = String.format(
-      "Cannot import coverage information for file '%s', coverage data is invalid. Error: java.lang.IllegalStateException: Line 1001 is out of range in the file %s (lines: 1000)",
-      inputFile,
-      inputFile);
+    String expectedLogError = "Cannot import coverage information for file '" + inputFile
+      + "', coverage data is invalid. Error: java.lang.IllegalStateException: Line 1001 is out of range in the file " + inputFile + " (lines: 1000)";
     assertThat(logTester.logs(Level.ERROR)).contains(expectedLogError);
   }
 
