@@ -85,9 +85,8 @@ class SensorUtilsTest {
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
     SensorUtils.importReports(Arrays.asList(invalidFile, validFile), locator, importer, LOG, analysisWarnings, "my-module");
 
-    String expectedErrorMessage = String.format(
-            "Coverage report '%s' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61",
-            invalidFile);
+    String expectedErrorMessage = "Coverage report '" + invalidFile
+      + "' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61";
 
     assertThat(logTester.logs(Level.INFO)).contains("Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
 
@@ -124,11 +123,10 @@ class SensorUtilsTest {
 
     SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
 
-    assertThat(logTester.logs(Level.INFO)).contains(String.format(
-            "Coverage report '%s': 35 of 36 files were not found in the analysed sources of 'my-module'."
-                    + " This is expected when a single aggregated report is imported by several modules."
-                    + " Enable debug logs for the full list.",
-            MANY_FILES_REPORT));
+    assertThat(logTester.logs(Level.INFO)).contains("Coverage report '" + MANY_FILES_REPORT
+      + "': 35 of 36 files were not found in the analysed sources of 'my-module'."
+      + " This is expected when a single aggregated report is imported by several modules."
+      + " Enable debug logs for the full list.");
     assertThat(logTester.logs(Level.WARN)).isEmpty();
     verifyNoInteractions(analysisWarnings);
   }
@@ -166,9 +164,9 @@ class SensorUtilsTest {
     assertThat(logTester.logs(Level.WARN)).containsExactly(
             "Coverage was not imported for 2 JaCoCo report source file(s) because each matched multiple project source files."
                     + " Enable debug logs for the full list.");
-    String ambiguitySummary = String.format(
-            "Coverage report '%s': coverage data was skipped for 1 of 1 files because their paths could not be resolved unambiguously in 'my-project'."
-                    + " Enable debug logs for the full list.", SINGLE_FILE_REPORT);
+    String ambiguitySummary = "Coverage report '" + SINGLE_FILE_REPORT
+      + "': coverage data was skipped for 1 of 1 files because their paths could not be resolved unambiguously in 'my-project'."
+      + " Enable debug logs for the full list.";
     assertThat(logTester.logs(Level.INFO)).containsExactly(
             "Importing 2 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
             ambiguitySummary,
@@ -197,11 +195,13 @@ class SensorUtilsTest {
 
     assertThat(logTester.logs(Level.INFO)).containsExactly(
             "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
-            String.format("Coverage report '%s': coverage data was skipped for 1 of 36 files because their paths could not be resolved unambiguously in 'my-project'."
-                    + " Enable debug logs for the full list.", MANY_FILES_REPORT));
+            "Coverage report '" + MANY_FILES_REPORT
+              + "': coverage data was skipped for 1 of 36 files because their paths could not be resolved unambiguously in 'my-project'."
+              + " Enable debug logs for the full list.");
     assertThat(logTester.logs(Level.WARN)).containsExactly(
-            String.format("None of the 36 files in coverage report '%s' could be matched to the analysed sources of 'my-project'."
-                    + " No coverage was imported from this report.", MANY_FILES_REPORT),
+            "None of the 36 files in coverage report '" + MANY_FILES_REPORT
+              + "' could be matched to the analysed sources of 'my-project'."
+              + " No coverage was imported from this report.",
             "Coverage was not imported for 1 JaCoCo report source file(s) because each matched multiple project source files."
                     + " Enable debug logs for the full list.");
     verify(analysisWarnings).addUnique(SensorUtils.NOTHING_MATCHED_ANALYSIS_WARNING);
@@ -218,10 +218,9 @@ class SensorUtilsTest {
 
     SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
 
-    assertThat(logTester.logs(Level.WARN)).containsExactly(String.format(
-            "None of the 1 files in coverage report '%s' could be matched to the analysed sources of 'my-module'."
-                    + " No coverage was imported from this report.",
-            SINGLE_FILE_REPORT));
+    assertThat(logTester.logs(Level.WARN)).containsExactly("None of the 1 files in coverage report '" + SINGLE_FILE_REPORT
+      + "' could be matched to the analysed sources of 'my-module'."
+      + " No coverage was imported from this report.");
     verify(analysisWarnings).addUnique(SensorUtils.NOTHING_MATCHED_ANALYSIS_WARNING);
   }
 

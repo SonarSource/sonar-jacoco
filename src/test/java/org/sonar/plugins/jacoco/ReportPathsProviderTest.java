@@ -117,7 +117,7 @@ class ReportPathsProviderTest {
     Path reportThatDoesNotExist = temp.resolve("report-that-does-not-exist.xml");
     settings.setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, reportThatDoesNotExist.toString());
     assertThat(provider.getAggregateReportPaths()).isEmpty();
-    verify(analysisWarnings).addUnique(String.format("No coverage report found for pattern: '%s'", reportThatDoesNotExist));
+    verify(analysisWarnings).addUnique("No coverage report found for pattern: '" + reportThatDoesNotExist + "'");
     verify(tester, times(1)).addTelemetryProperty(TelemetryProperties.AGGREGATE_REPORT_PATH_PROPERTY_KEY_IS_SET, "true");
   }
 
