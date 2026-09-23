@@ -47,7 +47,8 @@ class SensorUtils {
         skippedAmbiguousReportEntries += summary.ambiguous;
         logImportSummary(summary, reportPath, locator, logger, analysisWarnings, contextLabel);
       } catch (Exception e) {
-        String message = String.format("Coverage report '%s' could not be read/imported. Error: %s: %s", reportPath, e.getClass().getName(), e.getMessage());
+        String message = "Coverage report '" + reportPath + "' could not be read/imported. Error: "
+          + e.getClass().getName() + ": " + e.getMessage();
         logger.error(message);
         analysisWarnings.addUnique(message);
       }
