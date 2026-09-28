@@ -75,12 +75,16 @@ jobs:
         uses: ./.github/actions/orchestrator-cache
         with:
           sq-version: ${{ env.SQ_VERSION }}
+      - name: Wait for Artifactory token federation
+        uses: SonarSource/sonarsource-infra-artifactory/.github/actions/wait-for-artifactory-token-federation@979fc5f122d4f67f0d7e0ea880e0f1c3b8019941
+        with:
+          probe-path: "api/search/versions?g=com.sonarsource.sonarqube&a=sonarqube-enterprise-lw&remote=1&repos=sonarsource-releases&v=*"
       - name: Build
         env:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         shell: bash
         run: |
-          ./gradlew "-Dsonar.runtimeVersion=$SQ_VERSION" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
+          ./gradlew "-Dsonar.runtimeVersion=$SQ_VERSION" -Dorchestrator.artifactory.url=https://repox-internal.dev.sonar.build/artifactory "-Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
 
   qa:
     needs: [build]
@@ -131,6 +135,10 @@ jobs:
         uses: ./.github/actions/orchestrator-cache
         with:
           sq-version: ${{ matrix.sq-version }}
+      - name: Wait for Artifactory token federation
+        uses: SonarSource/sonarsource-infra-artifactory/.github/actions/wait-for-artifactory-token-federation@979fc5f122d4f67f0d7e0ea880e0f1c3b8019941
+        with:
+          probe-path: "api/search/versions?g=com.sonarsource.sonarqube&a=sonarqube-enterprise-lw&remote=1&repos=sonarsource-releases&v=*"
       - name: Run QA Tests
         shell: bash
         env:
@@ -140,6 +148,7 @@ jobs:
           ./gradlew -DbuildNumber=$BUILD_NUMBER
           -PintegrationTests=true
           -Dsonar.runtimeVersion=$SQ_VERSION
+          -Dorchestrator.artifactory.url=https://repox-internal.dev.sonar.build/artifactory
           -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN
           --console plain --no-daemon --info
           build test
