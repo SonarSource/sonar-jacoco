@@ -76,7 +76,7 @@ jobs:
         with:
           sq-version: ${{ env.SQ_VERSION }}
       - name: Wait for Artifactory token federation
-        uses: SonarSource/sonarsource-infra-artifactory/.github/actions/wait-for-artifactory-token-federation@979fc5f122d4f67f0d7e0ea880e0f1c3b8019941
+        uses: ./.github/actions/wait-for-artifactory-token-federation
         with:
           probe-path: "api/search/versions?g=com.sonarsource.sonarqube&a=sonarqube-enterprise-lw&remote=1&repos=sonarsource-releases&v=*"
       - name: Build
@@ -136,7 +136,7 @@ jobs:
         with:
           sq-version: ${{ matrix.sq-version }}
       - name: Wait for Artifactory token federation
-        uses: SonarSource/sonarsource-infra-artifactory/.github/actions/wait-for-artifactory-token-federation@979fc5f122d4f67f0d7e0ea880e0f1c3b8019941
+        uses: ./.github/actions/wait-for-artifactory-token-federation
         with:
           probe-path: "api/search/versions?g=com.sonarsource.sonarqube&a=sonarqube-enterprise-lw&remote=1&repos=sonarsource-releases&v=*"
       - name: Run QA Tests
