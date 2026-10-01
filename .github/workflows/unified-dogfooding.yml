@@ -20,7 +20,7 @@ jobs:
           version: 2026.9.13
       - name: Select Java 21
         run: mise use java@21
-      - uses: SonarSource/ci-github-actions/build-gradle@v1
+      - uses: SonarSource/ci-github-actions/build-gradle@v2
         with:
           run-shadow-scans: true
           artifactory-reader-role: private-reader
