@@ -58,16 +58,16 @@ test.finalizedBy jacocoTestReport
 
 dependencies {
     compileOnly('com.google.code.findbugs:jsr305:3.0.2')
-    compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:14.0.0.4498')
+    compileOnly('org.sonarsource.api.plugin:sonar-plugin-api:14.1.0.5543')
 
     testImplementation(platform('org.junit:junit-bom:6.1.3'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testImplementation('org.junit.jupiter:junit-jupiter-migrationsupport')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 
-    testImplementation('org.mockito:mockito-core:5.23.0')
+    testImplementation('org.mockito:mockito-core:5.24.0')
     testImplementation('org.assertj:assertj-core:3.27.7')
-    testImplementation('org.sonarsource.api.plugin:sonar-plugin-api-test-fixtures:14.0.0.4498')
+    testImplementation('org.sonarsource.api.plugin:sonar-plugin-api-test-fixtures:14.1.0.5543')
     testImplementation('org.sonarsource.scanner.engine:plugin-api-scanner-impl:13.14.0.6149')
     testImplementation('org.sonarsource.scanner.engine:sensor-test-fixtures:13.14.0.6149')
 }
