@@ -33,9 +33,10 @@ jobs:
           version: 2026.9.14
       - name: Select Java 21
         run: mise use java@21
-      - uses: SonarSource/ci-github-actions/build-gradle@v2
+      - uses: SonarSource/ci-github-actions/build-gradle@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         id: build-step
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           deploy-pull-request: true
           artifactory-reader-role: private-reader
           artifactory-deployer-role: qa-deployer
@@ -68,23 +69,20 @@ jobs:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
       - name: Configure Gradle
-        uses: SonarSource/ci-github-actions/config-gradle@v2
+        uses: SonarSource/ci-github-actions/config-gradle@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
         uses: ./.github/actions/orchestrator-cache
         with:
           sq-version: ${{ env.SQ_VERSION }}
-      - name: Wait for Artifactory token federation
-        uses: SonarSource/ci-github-actions/wait-for-artifactory-token-federation@715009ff183f509d685a028c3cac34c69e3714c4
-        with:
-          probe-path: "api/search/versions?g=com.sonarsource.sonarqube&a=sonarqube-enterprise-lw&remote=1&repos=sonarsource-releases&v=*"
       - name: Build
         env:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
         shell: bash
         run: |
-          ./gradlew "-Dsonar.runtimeVersion=$SQ_VERSION" -Dorchestrator.artifactory.url=https://repox-internal.dev.sonar.build/artifactory "-Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
+          ./gradlew "-Dsonar.runtimeVersion=$SQ_VERSION" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
 
   qa:
     needs: [build]
@@ -128,17 +126,14 @@ jobs:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
       - name: Configure Gradle
-        uses: SonarSource/ci-github-actions/config-gradle@v2
+        uses: SonarSource/ci-github-actions/config-gradle@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
         uses: ./.github/actions/orchestrator-cache
         with:
           sq-version: ${{ matrix.sq-version }}
-      - name: Wait for Artifactory token federation
-        uses: SonarSource/ci-github-actions/wait-for-artifactory-token-federation@715009ff183f509d685a028c3cac34c69e3714c4
-        with:
-          probe-path: "api/search/versions?g=com.sonarsource.sonarqube&a=sonarqube-enterprise-lw&remote=1&repos=sonarsource-releases&v=*"
       - name: Run QA Tests
         shell: bash
         env:
@@ -148,7 +143,6 @@ jobs:
           ./gradlew -DbuildNumber=$BUILD_NUMBER
           -PintegrationTests=true
           -Dsonar.runtimeVersion=$SQ_VERSION
-          -Dorchestrator.artifactory.url=https://repox-internal.dev.sonar.build/artifactory
           -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN
           --console plain --no-daemon --info
           build test
@@ -164,6 +158,6 @@ jobs:
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
     steps:
-      - uses: SonarSource/ci-github-actions/promote@v2
+      - uses: SonarSource/ci-github-actions/promote@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         with:
           promote-pull-request: true
