@@ -33,9 +33,10 @@ jobs:
           version: 2026.9.15
       - name: Select Java 21
         run: mise use java@21
-      - uses: SonarSource/ci-github-actions/build-gradle@v2
+      - uses: SonarSource/ci-github-actions/build-gradle@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         id: build-step
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           deploy-pull-request: true
           artifactory-reader-role: private-reader
           artifactory-deployer-role: qa-deployer
@@ -68,8 +69,9 @@ jobs:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
       - name: Configure Gradle
-        uses: SonarSource/ci-github-actions/config-gradle@v2
+        uses: SonarSource/ci-github-actions/config-gradle@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
         uses: ./.github/actions/orchestrator-cache
@@ -124,8 +126,9 @@ jobs:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
       - name: Configure Gradle
-        uses: SonarSource/ci-github-actions/config-gradle@v2
+        uses: SonarSource/ci-github-actions/config-gradle@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
         uses: ./.github/actions/orchestrator-cache
@@ -155,6 +158,6 @@ jobs:
     env:
       BUILD_NUMBER: ${{ needs.build.outputs.build-number }}
     steps:
-      - uses: SonarSource/ci-github-actions/promote@v2
+      - uses: SonarSource/ci-github-actions/promote@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
         with:
           promote-pull-request: true
