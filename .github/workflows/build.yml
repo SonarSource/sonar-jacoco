@@ -30,7 +30,7 @@ jobs:
           submodules: true
       - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          version: 2026.9.17
+          version: 2026.9.18
       - name: Select Java 21
         run: mise use java@21
       - uses: SonarSource/ci-github-actions/build-gradle@c3a85ac3a2f67f86966e2fb1fdf9a7c1bdc997dc # 2.2.0
@@ -59,7 +59,7 @@ jobs:
           submodules: true
       - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          version: 2026.9.17
+          version: 2026.9.18
       - name: Select Java 21
         run: mise use java@21
       - name: Get GitHub Token for QA Licenses
@@ -116,7 +116,7 @@ jobs:
           submodules: true
       - uses: jdx/mise-action@9149ea85001c7435d5a66bb127d6a1b6227cb0a5 # v5.0.0
         with:
-          version: 2026.9.17
+          version: 2026.9.18
       - name: Select Java 21
         run: mise use java@21
       - name: Get GitHub Token for QA Licenses
