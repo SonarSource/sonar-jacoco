@@ -28,14 +28,15 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
-          version: 2026.9.14
+          version: 2026.10.0
       - name: Select Java 21
         run: mise use java@21
       - uses: SonarSource/ci-github-actions/build-gradle@v2
         id: build-step
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           deploy-pull-request: true
           artifactory-reader-role: private-reader
           artifactory-deployer-role: qa-deployer
@@ -56,9 +57,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
-          version: 2026.9.14
+          version: 2026.10.0
       - name: Select Java 21
         run: mise use java@21
       - name: Get GitHub Token for QA Licenses
@@ -70,6 +71,7 @@ jobs:
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
         uses: ./.github/actions/orchestrator-cache
@@ -112,9 +114,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - uses: jdx/mise-action@7a4e45a543138629540c9a1616d08632b893e492 # v5.0.1
         with:
-          version: 2026.9.14
+          version: 2026.10.0
       - name: Select Java 21
         run: mise use java@21
       - name: Get GitHub Token for QA Licenses
@@ -126,6 +128,7 @@ jobs:
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
+          repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
       - name: Orchestrator Cache
         uses: ./.github/actions/orchestrator-cache
