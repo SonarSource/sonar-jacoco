@@ -4,10 +4,14 @@ on:
     - cron: '45 3 * * 1-5' # Run the workflow Mon-Fri at 03:45 UTC
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  unified-platform-dogfooding:
+  build:
     runs-on: sonar-m
-    name: Unified Platform Dogfooding
+    name: Build for Shadow Scan
     permissions:
       id-token: write
       contents: read
@@ -26,6 +30,20 @@ jobs:
           artifactory-reader-role: private-reader
           artifactory-deployer-role: qa-deployer
           deploy-pull-request: false
+
+  run_iris:
+    needs: [ build ]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    concurrency:
+      group: iris
+      cancel-in-progress: false
+      queue: single
+    runs-on: sonar-xs
+    name: Run IRIS
+    permissions:
+      id-token: write
+      contents: read
+    steps:
       - name: Run IRIS Analysis
         uses: SonarSource/unified-dogfooding-actions/run-iris@v1
         with:
