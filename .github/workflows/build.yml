@@ -68,6 +68,7 @@ jobs:
         with:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
+            development/artifactory-edge-prod/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | ORCHESTRATOR_ACCESS_TOKEN;
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
@@ -80,9 +81,11 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+          ORCHESTRATOR_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ORCHESTRATOR_ACCESS_TOKEN }}
+          ORCHESTRATOR_HOME: ${{ github.event_name == 'pull_request' && format('{0}/orchestrator-production', runner.temp) || env.ORCHESTRATOR_HOME }}
         shell: bash
         run: |
-          ./gradlew "-Dsonar.runtimeVersion=$SQ_VERSION" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
+          ./gradlew -Dorchestrator.artifactory.url=https://repox-internal.sonar.build/artifactory "-Dorchestrator.artifactory.accessToken=$ORCHESTRATOR_ACCESS_TOKEN" "-Dorchestrator.home=$ORCHESTRATOR_HOME" "-Dsonar.runtimeVersion=$SQ_VERSION" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
 
   qa:
     needs: [build]
@@ -125,6 +128,7 @@ jobs:
         with:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
+            development/artifactory-edge-prod/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | ORCHESTRATOR_ACCESS_TOKEN;
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
@@ -139,11 +143,13 @@ jobs:
         env:
           SQ_VERSION: ${{ matrix.sq-version }}
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+          ORCHESTRATOR_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ORCHESTRATOR_ACCESS_TOKEN }}
+          ORCHESTRATOR_HOME: ${{ github.event_name == 'pull_request' && format('{0}/orchestrator-production', runner.temp) || env.ORCHESTRATOR_HOME }}
         run: >-
           ./gradlew -DbuildNumber=$BUILD_NUMBER
           -PintegrationTests=true
           -Dsonar.runtimeVersion=$SQ_VERSION
-          -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN
+          -Dorchestrator.artifactory.url=https://repox-internal.sonar.build/artifactory "-Dorchestrator.artifactory.accessToken=$ORCHESTRATOR_ACCESS_TOKEN" "-Dorchestrator.home=$ORCHESTRATOR_HOME"
           --console plain --no-daemon --info
           build test
 
