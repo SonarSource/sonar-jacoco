@@ -174,8 +174,12 @@ class JacocoSensorTest {
 
     SensorContextTester context = SensorContextTester.create(temp);
     context.setSettings(settings);
+    // A main file is required, otherwise the module is skipped before the report is read
+    context.fileSystem().add(TestInputFileBuilder.create("library", "src/main/java/Foo.java").build());
+    logTester.setLevel(Level.DEBUG);
 
     sensor.execute(context);
+    assertThat(logTester.logs(Level.DEBUG)).contains("Reading report '" + aggregateReportPath.toAbsolutePath() + "'");
     assertThat(logTester.getLogs(Level.ERROR)).isEmpty();
   }
 
