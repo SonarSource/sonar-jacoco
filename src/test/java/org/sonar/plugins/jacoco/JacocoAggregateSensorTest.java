@@ -21,6 +21,8 @@ package org.sonar.plugins.jacoco;
 
 import com.sonarsource.scanner.engine.sensor.test.fixtures.SensorContextTester;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -119,6 +121,35 @@ class JacocoAggregateSensorTest {
             "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list."
     );
     assertThat(logTester.logs(Level.ERROR)).isEmpty();
+  }
+
+  @Test
+  void reuse_a_report_already_parsed_by_a_module_and_release_the_parsed_reports() {
+    Path aggregateReport = Path.of("src", "test", "resources", "jacoco-aggregate.xml").toAbsolutePath();
+    List<Path> parsedReports = new ArrayList<>();
+    var projectCoverageContext = new ProjectCoverageContext(new XmlReportCache(reportPath -> {
+      parsedReports.add(reportPath);
+      return new XmlReportParser(reportPath).parse();
+    }));
+    projectCoverageContext.getReportCache().parse(aggregateReport);
+    context.settings()
+            .setProperty(ReportPathsProvider.AGGREGATE_REPORT_PATHS_PROPERTY_KEY, aggregateReport.toString());
+
+    new JacocoAggregateSensor(projectCoverageContext, analysisWarnings).execute(context);
+
+    assertThat(parsedReports).containsExactly(aggregateReport);
+    assertThat(logTester.logs(Level.DEBUG)).contains("Report '" + aggregateReport + "' was already parsed during this analysis, reusing its content");
+    assertThat(projectCoverageContext.getReportCache().size()).isZero();
+  }
+
+  @Test
+  void release_the_parsed_reports_when_there_is_no_aggregate_report() {
+    var projectCoverageContext = new ProjectCoverageContext();
+    projectCoverageContext.getReportCache().parse(Path.of("src", "test", "resources", "simple.xml"));
+
+    new JacocoAggregateSensor(projectCoverageContext, analysisWarnings).execute(context);
+
+    assertThat(projectCoverageContext.getReportCache().size()).isZero();
   }
 
 }

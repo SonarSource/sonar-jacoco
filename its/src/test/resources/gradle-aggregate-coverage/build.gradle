@@ -37,14 +37,30 @@ tasks.register('codeCoverageReport', JacocoReport) {
   }
 }
 
+def aggregateReport = layout.buildDirectory.file('reports/jacoco/codeCoverageReport/codeCoverageReport.xml').get().asFile.absolutePath
+// When set, every module imports the aggregated report through sonar.coverage.jacoco.xmlReportPaths, as with Gradle's
+// jacoco-report-aggregation, instead of the project-level aggregate importer.
+def importAggregateReportInEveryModule = System.getProperty('jacocoIt.importAggregateReportInEveryModule') == 'true'
+
+if (importAggregateReportInEveryModule) {
+  allprojects {
+    sonar {
+      properties {
+        property 'sonar.coverage.jacoco.xmlReportPaths', aggregateReport
+      }
+    }
+  }
+}
+
 sonar {
   properties {
     property 'sonar.projectKey', 'jacoco-gradle-aggregate-reproducer'
-    property 'sonar.coverage.jacoco.aggregateXmlReportPaths',
-      layout.buildDirectory.file('reports/jacoco/codeCoverageReport/codeCoverageReport.xml').get().asFile.absolutePath
-    // SonarScanner for Gradle auto-detects codeCoverageReport as a normal JaCoCo report. Clear that property so this
-    // fixture exercises only the project-level aggregate importer.
-    property 'sonar.coverage.jacoco.xmlReportPaths', ''
+    if (!importAggregateReportInEveryModule) {
+      property 'sonar.coverage.jacoco.aggregateXmlReportPaths', aggregateReport
+      // SonarScanner for Gradle auto-detects codeCoverageReport as a normal JaCoCo report. Clear that property so this
+      // fixture exercises only the project-level aggregate importer.
+      property 'sonar.coverage.jacoco.xmlReportPaths', ''
+    }
   }
 }
 
