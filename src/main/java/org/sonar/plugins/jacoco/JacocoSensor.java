@@ -62,7 +62,7 @@ public class JacocoSensor implements Sensor {
     ModuleFileLocator locator = new ModuleFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream));
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer, LOG, analysisWarnings, moduleCoverageContext.name);
+    importReports(reportPaths, projectCoverageContext.getReportCache(), locator, importer, LOG, analysisWarnings, moduleCoverageContext.name);
   }
 
   private ModuleCoverageContext recordModuleCoverageContext(SensorContext sensorContext) {

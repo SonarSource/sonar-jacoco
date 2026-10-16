@@ -24,11 +24,29 @@ import java.util.ArrayList;
 import java.util.List;
 import org.sonar.api.scanner.ScannerSide;
 
+/**
+ * Project-level component (a {@link ScannerSide} component without instantiation strategy is created once per analysis), shared by the module executions of
+ * {@link JacocoSensor} and by {@link JacocoAggregateSensor}.
+ */
 @ScannerSide
 public class ProjectCoverageContext {
   private Path projectBaseDir;
 
   private List<ModuleCoverageContext> moduleContexts = new ArrayList<>();
+
+  private final XmlReportCache reportCache;
+
+  public ProjectCoverageContext() {
+    this(new XmlReportCache());
+  }
+
+  ProjectCoverageContext(XmlReportCache reportCache) {
+    this.reportCache = reportCache;
+  }
+
+  XmlReportCache getReportCache() {
+    return reportCache;
+  }
 
   public List<ModuleCoverageContext> getModuleContexts() {
     return moduleContexts;

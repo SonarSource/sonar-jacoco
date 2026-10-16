@@ -14,3 +14,7 @@ The `collision-a` and `collision-b` modules both contain `org/example/shared/Sha
 inside those files. Gradle merges their coverage into one `sourcefile` entry, so the importer cannot determine
 which physical source owns each line. It skips ambiguous entries, emits one aggregate warning, and keeps the
 per-file details at debug level instead of assigning potentially incorrect coverage.
+
+With `-DjacocoIt.importAggregateReportInEveryModule=true`, every module imports the same report through
+`sonar.coverage.jacoco.xmlReportPaths` instead, and the project-level aggregate importer is not used. The report is then parsed
+once and shared between all the modules.
