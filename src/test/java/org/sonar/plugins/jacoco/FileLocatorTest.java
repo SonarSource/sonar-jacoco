@@ -329,6 +329,23 @@ class FileLocatorTest {
   }
 
   @Test
+  void should_not_have_files_coverable_by_jacoco_for_kotlin_scripts() {
+    InputFile buildScript = inputFile("build.gradle.kts", "kotlin", InputFile.Type.MAIN);
+    InputFile settingsScript = inputFile("settings.gradle.kts", "kotlin", InputFile.Type.MAIN);
+    InputFile upperCaseScript = inputFile("buildSrc/Script.KTS", "kotlin", InputFile.Type.MAIN);
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(buildScript, settingsScript, upperCaseScript), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isFalse();
+  }
+
+  @Test
+  void should_have_files_coverable_by_jacoco_for_kotlin_files_next_to_kotlin_scripts() {
+    InputFile buildScript = inputFile("build.gradle.kts", "kotlin", InputFile.Type.MAIN);
+    InputFile mainFile = inputFile("src/main/kotlin/File.kt", "kotlin", InputFile.Type.MAIN);
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(buildScript, mainFile), kotlinFileLocator);
+    assertThat(locator.hasFilesCoverableByJacoco()).isTrue();
+  }
+
+  @Test
   void should_not_have_files_coverable_by_jacoco_when_no_file_is_indexed() {
     ModuleFileLocator locator = new ModuleFileLocator(Collections.emptyList(), kotlinFileLocator);
     assertThat(locator.hasFilesCoverableByJacoco()).isFalse();
