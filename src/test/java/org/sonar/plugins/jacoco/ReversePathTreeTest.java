@@ -52,14 +52,14 @@ class ReversePathTreeTest {
     reverseParseTree.index(clashingFile, clashingPath);
     reverseParseTree.index(target, path);
 
-    String[] pathWithoutSourceDirectory = new String[]{"org", "example", "App.java"};
+    String[] pathWithoutSourceDirectory = {"org", "example", "App.java"};
     assertThat(reverseParseTree.getFileWithSuffix(module, pathWithoutSourceDirectory)).isEqualTo(target);
   }
 
   @Test
   void module_aware_resolution_of_input_file_with_an_empty_index_returns_null() {
     var reverseParseTree = new ReversePathTree();
-    String[] pathWithoutSourceDirectory = new String[]{"src","main", "java","org", "example", "App.java"};
+    String[] pathWithoutSourceDirectory = {"src","main", "java","org", "example", "App.java"};
     assertThat(reverseParseTree.getFileWithSuffix("my-module", pathWithoutSourceDirectory)).isNull();
   }
 
@@ -70,7 +70,7 @@ class ReversePathTreeTest {
     String[] differentFilePath = differentFile.relativePath().split("/");
     reverseParseTree.index(differentFile, differentFilePath);
 
-    String[] pathWithoutSourceDirectory = new String[]{"src","main", "java","org", "example", "App.java"};
+    String[] pathWithoutSourceDirectory = {"src","main", "java","org", "example", "App.java"};
     assertThat(reverseParseTree.getFileWithSuffix("my-module", pathWithoutSourceDirectory)).isNull();
   }
 
@@ -86,7 +86,7 @@ class ReversePathTreeTest {
     String[] yeAnotherDifferentFilePath = yetAnotherDifferentFile.relativePath().split("/");
     reverseParseTree.index(yetAnotherDifferentFile, yeAnotherDifferentFilePath);
 
-    String[] pathWithoutSourceDirectory = new String[]{"src","main", "java","org", "example", "App.java"};
+    String[] pathWithoutSourceDirectory = {"src","main", "java","org", "example", "App.java"};
     assertThat(reverseParseTree.getFileWithSuffix("my-module", pathWithoutSourceDirectory)).isNull();
   }
 }

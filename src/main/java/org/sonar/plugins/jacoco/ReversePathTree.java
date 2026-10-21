@@ -26,7 +26,7 @@ import java.util.Map;
 import org.sonar.api.batch.fs.InputFile;
 
 public class ReversePathTree {
-  private Node root = new Node();
+  private final Node root = new Node();
 
   public void index(InputFile inputFile, String[] path) {
     Node currentNode = root;

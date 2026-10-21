@@ -28,7 +28,7 @@ import org.sonar.api.scanner.ScannerSide;
 public class ProjectCoverageContext {
   private Path projectBaseDir;
 
-  private List<ModuleCoverageContext> moduleContexts = new ArrayList<>();
+  private final List<ModuleCoverageContext> moduleContexts = new ArrayList<>();
 
   public List<ModuleCoverageContext> getModuleContexts() {
     return moduleContexts;

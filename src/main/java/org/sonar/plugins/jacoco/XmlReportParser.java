@@ -155,10 +155,10 @@ public class XmlReportParser {
   }
 
   static class SourceFile {
-    private String name;
-    private String packageName;
-    private @Nullable String groupName;
-    private List<Line> lines = new ArrayList<>();
+    private final String name;
+    private final String packageName;
+    private final @Nullable String groupName;
+    private final List<Line> lines = new ArrayList<>();
 
     SourceFile(String packageName, String name) {
       this(packageName, name, null);
@@ -192,11 +192,11 @@ public class XmlReportParser {
   }
 
   static class Line {
-    private int number;
-    private int missedInstrs;
-    private int coveredInstrs;
-    private int missedBranches;
-    private int coveredBranches;
+    private final int number;
+    private final int missedInstrs;
+    private final int coveredInstrs;
+    private final int missedBranches;
+    private final int coveredBranches;
 
     Line(int number, int mi, int ci, int mb, int cb) {
       this.number = number;

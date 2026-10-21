@@ -35,7 +35,7 @@ public class ProjectFileLocator extends FileLocator {
 
   private static final Logger LOG = LoggerFactory.getLogger(ProjectFileLocator.class);
 
-  private ProjectCoverageContext projectCoverageContext;
+  private final ProjectCoverageContext projectCoverageContext;
   private int skippedAmbiguousReportEntries;
 
   public ProjectFileLocator(Iterable<InputFile> inputFiles, KotlinFileLocator kotlinFileLocator, ProjectCoverageContext projectCoverageContext) {
