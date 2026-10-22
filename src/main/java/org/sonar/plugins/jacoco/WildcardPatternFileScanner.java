@@ -100,7 +100,7 @@ public final class WildcardPatternFileScanner {
 
   /* Is visible for testing reasons */
   static String toUnixLikePath(String path) {
-    return path.indexOf('\\') != -1 ? path.replace('\\', '/') : path;
+    return path.indexOf('\\') == -1 ? path : path.replace('\\', '/');
   }
 
   /* Is visible for testing reasons */
