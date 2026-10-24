@@ -28,7 +28,11 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
@@ -45,6 +49,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -173,6 +178,99 @@ class JacocoSensorTest {
 
     sensor.execute(context);
     assertThat(logTester.getLogs(Level.ERROR)).isEmpty();
+  }
+
+  @Test
+  void parse_a_report_shared_by_several_modules_only_once() throws URISyntaxException, IOException {
+    Files.copy(load("jacoco.xml"), temp.resolve("jacoco.xml"));
+    List<Path> parsedReports = new ArrayList<>();
+    ProjectCoverageContext projectCoverageContext = new ProjectCoverageContext(new XmlReportCache(reportPath -> {
+      parsedReports.add(reportPath);
+      return new XmlReportParser(reportPath).parse();
+    }));
+    JacocoSensor sharedSensor = new JacocoSensor(projectCoverageContext, analysisWarnings);
+    InputFile mainFile = TestInputFileBuilder.create("module-a", "org/sonarlint/cli/Main.java").setLines(1000).build();
+    InputFile statsFile = TestInputFileBuilder.create("module-b", "org/sonarlint/cli/Stats.java").setLines(1000).build();
+    SensorContextTester moduleA = moduleContext("module-a", "jacoco.xml", mainFile);
+    SensorContextTester moduleB = moduleContext("module-b", "jacoco.xml", statsFile);
+
+    sharedSensor.execute(moduleA);
+    sharedSensor.execute(moduleB);
+
+    assertThat(parsedReports).containsExactly(temp.resolve("jacoco.xml"));
+    assertThat(projectCoverageContext.getReportCache().size()).isEqualTo(1);
+    assertThat(moduleA.lineHits(mainFile.key(), 110)).isEqualTo(1);
+    assertThat(moduleA.conditions(mainFile.key(), 110)).isEqualTo(2);
+    assertThat(moduleA.coveredConditions(mainFile.key(), 110)).isEqualTo(1);
+    assertThat(moduleB.lineHits(statsFile.key(), 24)).isEqualTo(1);
+    assertThat(logTester.logs(Level.INFO)).containsExactly(
+      "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
+      "Coverage report '" + temp.resolve("jacoco.xml") + "': 35 of 36 files were not found in the analysed sources of 'module-a'."
+        + " This is expected when a single aggregated report is imported by several modules. Enable debug logs for the full list.",
+      "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
+      "Coverage report '" + temp.resolve("jacoco.xml") + "': 35 of 36 files were not found in the analysed sources of 'module-b'."
+        + " This is expected when a single aggregated report is imported by several modules. Enable debug logs for the full list.");
+  }
+
+  @Test
+  void import_the_same_coverage_from_a_shared_report_as_from_a_report_parsed_for_the_module_only() throws URISyntaxException, IOException {
+    Files.copy(load("jacoco.xml"), temp.resolve("jacoco.xml"));
+    JacocoSensor sharedSensor = new JacocoSensor(new ProjectCoverageContext(), analysisWarnings);
+    InputFile mainFile = TestInputFileBuilder.create("module-a", "org/sonarlint/cli/Main.java").setLines(1000).build();
+    InputFile statsFile = TestInputFileBuilder.create("module-b", "org/sonarlint/cli/Stats.java").setLines(1000).build();
+    SensorContextTester sharedModuleB = moduleContext("module-b", "jacoco.xml", statsFile);
+    SensorContextTester isolatedModuleB = moduleContext("module-b", "jacoco.xml", statsFile);
+
+    sharedSensor.execute(moduleContext("module-a", "jacoco.xml", mainFile));
+    sharedSensor.execute(sharedModuleB);
+    new JacocoSensor(new ProjectCoverageContext(), analysisWarnings).execute(isolatedModuleB);
+
+    assertThat(coverageOf(sharedModuleB, statsFile))
+      .isNotEmpty()
+      .isEqualTo(coverageOf(isolatedModuleB, statsFile));
+  }
+
+  @Test
+  void report_an_invalid_shared_report_in_every_module() throws URISyntaxException, IOException {
+    Files.copy(load("invalid_ci_in_line.xml"), temp.resolve("invalid.xml"));
+    List<Path> parsedReports = new ArrayList<>();
+    JacocoSensor sharedSensor = new JacocoSensor(new ProjectCoverageContext(new XmlReportCache(reportPath -> {
+      parsedReports.add(reportPath);
+      return new XmlReportParser(reportPath).parse();
+    })), analysisWarnings);
+    InputFile fileA = TestInputFileBuilder.create("module-a", "org/sonarlint/cli/File.java").setLines(1000).build();
+    InputFile fileB = TestInputFileBuilder.create("module-b", "org/sonarlint/cli/File.java").setLines(1000).build();
+
+    sharedSensor.execute(moduleContext("module-a", "invalid.xml", fileA));
+    sharedSensor.execute(moduleContext("module-b", "invalid.xml", fileB));
+
+    String expectedErrorMessage = "Coverage report '" + temp.resolve("invalid.xml")
+      + "' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61";
+    assertThat(parsedReports).hasSize(1);
+    assertThat(logTester.logs(Level.ERROR)).containsExactly(expectedErrorMessage, expectedErrorMessage);
+    verify(analysisWarnings, times(2)).addUnique(expectedErrorMessage);
+  }
+
+  private SensorContextTester moduleContext(String moduleKey, String reportPaths, InputFile inputFile) {
+    MapSettings settings = new MapSettings()
+      .setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, reportPaths)
+      .setProperty("sonar.moduleKey", moduleKey)
+      .setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString());
+    SensorContextTester context = SensorContextTester.create(temp);
+    context.setSettings(settings);
+    context.fileSystem().add(inputFile);
+    return context;
+  }
+
+  private static Map<Integer, List<Integer>> coverageOf(SensorContextTester context, InputFile inputFile) {
+    Map<Integer, List<Integer>> coverage = new TreeMap<>();
+    for (int line = 1; line <= inputFile.lines(); line++) {
+      Integer hits = context.lineHits(inputFile.key(), line);
+      if (hits != null) {
+        coverage.put(line, Arrays.asList(hits, context.conditions(inputFile.key(), line), context.coveredConditions(inputFile.key(), line)));
+      }
+    }
+    return coverage;
   }
 
   private Path load(String name) throws URISyntaxException {

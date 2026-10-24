@@ -36,14 +36,15 @@ class SensorUtils {
     /* This class should not be instantiated */
   }
 
-  static void importReports(Collection<Path> reportPaths, FileLocator locator, ReportImporter importer, Logger logger, AnalysisWarnings analysisWarnings, String contextLabel) {
+  static void importReports(Collection<Path> reportPaths, XmlReportCache reportCache, FileLocator locator, ReportImporter importer, Logger logger,
+    AnalysisWarnings analysisWarnings, String contextLabel) {
     logger.info("Importing {} report(s). Turn your logs in debug mode in order to see the exhaustive list.", reportPaths.size());
     int skippedAmbiguousReportEntries = 0;
 
     for (Path reportPath : reportPaths) {
       logger.debug("Reading report '{}'", reportPath);
       try {
-        ImportSummary summary = importReport(new XmlReportParser(reportPath), locator, importer, logger);
+        ImportSummary summary = importReport(reportCache.parse(reportPath), locator, importer, logger);
         skippedAmbiguousReportEntries += summary.ambiguous;
         logImportSummary(summary, reportPath, locator, logger, analysisWarnings, contextLabel);
       } catch (Exception e) {
@@ -91,8 +92,7 @@ class SensorUtils {
     }
   }
 
-  static ImportSummary importReport(XmlReportParser reportParser, FileLocator locator, ReportImporter importer, Logger logger) {
-    List<XmlReportParser.SourceFile> sourceFiles = reportParser.parse();
+  static ImportSummary importReport(List<XmlReportParser.SourceFile> sourceFiles, FileLocator locator, ReportImporter importer, Logger logger) {
     int notFound = 0;
     int ambiguous = 0;
 

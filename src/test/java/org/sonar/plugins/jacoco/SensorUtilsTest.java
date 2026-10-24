@@ -58,16 +58,14 @@ class SensorUtilsTest {
   void import_coverage() {
     ModuleFileLocator locator = mock(ModuleFileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
-    XmlReportParser parser = mock(XmlReportParser.class);
     InputFile inputFile = mock(InputFile.class);
 
     XmlReportParser.SourceFile sourceFile = new XmlReportParser.SourceFile("package", "File.java");
     sourceFile.lines().add(new XmlReportParser.Line(1, 0, 1, 0, 0));
 
-    when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
     when(locator.getInputFile(null,"package", "File.java")).thenReturn(inputFile);
 
-    SensorUtils.importReport(parser, locator, importer, LOG);
+    SensorUtils.importReport(Collections.singletonList(sourceFile), locator, importer, LOG);
 
     verify(importer).importCoverage(sourceFile, inputFile);
   }
@@ -83,7 +81,7 @@ class SensorUtilsTest {
     when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
 
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
-    SensorUtils.importReports(Arrays.asList(invalidFile, validFile), locator, importer, LOG, analysisWarnings, "my-module");
+    SensorUtils.importReports(Arrays.asList(invalidFile, validFile), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "my-module");
 
     String expectedErrorMessage = "Coverage report '" + invalidFile
       + "' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61";
@@ -97,15 +95,32 @@ class SensorUtilsTest {
   }
 
   @Test
+  void report_a_cached_parse_failure_to_every_context_importing_the_report() {
+    ModuleFileLocator locator = mock(ModuleFileLocator.class);
+    ReportImporter importer = mock(ReportImporter.class);
+    AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+    Path invalidFile = RESOURCES_DIR.resolve("invalid_ci_in_line.xml");
+    XmlReportCache reportCache = new XmlReportCache();
+
+    SensorUtils.importReports(Collections.singletonList(invalidFile), reportCache, locator, importer, LOG, analysisWarnings, "module-a");
+    SensorUtils.importReports(Collections.singletonList(invalidFile), reportCache, locator, importer, LOG, analysisWarnings, "module-b");
+
+    String expectedErrorMessage = "Coverage report '" + invalidFile
+      + "' could not be read/imported. Error: java.lang.IllegalStateException: Invalid report: failed to parse integer from the attribute 'ci' for the sourcefile 'File.java' at line 6 column 61";
+    assertThat(logTester.logs(Level.ERROR)).containsExactly(expectedErrorMessage, expectedErrorMessage);
+    verify(analysisWarnings, times(2)).addUnique(expectedErrorMessage);
+    assertThat(reportCache.size()).isEqualTo(1);
+    verifyNoInteractions(importer);
+  }
+
+  @Test
   void do_nothing_if_file_not_found() {
     logTester.setLevel(Level.DEBUG);
     ModuleFileLocator locator = mock(ModuleFileLocator.class);
     ReportImporter importer = mock(ReportImporter.class);
-    XmlReportParser parser = mock(XmlReportParser.class);
     XmlReportParser.SourceFile sourceFile = mock(XmlReportParser.SourceFile.class);
 
-    when(parser.parse()).thenReturn(Collections.singletonList(sourceFile));
-    SensorUtils.importReport(parser, locator, importer, LOG);
+    SensorUtils.importReport(Collections.singletonList(sourceFile), locator, importer, LOG);
 
     // One line per unresolved file would flood the logs of a multi-module build importing an aggregated report, so it stays at debug level.
     assertThat(logTester.logs(Level.DEBUG)).anySatisfy(logMessage -> assertThat(logMessage).contains("File 'null/null' not found in the analysed sources"));
@@ -121,7 +136,7 @@ class SensorUtilsTest {
     when(locator.hasFilesCoverableByJacoco()).thenReturn(true);
     when(locator.getInputFile(null, "org/sonarlint/cli", "Stats.java")).thenReturn(inputFile);
 
-    SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
+    SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "my-module");
 
     assertThat(logTester.logs(Level.INFO)).contains("Coverage report '" + MANY_FILES_REPORT
       + "': 35 of 36 files were not found in the analysed sources of 'my-module'."
@@ -140,7 +155,7 @@ class SensorUtilsTest {
     when(locator.hasFilesCoverableByJacoco()).thenReturn(true);
     when(locator.getInputFile(null, "org/sonarlint/cli", "File.java")).thenReturn(inputFile);
 
-    SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
+    SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "my-module");
 
     assertThat(logTester.logs(Level.WARN)).isEmpty();
     assertThat(logTester.logs(Level.INFO)).containsExactly("Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.");
@@ -159,7 +174,7 @@ class SensorUtilsTest {
     });
     when(locator.skippedAmbiguousReportEntries()).thenAnswer(invocation -> ambiguousEntries.get());
 
-    SensorUtils.importReports(Arrays.asList(SINGLE_FILE_REPORT, SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
+    SensorUtils.importReports(Arrays.asList(SINGLE_FILE_REPORT, SINGLE_FILE_REPORT), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "my-project");
 
     assertThat(logTester.logs(Level.WARN)).containsExactly(
             "Coverage was not imported for 2 JaCoCo report source file(s) because each matched multiple project source files."
@@ -191,7 +206,7 @@ class SensorUtilsTest {
     });
     when(locator.skippedAmbiguousReportEntries()).thenAnswer(invocation -> ambiguousEntries.get());
 
-    SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
+    SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "my-project");
 
     assertThat(logTester.logs(Level.INFO)).containsExactly(
             "Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.",
@@ -216,7 +231,7 @@ class SensorUtilsTest {
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
     when(locator.hasFilesCoverableByJacoco()).thenReturn(true);
 
-    SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
+    SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "my-module");
 
     assertThat(logTester.logs(Level.WARN)).containsExactly("None of the 1 files in coverage report '" + SINGLE_FILE_REPORT
       + "' could be matched to the analysed sources of 'my-module'."
@@ -231,7 +246,7 @@ class SensorUtilsTest {
     AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
     when(locator.hasFilesCoverableByJacoco()).thenReturn(true);
 
-    SensorUtils.importReports(Arrays.asList(SINGLE_FILE_REPORT, MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-module");
+    SensorUtils.importReports(Arrays.asList(SINGLE_FILE_REPORT, MANY_FILES_REPORT), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "my-module");
 
     // The detail stays in the logs, one line per report, while the analysis warning is a constant: addUnique then
     // collapses the two calls below into a single entry in the UI, whatever the number of modules and reports.
@@ -248,7 +263,7 @@ class SensorUtilsTest {
     // than a failed import.
     when(locator.hasFilesCoverableByJacoco()).thenReturn(false);
 
-    SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), locator, importer, LOG, analysisWarnings, "aggregator");
+    SensorUtils.importReports(Collections.singletonList(SINGLE_FILE_REPORT), new XmlReportCache(), locator, importer, LOG, analysisWarnings, "aggregator");
 
     assertThat(logTester.logs(Level.WARN)).isEmpty();
     verifyNoInteractions(analysisWarnings);

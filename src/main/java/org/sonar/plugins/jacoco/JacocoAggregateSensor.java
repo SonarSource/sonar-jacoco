@@ -51,6 +51,15 @@ public class JacocoAggregateSensor implements ProjectSensor {
 
   @Override
   public void execute(SensorContext context) {
+    try {
+      importAggregateReports(context);
+    } finally {
+      // Project sensors run after every module sensor: the reports parsed for the modules are no longer needed, so their content is released for the rest of the analysis.
+      projectCoverageContext.getReportCache().clear();
+    }
+  }
+
+  private void importAggregateReports(SensorContext context) {
     this.projectCoverageContext.setProjectBaseDir(Paths.get(context.config().get("sonar.projectBaseDir").get()));
     Set<Path> reportPaths = new ReportPathsProvider(context, analysisWarnings).getAggregateReportPaths();
     if (reportPaths.isEmpty()) {
@@ -62,6 +71,6 @@ public class JacocoAggregateSensor implements ProjectSensor {
     FileLocator locator = new ProjectFileLocator(inputFiles, new KotlinFileLocator(kotlinInputFileStream), projectCoverageContext);
     ReportImporter importer = new ReportImporter(context);
 
-    importReports(reportPaths, locator, importer, LOG, analysisWarnings, context.project().key());
+    importReports(reportPaths, projectCoverageContext.getReportCache(), locator, importer, LOG, analysisWarnings, context.project().key());
   }
 }

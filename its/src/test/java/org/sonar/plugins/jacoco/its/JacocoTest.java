@@ -44,6 +44,8 @@ class JacocoTest {
   private static final String FILE_WITHOUT_COVERAGE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/CalcNoCoverage.java";
   /** Modules of the aggregate-and-module-based-mixed-coverage fixture, root included. */
   private static final int MODULE_COUNT = 8;
+  private static final String GRADLE_ALPHA_FILE_KEY = "jacoco-gradle-aggregate-reproducer:alpha/src/main/java/org/example/alpha/Alpha.java";
+  private static final String GRADLE_BETA_FILE_KEY = "jacoco-gradle-aggregate-reproducer:beta/src/main/java/org/example/beta/Beta.java";
 
   private static OrchestratorRule orchestrator;
 
@@ -277,6 +279,31 @@ class JacocoTest {
   }
 
   /**
+   * JACOCO-239: every module imports the same aggregated report through sonar.coverage.jacoco.xmlReportPaths, as with Gradle's jacoco-report-aggregation. The report is
+   * parsed by the first module only and its content is reused by the others, which must still get the same coverage as when the report is imported at project level.
+   */
+  @Test
+  void aggregated_report_imported_by_every_module_is_parsed_once_and_covers_every_module() throws IOException {
+    executeGradleAggregateAnalysis(false);
+    Map<String, Double> alphaCoverageFromAggregateImport = getCoverageMeasures(GRADLE_ALPHA_FILE_KEY);
+    Map<String, Double> betaCoverageFromAggregateImport = getCoverageMeasures(GRADLE_BETA_FILE_KEY);
+    assertThat(alphaCoverageFromAggregateImport.get("line_coverage")).isPositive();
+    assertThat(betaCoverageFromAggregateImport.get("line_coverage")).isPositive();
+
+    BuildResult result = executeGradleAggregateAnalysis(true);
+
+    assertThat(getCoverageMeasures(GRADLE_ALPHA_FILE_KEY)).isEqualTo(alphaCoverageFromAggregateImport);
+    assertThat(getCoverageMeasures(GRADLE_BETA_FILE_KEY)).isEqualTo(betaCoverageFromAggregateImport);
+
+    List<String> logLines = Arrays.asList(result.getLogs().split("\\R"));
+    long readReportLines = logLines.stream().filter(line -> line.contains("Reading report '") && line.contains("codeCoverageReport.xml")).count();
+    long reusedReportLines = logLines.stream().filter(line -> line.contains("was already parsed during this analysis, reusing its content")).count();
+    assertThat(readReportLines).isGreaterThan(1);
+    assertThat(reusedReportLines).isEqualTo(readReportLines - 1);
+    assertThat(result.getLogs()).doesNotContain("could not be read/imported");
+  }
+
+  /**
    * Reproduces USER-2307: a single aggregated report handed to every module through sonar.coverage.jacoco.xmlReportPaths, which is what SonarScanner for Gradle does when the
    * property is set at the root. Every module then fails to resolve the files of all its siblings, so an unconditional per-file warning grows as files x modules.
    * Default-verbosity logs must stay flat: one summary line per report per module, and no per-file line.
@@ -403,11 +430,24 @@ class JacocoTest {
   }
 
   private BuildResult executeGradleAggregateAnalysis() throws IOException {
+    return executeGradleAggregateAnalysis(false);
+  }
+
+  /**
+   * @param importAggregateReportInEveryModule whether every module imports the report through sonar.coverage.jacoco.xmlReportPaths, instead of the project-level
+   *   sonar.coverage.jacoco.aggregateXmlReportPaths, with debug logs
+   */
+  private BuildResult executeGradleAggregateAnalysis(boolean importAggregateReportInEveryModule) throws IOException {
     File project = prepareGradleProject("gradle-aggregate-coverage");
     GradleBuild build = GradleBuild.create(project)
             .addTask("clean")
             .addTask("codeCoverageReport")
-            .addTask("sonar");
+            .addTask("sonar")
+            .setProperty("jacocoIt.importAggregateReportInEveryModule", String.valueOf(importAggregateReportInEveryModule));
+    if (importAggregateReportInEveryModule) {
+      // SonarScanner for Gradle only prints the debug logs of the analysis when Gradle itself logs at the debug level
+      build.setProperty("sonar.verbose", "true").addArgument("--debug");
+    }
 
     BuildResult result = orchestrator.executeBuild(build, true);
 
