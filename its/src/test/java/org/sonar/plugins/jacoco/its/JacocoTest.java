@@ -17,10 +17,12 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.sonarqube.ws.Ce;
 import org.sonarqube.ws.Measures;
 import org.sonarqube.ws.client.HttpConnector;
 import org.sonarqube.ws.client.WsClient;
 import org.sonarqube.ws.client.WsClientFactories;
+import org.sonarqube.ws.client.ce.AnalysisStatusRequest;
 import org.sonarqube.ws.client.measures.ComponentRequest;
 
 import java.io.File;
@@ -329,6 +331,33 @@ class JacocoTest {
     orchestrator.executeBuild(build);
 
     checkCoveredKotlinFile();
+  }
+
+  /**
+   * Reproduces JACOCO-241: SonarScanner for Gradle adds the Kotlin build scripts of the whole build to the sources of the root module, which also inherits
+   * sonar.coverage.jacoco.xmlReportPaths. A Gradle script can't appear in a JaCoCo report, so matching nothing is expected and must not raise a warning.
+   */
+  @Test
+  void should_not_warn_when_the_only_kotlin_files_are_gradle_scripts() throws IOException {
+    String projectKey = "kotlin-gradle-scripts-project";
+    SonarScanner build = SonarScanner.create()
+      .setProjectKey(projectKey)
+      .setDebugLogs(true)
+      .setSourceDirs("build.gradle.kts,settings.gradle.kts")
+      .setProperty("sonar.coverage.jacoco.xmlReportPaths", "jacoco.xml")
+      .setProjectDir(prepareProject("kotlin-gradle-scripts-project"));
+    BuildResult result = orchestrator.executeBuild(build);
+
+    assertThat(result.getLogs())
+      .contains("which has no source file to analyze")
+      .doesNotContain("could be matched to the analysed sources");
+    List<String> warnings = getWsClient().ce().analysisStatus(new AnalysisStatusRequest().setComponent(projectKey))
+      .getComponent()
+      .getWarningsList()
+      .stream()
+      .map(Ce.AnalysisStatusWsResponse.Warning::getMessage)
+      .collect(Collectors.toList());
+    assertThat(warnings).noneMatch(warning -> warning.contains("JaCoCo"));
   }
 
   private void checkNoJacocoCoverage() {

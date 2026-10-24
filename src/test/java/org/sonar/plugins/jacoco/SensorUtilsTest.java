@@ -19,6 +19,7 @@
  */
 package org.sonar.plugins.jacoco;
 
+import com.sonarsource.scanner.engine.sensor.test.fixtures.TestInputFileBuilder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -252,5 +253,44 @@ class SensorUtilsTest {
 
     assertThat(logTester.logs(Level.WARN)).isEmpty();
     verifyNoInteractions(analysisWarnings);
+  }
+
+  @Test
+  void do_not_warn_when_the_only_kotlin_files_of_the_module_are_gradle_scripts() {
+    logTester.setLevel(Level.DEBUG);
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(
+      kotlinMainFile("build.gradle.kts"),
+      kotlinMainFile("settings.gradle.kts")), new KotlinFileLocator(null));
+    ReportImporter importer = mock(ReportImporter.class);
+    AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+
+    SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
+
+    assertThat(logTester.logs(Level.WARN)).isEmpty();
+    assertThat(logTester.logs(Level.DEBUG)).contains("Coverage report '" + MANY_FILES_REPORT
+      + "' was not imported into 'my-project', which has no source file to analyze.");
+    verifyNoInteractions(analysisWarnings);
+    verifyNoInteractions(importer);
+  }
+
+  @Test
+  void warn_when_nothing_matches_in_a_module_with_kotlin_sources_and_gradle_scripts() {
+    ModuleFileLocator locator = new ModuleFileLocator(Arrays.asList(
+      kotlinMainFile("build.gradle.kts"),
+      kotlinMainFile("src/main/kotlin/org/example/App.kt")), new KotlinFileLocator(null));
+    ReportImporter importer = mock(ReportImporter.class);
+    AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
+
+    SensorUtils.importReports(Collections.singletonList(MANY_FILES_REPORT), locator, importer, LOG, analysisWarnings, "my-project");
+
+    assertThat(logTester.logs(Level.WARN)).containsExactly("None of the 36 files in coverage report '" + MANY_FILES_REPORT
+      + "' could be matched to the analysed sources of 'my-project'."
+      + " No coverage was imported from this report.");
+    verify(analysisWarnings).addUnique(SensorUtils.NOTHING_MATCHED_ANALYSIS_WARNING);
+    verifyNoInteractions(importer);
+  }
+
+  private static InputFile kotlinMainFile(String relativePath) {
+    return new TestInputFileBuilder("my-project", relativePath).setLanguage("kotlin").setType(InputFile.Type.MAIN).build();
   }
 }

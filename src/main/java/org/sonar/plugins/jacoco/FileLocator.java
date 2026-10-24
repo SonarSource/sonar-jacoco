@@ -21,6 +21,7 @@ package org.sonar.plugins.jacoco;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
@@ -31,6 +32,7 @@ import org.sonar.api.batch.fs.InputFile;
 public abstract class FileLocator {
   public static final String SEPARATOR_REGEX = Pattern.quote(File.separator);
   private static final Set<String> COVERED_LANGUAGES = Set.of("java", "kotlin");
+  private static final String KOTLIN_SCRIPT_EXTENSION = ".kts";
 
   protected final ReversePathTree tree = new ReversePathTree();
   protected final KotlinFileLocator kotlinFileLocator;
@@ -55,7 +57,18 @@ public abstract class FileLocator {
   }
 
   private static boolean isCoverableByJacoco(InputFile inputFile) {
-    return inputFile.type() == InputFile.Type.MAIN && inputFile.language() != null && COVERED_LANGUAGES.contains(inputFile.language());
+    return inputFile.type() == InputFile.Type.MAIN
+      && inputFile.language() != null
+      && COVERED_LANGUAGES.contains(inputFile.language())
+      && !isKotlinScript(inputFile);
+  }
+
+  /**
+   * Kotlin scripts, such as the Gradle build scripts that the SonarScanner for Gradle adds to the sources of the root module, are not compiled
+   * into classes, so they never appear in a JaCoCo report.
+   */
+  private static boolean isKotlinScript(InputFile inputFile) {
+    return inputFile.filename().toLowerCase(Locale.ROOT).endsWith(KOTLIN_SCRIPT_EXTENSION);
   }
 
   public boolean hasFilesCoverableByJacoco() {
