@@ -52,6 +52,12 @@ public class JacocoSensor implements Sensor {
   @Override
   public void execute(SensorContext context) {
     ModuleCoverageContext moduleCoverageContext = recordModuleCoverageContext(context);
+    // Coverage saved on a test file is dropped by the scanner,
+    // so a module without any main file, such as an aggregator module, cannot receive coverage
+    if (!context.fileSystem().hasFiles(context.fileSystem().predicates().hasType(InputFile.Type.MAIN))) {
+      LOG.debug("No main file in module '{}', skipping the import of JaCoCo reports", moduleCoverageContext.name);
+      return;
+    }
     Collection<Path> reportPaths = new ReportPathsProvider(context, analysisWarnings).getPaths();
     if (reportPaths.isEmpty()) {
       LOG.info("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");

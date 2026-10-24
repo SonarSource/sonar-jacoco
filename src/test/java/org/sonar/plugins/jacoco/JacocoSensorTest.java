@@ -46,6 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 class JacocoSensorTest {
@@ -56,7 +57,8 @@ class JacocoSensorTest {
   public LogTesterJUnit5 logTester = new LogTesterJUnit5();
 
   private AnalysisWarnings analysisWarnings = mock(AnalysisWarnings.class);
-  private JacocoSensor sensor = new JacocoSensor(new ProjectCoverageContext(), analysisWarnings);
+  private ProjectCoverageContext projectCoverageContext = new ProjectCoverageContext();
+  private JacocoSensor sensor = new JacocoSensor(projectCoverageContext, analysisWarnings);
 
   @Test
   void describe_sensor() {
@@ -73,6 +75,7 @@ class JacocoSensorTest {
       .setProperty("sonar.moduleKey", "module")
       .setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString());
     spiedContext.setSettings(settings);
+    spiedContext.fileSystem().add(TestInputFileBuilder.create("module", "src/main/java/Foo.java").build());
     TestFileSystem spiedFileSystem = spy(spiedContext.fileSystem());
     when(spiedContext.fileSystem()).thenReturn(spiedFileSystem);
     sensor.execute(spiedContext);
@@ -96,6 +99,7 @@ class JacocoSensorTest {
             .setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString());
     settings.setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, "invalid.xml");
     tester.setSettings(settings);
+    tester.fileSystem().add(TestInputFileBuilder.create("module", "src/main/java/Foo.java").build());
     sensor.execute(tester);
 
     assertThat(logTester.logs(Level.INFO)).contains("No report imported, no coverage information will be imported by JaCoCo XML Report Importer");
@@ -170,9 +174,107 @@ class JacocoSensorTest {
 
     SensorContextTester context = SensorContextTester.create(temp);
     context.setSettings(settings);
+    // A main file is required, otherwise the module is skipped before the report is read
+    context.fileSystem().add(TestInputFileBuilder.create("library", "src/main/java/Foo.java").build());
+    logTester.setLevel(Level.DEBUG);
 
     sensor.execute(context);
+    assertThat(logTester.logs(Level.DEBUG)).contains("Reading report '" + aggregateReportPath.toAbsolutePath() + "'");
     assertThat(logTester.getLogs(Level.ERROR)).isEmpty();
+  }
+
+  @Test
+  void skip_module_without_any_file() throws IOException {
+    logTester.setLevel(Level.DEBUG);
+    Files.writeString(temp.resolve("jacoco.xml"), "this is not a JaCoCo report");
+    SensorContextTester spiedContext = spy(SensorContextTester.create(temp));
+    spiedContext.setSettings(moduleSettings("aggregator", "jacoco.xml"));
+    TestFileSystem spiedFileSystem = spy(spiedContext.fileSystem());
+    when(spiedContext.fileSystem()).thenReturn(spiedFileSystem);
+
+    sensor.execute(spiedContext);
+
+    verify(spiedFileSystem, never()).inputFiles(any());
+    verifyNoInteractions(analysisWarnings);
+    assertThat(logTester.logs(Level.DEBUG)).contains("No main file in module 'aggregator', skipping the import of JaCoCo reports");
+    assertThat(logTester.logs(Level.INFO)).isEmpty();
+    assertThat(logTester.logs(Level.WARN)).isEmpty();
+    assertThat(logTester.logs(Level.ERROR)).isEmpty();
+    assertThat(projectCoverageContext.getModuleContexts())
+      .extracting(moduleContext -> moduleContext.name)
+      .containsExactly("aggregator");
+  }
+
+  @Test
+  void skip_module_with_only_test_files() throws IOException {
+    logTester.setLevel(Level.DEBUG);
+    Files.writeString(temp.resolve("jacoco.xml"), "this is not a JaCoCo report");
+    SensorContextTester tester = SensorContextTester.create(temp);
+    tester.setSettings(moduleSettings("tests", "jacoco.xml"));
+    tester.fileSystem().add(TestInputFileBuilder
+      .create("tests", "org/sonarlint/cli/Main.java")
+      .setType(InputFile.Type.TEST)
+      .setLines(1000)
+      .build());
+
+    sensor.execute(tester);
+
+    verifyNoInteractions(analysisWarnings);
+    assertThat(logTester.logs(Level.DEBUG)).contains("No main file in module 'tests', skipping the import of JaCoCo reports");
+    assertThat(logTester.logs(Level.ERROR)).isEmpty();
+    assertThat(projectCoverageContext.getModuleContexts())
+      .extracting(moduleContext -> moduleContext.name)
+      .containsExactly("tests");
+  }
+
+  @Test
+  void skip_module_without_main_file_does_not_warn_about_missing_reports() {
+    logTester.setLevel(Level.DEBUG);
+    SensorContextTester tester = SensorContextTester.create(temp);
+    tester.setSettings(moduleSettings("aggregator", "target/site/jacoco/jacoco.xml"));
+
+    sensor.execute(tester);
+
+    verifyNoInteractions(analysisWarnings);
+    assertThat(logTester.logs(Level.WARN)).isEmpty();
+    assertThat(logTester.logs(Level.DEBUG)).contains("No main file in module 'aggregator', skipping the import of JaCoCo reports");
+  }
+
+  @Test
+  void import_coverage_into_main_file_of_a_language_not_known_by_jacoco() throws IOException {
+    logTester.setLevel(Level.DEBUG);
+    Files.writeString(temp.resolve("jacoco.xml"), """
+      <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+      <report name="scala-module">
+        <package name="org/example">
+          <sourcefile name="Hello.scala">
+            <line nr="3" mi="0" ci="2" mb="1" cb="1"/>
+          </sourcefile>
+        </package>
+      </report>
+      """);
+    SensorContextTester tester = SensorContextTester.create(temp);
+    tester.setSettings(moduleSettings("scala-module", "jacoco.xml"));
+    InputFile scalaFile = TestInputFileBuilder
+      .create("scala-module", "src/main/scala/org/example/Hello.scala")
+      .setLanguage("scala")
+      .setLines(10)
+      .build();
+    tester.fileSystem().add(scalaFile);
+
+    sensor.execute(tester);
+
+    assertThat(tester.lineHits(scalaFile.key(), 3)).isEqualTo(1);
+    assertThat(tester.conditions(scalaFile.key(), 3)).isEqualTo(2);
+    assertThat(tester.coveredConditions(scalaFile.key(), 3)).isEqualTo(1);
+    assertThat(logTester.logs(Level.DEBUG)).noneMatch(log -> log.startsWith("No main file in module"));
+  }
+
+  private MapSettings moduleSettings(String moduleKey, String reportPaths) {
+    return new MapSettings()
+      .setProperty("sonar.moduleKey", moduleKey)
+      .setProperty("sonar.projectBaseDir", temp.toAbsolutePath().toString())
+      .setProperty(ReportPathsProvider.REPORT_PATHS_PROPERTY_KEY, reportPaths);
   }
 
   private Path load(String name) throws URISyntaxException {
