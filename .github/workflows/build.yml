@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
-      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           version: 2026.10.0
       - name: Select Java 21
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
-      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           version: 2026.10.0
       - name: Select Java 21
@@ -68,6 +68,24 @@ jobs:
         with:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
+            development/artifactory-edge-prod/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | ORCHESTRATOR_ACCESS_TOKEN;
+      - name: Configure production Orchestrator
+        shell: bash
+        env:
+          ORCHESTRATOR_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ORCHESTRATOR_ACCESS_TOKEN }}
+        run: |
+          umask 077
+          config_dir="$RUNNER_TEMP/orchestrator-production-config"
+          mkdir -p "$config_dir"
+          printf '%s\n' \
+            'orchestrator.artifactory.url=https://repox-internal.sonar.build/artifactory' \
+            "orchestrator.artifactory.accessToken=$ORCHESTRATOR_ACCESS_TOKEN" > "$config_dir/orchestrator.properties"
+          config_path="$config_dir/orchestrator.properties"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            config_path="/$(cygpath -m "$config_path")"
+          fi
+          config_path="${config_path// /%20}"
+          echo "ORCHESTRATOR_CONFIG_URL=file://$config_path" >> "$GITHUB_ENV"
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
@@ -80,9 +98,10 @@ jobs:
       - name: Build
         env:
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+          ORCHESTRATOR_HOME: ${{ github.event_name == 'pull_request' && format('{0}/orchestrator-production', runner.temp) || env.ORCHESTRATOR_HOME }}
         shell: bash
         run: |
-          ./gradlew "-Dsonar.runtimeVersion=$SQ_VERSION" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
+          ./gradlew "-Dorchestrator.configUrl=$ORCHESTRATOR_CONFIG_URL" "-Dorchestrator.home=$ORCHESTRATOR_HOME" "-Dsonar.runtimeVersion=$SQ_VERSION" -DbuildNumber=$BUILD_NUMBER --no-daemon --console plain --info --stacktrace build test -PintegrationTests=true
 
   qa:
     needs: [build]
@@ -114,7 +133,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
-      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           version: 2026.10.0
       - name: Select Java 21
@@ -125,6 +144,24 @@ jobs:
         with:
           secrets: |
             development/github/token/licenses-ro token | GITHUB_TOKEN;
+            development/artifactory-edge-prod/token/{REPO_OWNER_NAME_DASH}-private-reader access_token | ORCHESTRATOR_ACCESS_TOKEN;
+      - name: Configure production Orchestrator
+        shell: bash
+        env:
+          ORCHESTRATOR_ACCESS_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).ORCHESTRATOR_ACCESS_TOKEN }}
+        run: |
+          umask 077
+          config_dir="$RUNNER_TEMP/orchestrator-production-config"
+          mkdir -p "$config_dir"
+          printf '%s\n' \
+            'orchestrator.artifactory.url=https://repox-internal.sonar.build/artifactory' \
+            "orchestrator.artifactory.accessToken=$ORCHESTRATOR_ACCESS_TOKEN" > "$config_dir/orchestrator.properties"
+          config_path="$config_dir/orchestrator.properties"
+          if [[ "$RUNNER_OS" == Windows ]]; then
+            config_path="/$(cygpath -m "$config_path")"
+          fi
+          config_path="${config_path// /%20}"
+          echo "ORCHESTRATOR_CONFIG_URL=file://$config_path" >> "$GITHUB_ENV"
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v2
         with:
@@ -139,11 +176,12 @@ jobs:
         env:
           SQ_VERSION: ${{ matrix.sq-version }}
           GITHUB_TOKEN: ${{ fromJSON(steps.secrets.outputs.vault).GITHUB_TOKEN }}
+          ORCHESTRATOR_HOME: ${{ github.event_name == 'pull_request' && format('{0}/orchestrator-production', runner.temp) || env.ORCHESTRATOR_HOME }}
         run: >-
           ./gradlew -DbuildNumber=$BUILD_NUMBER
           -PintegrationTests=true
           -Dsonar.runtimeVersion=$SQ_VERSION
-          -Dorchestrator.artifactory.accessToken=$ARTIFACTORY_ACCESS_TOKEN
+          "-Dorchestrator.configUrl=$ORCHESTRATOR_CONFIG_URL" "-Dorchestrator.home=$ORCHESTRATOR_HOME"
           --console plain --no-daemon --info
           build test
 

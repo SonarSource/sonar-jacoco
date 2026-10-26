@@ -4,18 +4,22 @@ on:
     - cron: '45 3 * * 1-5' # Run the workflow Mon-Fri at 03:45 UTC
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  unified-platform-dogfooding:
+  build:
     runs-on: sonar-m
-    name: Unified Platform Dogfooding
+    name: Build for Shadow Scan
     permissions:
       id-token: write
-      contents: write  # Required for repository access and tagging
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: true
-      - uses: jdx/mise-action@2d8d4cafcbd33be2ea37d2b6f5ad595363d1f1ca # v5.1.1
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
         with:
           version: 2026.10.0
       - name: Select Java 21
@@ -26,6 +30,20 @@ jobs:
           artifactory-reader-role: private-reader
           artifactory-deployer-role: qa-deployer
           deploy-pull-request: false
+
+  run_iris:
+    needs: [ build ]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
+    concurrency:
+      group: iris
+      cancel-in-progress: false
+      queue: single
+    runs-on: sonar-xs
+    name: Run IRIS
+    permissions:
+      id-token: write
+      contents: read
+    steps:
       - name: Run IRIS Analysis
         uses: SonarSource/unified-dogfooding-actions/run-iris@v1
         with:
