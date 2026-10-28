@@ -41,6 +41,7 @@ class JacocoTest {
   private final static String PROJECT_KEY = "jacoco-test-project";
   private static final String FILE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/Calc.java";
   private static final String KOTLIN_FILE_KEY = "org.sonarsource.it.projects:kotlin-jacoco-project:src/main/kotlin/CoverMe.kt";
+  private static final String MULTI_MODULE_PROJECT_KEY = "jacoco-multi-module-project";
   private static final String FILE_WITHOUT_COVERAGE_KEY = "jacoco-test-project:src/main/java/org/sonarsource/test/CalcNoCoverage.java";
   /** Modules of the aggregate-and-module-based-mixed-coverage fixture, root included. */
   private static final int MODULE_COUNT = 8;
@@ -319,6 +320,30 @@ class JacocoTest {
     assertThat(measuresForLibrary.get("lines_to_cover")).isPositive();
   }
 
+  /**
+   * JACOCO-240: the root module of a multi-module build has no source file but inherits sonar.coverage.jacoco.xmlReportPaths.
+   * Its sensor must skip the import, without warning about a report missing at its own location, while the module with sources still imports its coverage.
+   */
+  @Test
+  void aggregator_module_without_main_file_is_skipped() throws IOException {
+    SonarScanner build = SonarScanner.create()
+      .setProjectKey(MULTI_MODULE_PROJECT_KEY)
+      .setDebugLogs(true)
+      .setProperty("sonar.modules", "app")
+      .setProperty("app.sonar.sources", "src/main")
+      .setProperty("sonar.coverage.jacoco.xmlReportPaths", "reports/jacoco.xml")
+      .setProperty("sonar.java.binaries", ".")
+      .setProjectDir(prepareProject("multi-module-with-aggregator"));
+
+    BuildResult result = orchestrator.executeBuild(build);
+
+    assertThat(result.getLogs())
+      .contains("No main file in module '" + MULTI_MODULE_PROJECT_KEY + "', skipping the import of JaCoCo reports")
+      .doesNotContain("No main file in module 'app'")
+      .doesNotContain("No coverage report can be found with sonar.coverage.jacoco.xmlReportPaths");
+    checkCoveredFile(MULTI_MODULE_PROJECT_KEY + ":app/src/main/java/org/sonarsource/test/Calc.java");
+  }
+
   @Test
   void kotlin_files_should_be_located_and_covered() {
     Path BASE_DIRECTORY = Paths.get("src/test/resources");
@@ -355,7 +380,11 @@ class JacocoTest {
   }
 
   private void checkCoveredFile() {
-    Map<String, Double> measures = getCoverageMeasures(FILE_KEY);
+    checkCoveredFile(FILE_KEY);
+  }
+
+  private void checkCoveredFile(String fileKey) {
+    Map<String, Double> measures = getCoverageMeasures(fileKey);
     assertThat(measures.get("line_coverage")).isEqualTo(90.9);
     assertThat(measures.get("lines_to_cover")).isEqualTo(11.0);
     assertThat(measures.get("uncovered_lines")).isEqualTo(1.0);
