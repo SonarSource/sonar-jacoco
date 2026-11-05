@@ -12,7 +12,7 @@ dependencies {
   testImplementation('org.mockito:mockito-core:5.24.0')
   testImplementation('org.assertj:assertj-core:3.27.7')
   testImplementation('org.sonarsource.orchestrator:sonar-orchestrator-junit4:6.4.4.4797')
-  testImplementation('org.sonarsource.sonarqube:sonar-ws:26.10.0.133078')
+  testImplementation('org.sonarsource.sonarqube:sonar-ws:26.11.0.134175')
   testImplementation('com.google.code.findbugs:jsr305:3.0.2')
 }
 
