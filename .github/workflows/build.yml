@@ -91,6 +91,11 @@ jobs:
         with:
           repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
+      - name: Configure Maven
+        uses: SonarSource/ci-github-actions/config-maven@v2
+        with:
+          repox-url: https://repox-internal.dev.sonar.build
+          artifactory-reader-role: private-reader
       - name: Orchestrator Cache
         uses: ./.github/actions/orchestrator-cache
         with:
@@ -164,6 +169,11 @@ jobs:
           echo "ORCHESTRATOR_CONFIG_URL=file://$config_path" >> "$GITHUB_ENV"
       - name: Configure Gradle
         uses: SonarSource/ci-github-actions/config-gradle@v2
+        with:
+          repox-url: https://repox-internal.dev.sonar.build
+          artifactory-reader-role: private-reader
+      - name: Configure Maven
+        uses: SonarSource/ci-github-actions/config-maven@v2
         with:
           repox-url: https://repox-internal.dev.sonar.build
           artifactory-reader-role: private-reader
