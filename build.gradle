@@ -68,8 +68,8 @@ dependencies {
     testImplementation('org.mockito:mockito-core:5.24.0')
     testImplementation('org.assertj:assertj-core:3.27.7')
     testImplementation('org.sonarsource.api.plugin:sonar-plugin-api-test-fixtures:14.3.0.5639')
-    testImplementation('org.sonarsource.scanner.engine:plugin-api-scanner-impl:13.18.0.6805')
-    testImplementation('org.sonarsource.scanner.engine:sensor-test-fixtures:13.18.0.6805')
+    testImplementation('org.sonarsource.scanner.engine:plugin-api-scanner-impl:13.19.0.6869')
+    testImplementation('org.sonarsource.scanner.engine:sensor-test-fixtures:13.19.0.6869')
 }
 
 test {
